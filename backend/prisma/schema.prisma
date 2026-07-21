@@ -1,0 +1,773 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model absensi_ekstrakurikuler {
+  id                              Int                          @id @default(autoincrement())
+  sesi_absensi_ekstrakurikuler_id Int
+  siswa_id                        Int
+  status                          status_absensi
+  keterangan                      String?
+  dicatat_oleh                    Int?
+  dicatat_pada                    DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                      DateTime                     @default(now()) @db.Timestamptz(6)
+  users                           users?                       @relation(fields: [dicatat_oleh], references: [id], onUpdate: NoAction, map: "fk_absensi_ekskul_dicatat_oleh")
+  sesi_absensi_ekstrakurikuler    sesi_absensi_ekstrakurikuler @relation(fields: [sesi_absensi_ekstrakurikuler_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_absensi_ekskul_sesi")
+  siswa                           siswa                        @relation(fields: [siswa_id], references: [id], onUpdate: NoAction, map: "fk_absensi_ekskul_siswa")
+
+  @@unique([sesi_absensi_ekstrakurikuler_id, siswa_id], map: "uq_absensi_ekskul_siswa_sesi")
+  @@index([siswa_id], map: "idx_absensi_ekskul_siswa")
+  @@index([status], map: "idx_absensi_ekskul_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model absensi_guru {
+  id                Int            @id @default(autoincrement())
+  guru_id           Int
+  tanggal           DateTime       @db.Date
+  status            status_absensi
+  waktu_masuk       DateTime?      @db.Timestamptz(6)
+  waktu_pulang      DateTime?      @db.Timestamptz(6)
+  latitude_masuk    Decimal?       @db.Decimal(10, 7)
+  longitude_masuk   Decimal?       @db.Decimal(10, 7)
+  latitude_pulang   Decimal?       @db.Decimal(10, 7)
+  longitude_pulang  Decimal?       @db.Decimal(10, 7)
+  keterangan        String?
+  diverifikasi_oleh Int?
+  created_at        DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime       @default(now()) @db.Timestamptz(6)
+  guru              guru           @relation(fields: [guru_id], references: [id], onUpdate: NoAction, map: "fk_absensi_guru_guru")
+  users             users?         @relation(fields: [diverifikasi_oleh], references: [id], onUpdate: NoAction, map: "fk_absensi_guru_verifikator")
+
+  @@unique([guru_id, tanggal], map: "uq_absensi_guru_tanggal")
+  @@index([status], map: "idx_absensi_guru_status")
+  @@index([tanggal], map: "idx_absensi_guru_tanggal")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model absensi_guru_piket {
+  id                Int               @id @default(autoincrement())
+  jadwal_piket_id   Int
+  guru_id           Int
+  tanggal           DateTime          @db.Date
+  status            status_absensi
+  waktu_absen       DateTime?         @db.Timestamptz(6)
+  latitude          Decimal?          @db.Decimal(10, 7)
+  longitude         Decimal?          @db.Decimal(10, 7)
+  keterangan        String?
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime          @default(now()) @db.Timestamptz(6)
+  jadwal_piket_guru jadwal_piket_guru @relation(fields: [jadwal_piket_id, guru_id], references: [jadwal_piket_id, guru_id], onUpdate: NoAction, map: "fk_absensi_piket_penugasan")
+
+  @@unique([jadwal_piket_id, guru_id, tanggal], map: "uq_absensi_piket_guru_tanggal")
+  @@index([guru_id], map: "idx_absensi_piket_guru")
+  @@index([tanggal], map: "idx_absensi_piket_tanggal")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model absensi_siswa {
+  id                 Int                @id @default(autoincrement())
+  sesi_absensi_id    Int
+  siswa_id           Int
+  status             status_absensi
+  keterangan         String?
+  dicatat_oleh       Int?
+  dicatat_pada       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime           @default(now()) @db.Timestamptz(6)
+  users              users?             @relation(fields: [dicatat_oleh], references: [id], onUpdate: NoAction, map: "fk_absensi_siswa_dicatat_oleh")
+  sesi_absensi_siswa sesi_absensi_siswa @relation(fields: [sesi_absensi_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_absensi_siswa_sesi")
+  siswa              siswa              @relation(fields: [siswa_id], references: [id], onUpdate: NoAction, map: "fk_absensi_siswa_siswa")
+
+  @@unique([sesi_absensi_id, siswa_id], map: "uq_absensi_siswa_per_sesi")
+  @@index([siswa_id], map: "idx_absensi_siswa_siswa")
+  @@index([status], map: "idx_absensi_siswa_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model anggota_ekstrakurikuler {
+  id                 Int                @id @default(autoincrement())
+  ekstrakurikuler_id Int
+  siswa_id           Int
+  tahun_ajaran_id    Int                @db.SmallInt
+  tanggal_masuk      DateTime           @default(dbgenerated("CURRENT_DATE")) @db.Date
+  tanggal_keluar     DateTime?          @db.Date
+  status             status_keanggotaan @default(aktif)
+  created_by         Int?
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime           @default(now()) @db.Timestamptz(6)
+  users              users?             @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_anggota_ekskul_created_by")
+  ekstrakurikuler    ekstrakurikuler    @relation(fields: [ekstrakurikuler_id], references: [id], onUpdate: NoAction, map: "fk_anggota_ekskul_ekskul")
+  siswa              siswa              @relation(fields: [siswa_id], references: [id], onUpdate: NoAction, map: "fk_anggota_ekskul_siswa")
+  tahun_ajaran       tahun_ajaran       @relation(fields: [tahun_ajaran_id], references: [id], onUpdate: NoAction, map: "fk_anggota_ekskul_tahun")
+
+  @@unique([ekstrakurikuler_id, siswa_id, tahun_ajaran_id], map: "uq_anggota_ekskul_tahun")
+  @@index([siswa_id], map: "idx_anggota_ekskul_siswa")
+  @@index([tahun_ajaran_id], map: "idx_anggota_ekskul_tahun")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model audit_log {
+  id          BigInt   @id @default(autoincrement())
+  user_id     Int?
+  action      String   @db.VarChar(50)
+  entity_type String   @db.VarChar(100)
+  entity_id   String?  @db.VarChar(100)
+  old_data    Json?
+  new_data    Json?
+  ip_address  String?  @db.Inet
+  user_agent  String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  users       users?   @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_audit_log_user")
+
+  @@index([created_at(sort: Desc)], map: "idx_audit_log_created_at")
+  @@index([entity_type, entity_id], map: "idx_audit_log_entity")
+  @@index([user_id], map: "idx_audit_log_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model buku {
+  id                           Int               @id @default(autoincrement())
+  kategori_id                  Int?              @db.SmallInt
+  isbn                         String?           @unique(map: "uq_buku_isbn", where: raw("((isbn IS NOT NULL) AND (deleted_at IS NULL))")) @db.VarChar(30)
+  judul                        String            @db.VarChar(255)
+  penulis                      String?           @db.VarChar(255)
+  penerbit                     String?           @db.VarChar(255)
+  tahun_terbit                 Int?              @db.SmallInt
+  deskripsi                    String?
+  url_sampul                   String?
+  created_by                   Int?
+  updated_by                   Int?
+  created_at                   DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at                   DateTime?         @db.Timestamptz(6)
+  users_buku_created_byTousers users?            @relation("buku_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_buku_created_by")
+  kategori_buku                kategori_buku?    @relation(fields: [kategori_id], references: [id], onUpdate: NoAction, map: "fk_buku_kategori")
+  users_buku_updated_byTousers users?            @relation("buku_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_buku_updated_by")
+  inventaris_buku              inventaris_buku[]
+
+  @@index([judul], map: "idx_buku_judul")
+  @@index([kategori_id], map: "idx_buku_kategori")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model catatan_konseling {
+  id                                        Int                   @id @default(autoincrement())
+  siswa_id                                  Int
+  guru_bk_id                                Int
+  tanggal                                   DateTime              @default(now()) @db.Timestamptz(6)
+  topik                                     String                @db.VarChar(255)
+  isi                                       String
+  tindak_lanjut                             String?
+  visibilitas                               visibilitas_konseling @default(rahasia)
+  created_by                                Int?
+  updated_by                                Int?
+  created_at                                DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at                                DateTime              @default(now()) @db.Timestamptz(6)
+  deleted_at                                DateTime?             @db.Timestamptz(6)
+  users_catatan_konseling_created_byTousers users?                @relation("catatan_konseling_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_konseling_created_by")
+  guru                                      guru                  @relation(fields: [guru_bk_id], references: [id], onUpdate: NoAction, map: "fk_konseling_guru_bk")
+  siswa                                     siswa                 @relation(fields: [siswa_id], references: [id], onUpdate: NoAction, map: "fk_konseling_siswa")
+  users_catatan_konseling_updated_byTousers users?                @relation("catatan_konseling_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_konseling_updated_by")
+
+  @@index([guru_bk_id], map: "idx_konseling_guru_bk")
+  @@index([siswa_id], map: "idx_konseling_siswa")
+  @@index([tanggal], map: "idx_konseling_tanggal")
+  @@index([visibilitas], map: "idx_konseling_visibilitas")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model ekstrakurikuler {
+  id                                      Int                                    @id @default(autoincrement())
+  kode                                    String                                 @db.VarChar(30)
+  nama                                    String                                 @db.VarChar(150)
+  deskripsi                               String?
+  status_aktif                            Boolean                                @default(true)
+  created_by                              Int?
+  updated_by                              Int?
+  created_at                              DateTime                               @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime                               @default(now()) @db.Timestamptz(6)
+  deleted_at                              DateTime?                              @db.Timestamptz(6)
+  anggota_ekstrakurikuler                 anggota_ekstrakurikuler[]
+  users_ekstrakurikuler_created_byTousers users?                                 @relation("ekstrakurikuler_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_ekstrakurikuler_created_by")
+  users_ekstrakurikuler_updated_byTousers users?                                 @relation("ekstrakurikuler_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_ekstrakurikuler_updated_by")
+  jadwal_ekstrakurikuler                  jadwal_ekstrakurikuler[]
+  pembina_ekstrakurikuler                 pembina_ekstrakurikuler[]
+  permintaan_perubahan_ekstrakurikuler    permintaan_perubahan_ekstrakurikuler[]
+}
+
+model guru {
+  id                 Int                  @id @default(autoincrement())
+  pegawai_id         Int                  @unique
+  kode_guru          String?              @unique(map: "uq_guru_kode", where: raw("(kode_guru IS NOT NULL)")) @db.VarChar(30)
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime             @default(now()) @db.Timestamptz(6)
+  absensi_guru       absensi_guru[]
+  catatan_konseling  catatan_konseling[]
+  pegawai            pegawai              @relation(fields: [pegawai_id], references: [id], onUpdate: NoAction, map: "fk_guru_pegawai")
+  jadwal_pelajaran   jadwal_pelajaran[]
+  jadwal_piket_guru  jadwal_piket_guru[]
+  kelas              kelas[]
+  sesi_absensi_siswa sesi_absensi_siswa[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model inventaris_buku {
+  id                                      Int                    @id @default(autoincrement())
+  buku_id                                 Int
+  kode_inventaris                         String                 @unique(map: "uq_inventaris_kode", where: raw("(deleted_at IS NULL)")) @db.VarChar(100)
+  barcode                                 String?                @unique(map: "uq_inventaris_barcode", where: raw("((barcode IS NOT NULL) AND (deleted_at IS NULL))")) @db.VarChar(100)
+  lokasi_rak                              String?                @db.VarChar(100)
+  tanggal_perolehan                       DateTime?              @db.Date
+  sumber_perolehan                        String?                @db.VarChar(150)
+  harga_perolehan                         Decimal?               @db.Decimal(14, 2)
+  kondisi                                 kondisi_buku           @default(baik)
+  status                                  status_inventaris_buku @default(tersedia)
+  catatan                                 String?
+  created_by                              Int?
+  updated_by                              Int?
+  created_at                              DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime               @default(now()) @db.Timestamptz(6)
+  deleted_at                              DateTime?              @db.Timestamptz(6)
+  buku                                    buku                   @relation(fields: [buku_id], references: [id], onUpdate: NoAction, map: "fk_inventaris_buku_buku")
+  users_inventaris_buku_created_byTousers users?                 @relation("inventaris_buku_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_inventaris_buku_created_by")
+  users_inventaris_buku_updated_byTousers users?                 @relation("inventaris_buku_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_inventaris_buku_updated_by")
+
+  @@index([buku_id], map: "idx_inventaris_buku")
+  @@index([status], map: "idx_inventaris_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model jadwal_ekstrakurikuler {
+  id                           Int                            @id @default(autoincrement())
+  ekstrakurikuler_id           Int
+  semester_id                  Int                            @db.SmallInt
+  hari                         nama_hari
+  jam_mulai                    DateTime                       @db.Time(6)
+  jam_selesai                  DateTime                       @db.Time(6)
+  lokasi                       String?                        @db.VarChar(150)
+  status_aktif                 Boolean                        @default(true)
+  created_by                   Int?
+  created_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  deleted_at                   DateTime?                      @db.Timestamptz(6)
+  users                        users?                         @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_jadwal_ekskul_created_by")
+  ekstrakurikuler              ekstrakurikuler                @relation(fields: [ekstrakurikuler_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_ekskul_ekskul")
+  semester                     semester                       @relation(fields: [semester_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_ekskul_semester")
+  sesi_absensi_ekstrakurikuler sesi_absensi_ekstrakurikuler[]
+
+  @@unique([ekstrakurikuler_id, semester_id, hari, jam_mulai], map: "uq_jadwal_ekskul_start", where: raw("((status_aktif = true) AND (deleted_at IS NULL))"))
+  @@index([semester_id], map: "idx_jadwal_ekskul_semester")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model jadwal_pelajaran {
+  id                                       Int                  @id @default(autoincrement())
+  semester_id                              Int                  @db.SmallInt
+  kelas_id                                 Int
+  mata_pelajaran_id                        Int
+  guru_id                                  Int
+  hari                                     nama_hari
+  jam_mulai                                DateTime             @db.Time(6)
+  jam_selesai                              DateTime             @db.Time(6)
+  ruang                                    String?              @db.VarChar(100)
+  status_aktif                             Boolean              @default(true)
+  created_by                               Int?
+  updated_by                               Int?
+  created_at                               DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime             @default(now()) @db.Timestamptz(6)
+  deleted_at                               DateTime?            @db.Timestamptz(6)
+  users_jadwal_pelajaran_created_byTousers users?               @relation("jadwal_pelajaran_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_jadwal_created_by")
+  guru                                     guru                 @relation(fields: [guru_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_guru")
+  kelas                                    kelas                @relation(fields: [kelas_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_kelas")
+  mata_pelajaran                           mata_pelajaran       @relation(fields: [mata_pelajaran_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_mata_pelajaran")
+  semester                                 semester             @relation(fields: [semester_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_semester")
+  users_jadwal_pelajaran_updated_byTousers users?               @relation("jadwal_pelajaran_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_jadwal_updated_by")
+  sesi_absensi_siswa                       sesi_absensi_siswa[]
+
+  @@unique([semester_id, guru_id, hari, jam_mulai], map: "uq_jadwal_guru_start", where: raw("((status_aktif = true) AND (deleted_at IS NULL))"))
+  @@unique([semester_id, kelas_id, hari, jam_mulai], map: "uq_jadwal_kelas_start", where: raw("((status_aktif = true) AND (deleted_at IS NULL))"))
+  @@index([guru_id], map: "idx_jadwal_guru")
+  @@index([hari], map: "idx_jadwal_hari")
+  @@index([kelas_id], map: "idx_jadwal_kelas")
+  @@index([mata_pelajaran_id], map: "idx_jadwal_mapel")
+  @@index([semester_id], map: "idx_jadwal_semester")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model jadwal_piket {
+  id                Int                 @id @default(autoincrement())
+  semester_id       Int                 @db.SmallInt
+  nama              String              @db.VarChar(100)
+  hari              nama_hari
+  jam_mulai         DateTime            @db.Time(6)
+  jam_selesai       DateTime            @db.Time(6)
+  lokasi            String?             @db.VarChar(100)
+  status_aktif      Boolean             @default(true)
+  created_by        Int?
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?           @db.Timestamptz(6)
+  users             users?              @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_jadwal_piket_created_by")
+  semester          semester            @relation(fields: [semester_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_piket_semester")
+  jadwal_piket_guru jadwal_piket_guru[]
+
+  @@index([semester_id], map: "idx_jadwal_piket_semester")
+}
+
+model jadwal_piket_guru {
+  jadwal_piket_id    Int
+  guru_id            Int
+  assigned_by        Int?
+  assigned_at        DateTime             @default(now()) @db.Timestamptz(6)
+  absensi_guru_piket absensi_guru_piket[]
+  users              users?               @relation(fields: [assigned_by], references: [id], onUpdate: NoAction, map: "fk_jadwal_piket_guru_assigned_by")
+  guru               guru                 @relation(fields: [guru_id], references: [id], onUpdate: NoAction, map: "fk_jadwal_piket_guru_guru")
+  jadwal_piket       jadwal_piket         @relation(fields: [jadwal_piket_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_jadwal_piket_guru_jadwal")
+
+  @@id([jadwal_piket_id, guru_id])
+  @@index([guru_id], map: "idx_jadwal_piket_guru_guru")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model kategori_buku {
+  id         Int      @id @default(autoincrement()) @db.SmallInt
+  nama       String   @unique(map: "uq_kategori_buku_nama") @db.VarChar(100)
+  deskripsi  String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  buku       buku[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model kelas {
+  id                            Int                @id @default(autoincrement())
+  tahun_ajaran_id               Int                @db.SmallInt
+  nama                          String             @db.VarChar(50)
+  tingkat                       Int                @db.SmallInt
+  wali_kelas_id                 Int?
+  kapasitas                     Int?               @db.SmallInt
+  ruang                         String?            @db.VarChar(100)
+  status_aktif                  Boolean            @default(true)
+  created_by                    Int?
+  updated_by                    Int?
+  created_at                    DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime           @default(now()) @db.Timestamptz(6)
+  deleted_at                    DateTime?          @db.Timestamptz(6)
+  jadwal_pelajaran              jadwal_pelajaran[]
+  users_kelas_created_byTousers users?             @relation("kelas_created_byTousers", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_kelas_created_by")
+  tahun_ajaran                  tahun_ajaran       @relation(fields: [tahun_ajaran_id], references: [id], onUpdate: NoAction, map: "fk_kelas_tahun_ajaran")
+  users_kelas_updated_byTousers users?             @relation("kelas_updated_byTousers", fields: [updated_by], references: [id], onUpdate: NoAction, map: "fk_kelas_updated_by")
+  guru                          guru?              @relation(fields: [wali_kelas_id], references: [id], onUpdate: NoAction, map: "fk_kelas_wali")
+  siswa_kelas                   siswa_kelas[]
+
+  @@unique([tahun_ajaran_id, wali_kelas_id], map: "uq_kelas_wali_per_tahun", where: raw("((wali_kelas_id IS NOT NULL) AND (status_aktif = true) AND (deleted_at IS NULL))"))
+  @@index([tahun_ajaran_id], map: "idx_kelas_tahun_ajaran")
+  @@index([wali_kelas_id], map: "idx_kelas_wali")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model mata_pelajaran {
+  id               Int                @id @default(autoincrement())
+  kode             String             @db.VarChar(30)
+  nama             String             @db.VarChar(150)
+  deskripsi        String?
+  status_aktif     Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?          @db.Timestamptz(6)
+  jadwal_pelajaran jadwal_pelajaran[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model pegawai {
+  id                           Int                            @id @default(autoincrement())
+  user_id                      Int?                           @unique
+  nama_lengkap                 String                         @db.VarChar(255)
+  nip                          String?                        @unique(map: "uq_pegawai_nip", where: raw("((nip IS NOT NULL) AND (deleted_at IS NULL))")) @db.VarChar(30)
+  nuptk                        String?                        @unique(map: "uq_pegawai_nuptk", where: raw("((nuptk IS NOT NULL) AND (deleted_at IS NULL))")) @db.VarChar(30)
+  jenis_kelamin                jenis_kelamin
+  tempat_lahir                 String?                        @db.VarChar(100)
+  tanggal_lahir                DateTime?                      @db.Date
+  email                        String?                        @db.VarChar(255)
+  no_telepon                   String?                        @db.VarChar(30)
+  alamat                       String?
+  jabatan                      String?                        @db.VarChar(150)
+  status_aktif                 Boolean                        @default(true)
+  created_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime                       @default(now()) @db.Timestamptz(6)
+  deleted_at                   DateTime?                      @db.Timestamptz(6)
+  guru                         guru?
+  users                        users?                         @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_pegawai_user")
+  pembina_ekstrakurikuler      pembina_ekstrakurikuler[]
+  sesi_absensi_ekstrakurikuler sesi_absensi_ekstrakurikuler[]
+
+  @@index([nama_lengkap], map: "idx_pegawai_nama")
+  @@index([status_aktif], map: "idx_pegawai_status_aktif")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model pembina_ekstrakurikuler {
+  ekstrakurikuler_id Int
+  pegawai_id         Int
+  tanggal_mulai      DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
+  tanggal_selesai    DateTime?       @db.Date
+  is_active          Boolean         @default(true)
+  assigned_by        Int?
+  created_at         DateTime        @default(now()) @db.Timestamptz(6)
+  users              users?          @relation(fields: [assigned_by], references: [id], onUpdate: NoAction, map: "fk_pembina_ekskul_assigned_by")
+  ekstrakurikuler    ekstrakurikuler @relation(fields: [ekstrakurikuler_id], references: [id], onUpdate: NoAction, map: "fk_pembina_ekskul_ekskul")
+  pegawai            pegawai         @relation(fields: [pegawai_id], references: [id], onUpdate: NoAction, map: "fk_pembina_ekskul_pegawai")
+
+  @@id([ekstrakurikuler_id, pegawai_id, tanggal_mulai])
+  @@unique([ekstrakurikuler_id, pegawai_id], map: "uq_pembina_ekskul_aktif", where: raw("(is_active = true)"))
+  @@index([pegawai_id], map: "idx_pembina_ekskul_pegawai")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model permintaan_perubahan_ekstrakurikuler {
+  id                                                               Int                @id @default(autoincrement())
+  aksi                                                             aksi_persetujuan
+  target_ekstrakurikuler_id                                        Int?
+  data_sebelum                                                     Json?
+  data_sesudah                                                     Json?
+  status                                                           status_persetujuan @default(draft)
+  diajukan_oleh                                                    Int
+  diajukan_pada                                                    DateTime?          @db.Timestamptz(6)
+  diperiksa_oleh                                                   Int?
+  diperiksa_pada                                                   DateTime?          @db.Timestamptz(6)
+  catatan_pengajuan                                                String?
+  catatan_pemeriksaan                                              String?
+  created_at                                                       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                                                       DateTime           @default(now()) @db.Timestamptz(6)
+  users_permintaan_perubahan_ekstrakurikuler_diperiksa_olehTousers users?             @relation("permintaan_perubahan_ekstrakurikuler_diperiksa_olehTousers", fields: [diperiksa_oleh], references: [id], onUpdate: NoAction, map: "fk_permintaan_ekskul_pemeriksa")
+  users_permintaan_perubahan_ekstrakurikuler_diajukan_olehTousers  users              @relation("permintaan_perubahan_ekstrakurikuler_diajukan_olehTousers", fields: [diajukan_oleh], references: [id], onUpdate: NoAction, map: "fk_permintaan_ekskul_pengaju")
+  ekstrakurikuler                                                  ekstrakurikuler?   @relation(fields: [target_ekstrakurikuler_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_permintaan_ekskul_target")
+
+  @@index([diajukan_oleh], map: "idx_permintaan_ekskul_pengaju")
+  @@index([status], map: "idx_permintaan_ekskul_status")
+  @@index([target_ekstrakurikuler_id], map: "idx_permintaan_ekskul_target")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model permissions {
+  id               Int                @id @default(autoincrement())
+  code             String             @unique @db.VarChar(100)
+  module           String             @db.VarChar(50)
+  action           String             @db.VarChar(50)
+  description      String?
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  role_permissions role_permissions[]
+  user_permissions user_permissions[]
+
+  @@unique([module, action], map: "uq_permissions_module_action")
+}
+
+model role_permissions {
+  role_id       Int         @db.SmallInt
+  permission_id Int
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_role_permissions_permission")
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_role_permissions_role")
+
+  @@id([role_id, permission_id])
+  @@index([permission_id], map: "idx_role_permissions_permission_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model roles {
+  id               Int                @id @default(autoincrement()) @db.SmallInt
+  code             String             @unique @db.VarChar(50)
+  name             String             @db.VarChar(100)
+  description      String?
+  is_system        Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  role_permissions role_permissions[]
+  user_roles       user_roles[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model semester {
+  id                     Int                      @id @default(autoincrement()) @db.SmallInt
+  tahun_ajaran_id        Int                      @db.SmallInt
+  jenis                  jenis_semester
+  tanggal_mulai          DateTime                 @db.Date
+  tanggal_selesai        DateTime                 @db.Date
+  is_active              Boolean                  @unique(map: "uq_semester_active", where: raw("(is_active = true)")) @default(false)
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  jadwal_ekstrakurikuler jadwal_ekstrakurikuler[]
+  jadwal_pelajaran       jadwal_pelajaran[]
+  jadwal_piket           jadwal_piket[]
+  tahun_ajaran           tahun_ajaran             @relation(fields: [tahun_ajaran_id], references: [id], onUpdate: NoAction, map: "fk_semester_tahun_ajaran")
+
+  @@unique([tahun_ajaran_id, jenis], map: "uq_semester_tahun_jenis")
+  @@index([tahun_ajaran_id], map: "idx_semester_tahun_ajaran")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model sesi_absensi_ekstrakurikuler {
+  id                        Int                       @id @default(autoincrement())
+  jadwal_ekstrakurikuler_id Int
+  tanggal                   DateTime                  @db.Date
+  pembina_pegawai_id        Int
+  dibuka_pada               DateTime                  @default(now()) @db.Timestamptz(6)
+  ditutup_pada              DateTime?                 @db.Timestamptz(6)
+  catatan                   String?
+  created_at                DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                  @default(now()) @db.Timestamptz(6)
+  absensi_ekstrakurikuler   absensi_ekstrakurikuler[]
+  jadwal_ekstrakurikuler    jadwal_ekstrakurikuler    @relation(fields: [jadwal_ekstrakurikuler_id], references: [id], onUpdate: NoAction, map: "fk_sesi_absensi_ekskul_jadwal")
+  pegawai                   pegawai                   @relation(fields: [pembina_pegawai_id], references: [id], onUpdate: NoAction, map: "fk_sesi_absensi_ekskul_pembina")
+
+  @@unique([jadwal_ekstrakurikuler_id, tanggal], map: "uq_sesi_absensi_ekskul_tanggal")
+  @@index([tanggal], map: "idx_sesi_absensi_ekskul_tanggal")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model sesi_absensi_siswa {
+  id                  Int              @id @default(autoincrement())
+  jadwal_pelajaran_id Int
+  tanggal             DateTime         @db.Date
+  dibuka_oleh_guru_id Int
+  dibuka_pada         DateTime         @default(now()) @db.Timestamptz(6)
+  ditutup_pada        DateTime?        @db.Timestamptz(6)
+  catatan             String?
+  created_at          DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime         @default(now()) @db.Timestamptz(6)
+  absensi_siswa       absensi_siswa[]
+  guru                guru             @relation(fields: [dibuka_oleh_guru_id], references: [id], onUpdate: NoAction, map: "fk_sesi_absensi_guru")
+  jadwal_pelajaran    jadwal_pelajaran @relation(fields: [jadwal_pelajaran_id], references: [id], onUpdate: NoAction, map: "fk_sesi_absensi_jadwal")
+
+  @@unique([jadwal_pelajaran_id, tanggal], map: "uq_sesi_absensi_jadwal_tanggal")
+  @@index([dibuka_oleh_guru_id], map: "idx_sesi_absensi_guru")
+  @@index([tanggal], map: "idx_sesi_absensi_tanggal")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model siswa {
+  id                      Int                       @id @default(autoincrement())
+  user_id                 Int?                      @unique
+  nisn                    String                    @unique(map: "uq_siswa_nisn", where: raw("(deleted_at IS NULL)")) @db.VarChar(20)
+  nis                     String?                   @unique(map: "uq_siswa_nis", where: raw("((nis IS NOT NULL) AND (deleted_at IS NULL))")) @db.VarChar(30)
+  nama_lengkap            String                    @db.VarChar(255)
+  jenis_kelamin           jenis_kelamin
+  tempat_lahir            String?                   @db.VarChar(100)
+  tanggal_lahir           DateTime?                 @db.Date
+  email                   String?                   @db.VarChar(255)
+  no_telepon              String?                   @db.VarChar(30)
+  alamat                  String?
+  nama_wali               String?                   @db.VarChar(255)
+  no_telepon_wali         String?                   @db.VarChar(30)
+  status_aktif            Boolean                   @default(true)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  deleted_at              DateTime?                 @db.Timestamptz(6)
+  absensi_ekstrakurikuler absensi_ekstrakurikuler[]
+  absensi_siswa           absensi_siswa[]
+  anggota_ekstrakurikuler anggota_ekstrakurikuler[]
+  catatan_konseling       catatan_konseling[]
+  users                   users?                    @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_siswa_user")
+  siswa_kelas             siswa_kelas?
+
+  @@index([nama_lengkap], map: "idx_siswa_nama")
+  @@index([status_aktif], map: "idx_siswa_status_aktif")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model siswa_kelas {
+  id             Int       @id @default(autoincrement())
+  siswa_id       Int       @unique(map: "uq_siswa_satu_kelas_aktif", where: raw("(is_active = true)"))
+  kelas_id       Int
+  tanggal_masuk  DateTime  @db.Date
+  tanggal_keluar DateTime? @db.Date
+  is_active      Boolean   @default(true)
+  created_by     Int?
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+  users          users?    @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_siswa_kelas_created_by")
+  kelas          kelas     @relation(fields: [kelas_id], references: [id], onUpdate: NoAction, map: "fk_siswa_kelas_kelas")
+  siswa          siswa     @relation(fields: [siswa_id], references: [id], onUpdate: NoAction, map: "fk_siswa_kelas_siswa")
+
+  @@unique([siswa_id, kelas_id], map: "uq_siswa_kelas_history")
+  @@index([kelas_id], map: "idx_siswa_kelas_kelas")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tahun_ajaran {
+  id                      Int                       @id @default(autoincrement()) @db.SmallInt
+  nama                    String                    @unique @db.VarChar(20)
+  tanggal_mulai           DateTime                  @db.Date
+  tanggal_selesai         DateTime                  @db.Date
+  is_active               Boolean                   @unique(map: "uq_tahun_ajaran_active", where: raw("(is_active = true)")) @default(false)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  anggota_ekstrakurikuler anggota_ekstrakurikuler[]
+  kelas                   kelas[]
+  semester                semester[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_permissions {
+  user_id                                   Int
+  permission_id                             Int
+  is_allowed                                Boolean     @default(true)
+  assigned_by                               Int?
+  assigned_at                               DateTime    @default(now()) @db.Timestamptz(6)
+  expires_at                                DateTime?   @db.Timestamptz(6)
+  reason                                    String?
+  users_user_permissions_assigned_byTousers users?      @relation("user_permissions_assigned_byTousers", fields: [assigned_by], references: [id], onUpdate: NoAction, map: "fk_user_permissions_assigned_by")
+  permissions                               permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_permissions_permission")
+  users_user_permissions_user_idTousers     users       @relation("user_permissions_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_permissions_user")
+
+  @@id([user_id, permission_id])
+  @@index([permission_id], map: "idx_user_permissions_permission_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_roles {
+  user_id                             Int
+  role_id                             Int       @db.SmallInt
+  assigned_by                         Int?
+  assigned_at                         DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at                          DateTime? @db.Timestamptz(6)
+  users_user_roles_assigned_byTousers users?    @relation("user_roles_assigned_byTousers", fields: [assigned_by], references: [id], onUpdate: NoAction, map: "fk_user_roles_assigned_by")
+  roles                               roles     @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_role")
+  users_user_roles_user_idTousers     users     @relation("user_roles_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_roles_user")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "idx_user_roles_role_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model users {
+  id                                                                                              Int                                    @id @default(autoincrement())
+  username                                                                                        String                                 @db.VarChar(100)
+  email                                                                                           String?                                @db.VarChar(255)
+  password_hash                                                                                   String                                 @db.VarChar(255)
+  status                                                                                          status_user                            @default(aktif)
+  last_login_at                                                                                   DateTime?                              @db.Timestamptz(6)
+  password_changed_at                                                                             DateTime?                              @db.Timestamptz(6)
+  created_at                                                                                      DateTime                               @default(now()) @db.Timestamptz(6)
+  updated_at                                                                                      DateTime                               @default(now()) @db.Timestamptz(6)
+  deleted_at                                                                                      DateTime?                              @db.Timestamptz(6)
+  absensi_ekstrakurikuler                                                                         absensi_ekstrakurikuler[]
+  absensi_guru                                                                                    absensi_guru[]
+  absensi_siswa                                                                                   absensi_siswa[]
+  anggota_ekstrakurikuler                                                                         anggota_ekstrakurikuler[]
+  audit_log                                                                                       audit_log[]
+  buku_buku_created_byTousers                                                                     buku[]                                 @relation("buku_created_byTousers")
+  buku_buku_updated_byTousers                                                                     buku[]                                 @relation("buku_updated_byTousers")
+  catatan_konseling_catatan_konseling_created_byTousers                                           catatan_konseling[]                    @relation("catatan_konseling_created_byTousers")
+  catatan_konseling_catatan_konseling_updated_byTousers                                           catatan_konseling[]                    @relation("catatan_konseling_updated_byTousers")
+  ekstrakurikuler_ekstrakurikuler_created_byTousers                                               ekstrakurikuler[]                      @relation("ekstrakurikuler_created_byTousers")
+  ekstrakurikuler_ekstrakurikuler_updated_byTousers                                               ekstrakurikuler[]                      @relation("ekstrakurikuler_updated_byTousers")
+  inventaris_buku_inventaris_buku_created_byTousers                                               inventaris_buku[]                      @relation("inventaris_buku_created_byTousers")
+  inventaris_buku_inventaris_buku_updated_byTousers                                               inventaris_buku[]                      @relation("inventaris_buku_updated_byTousers")
+  jadwal_ekstrakurikuler                                                                          jadwal_ekstrakurikuler[]
+  jadwal_pelajaran_jadwal_pelajaran_created_byTousers                                             jadwal_pelajaran[]                     @relation("jadwal_pelajaran_created_byTousers")
+  jadwal_pelajaran_jadwal_pelajaran_updated_byTousers                                             jadwal_pelajaran[]                     @relation("jadwal_pelajaran_updated_byTousers")
+  jadwal_piket                                                                                    jadwal_piket[]
+  jadwal_piket_guru                                                                               jadwal_piket_guru[]
+  kelas_kelas_created_byTousers                                                                   kelas[]                                @relation("kelas_created_byTousers")
+  kelas_kelas_updated_byTousers                                                                   kelas[]                                @relation("kelas_updated_byTousers")
+  pegawai                                                                                         pegawai?
+  pembina_ekstrakurikuler                                                                         pembina_ekstrakurikuler[]
+  permintaan_perubahan_ekstrakurikuler_permintaan_perubahan_ekstrakurikuler_diperiksa_olehTousers permintaan_perubahan_ekstrakurikuler[] @relation("permintaan_perubahan_ekstrakurikuler_diperiksa_olehTousers")
+  permintaan_perubahan_ekstrakurikuler_permintaan_perubahan_ekstrakurikuler_diajukan_olehTousers  permintaan_perubahan_ekstrakurikuler[] @relation("permintaan_perubahan_ekstrakurikuler_diajukan_olehTousers")
+  siswa                                                                                           siswa?
+  siswa_kelas                                                                                     siswa_kelas[]
+  user_permissions_user_permissions_assigned_byTousers                                            user_permissions[]                     @relation("user_permissions_assigned_byTousers")
+  user_permissions_user_permissions_user_idTousers                                                user_permissions[]                     @relation("user_permissions_user_idTousers")
+  user_roles_user_roles_assigned_byTousers                                                        user_roles[]                           @relation("user_roles_assigned_byTousers")
+  user_roles_user_roles_user_idTousers                                                            user_roles[]                           @relation("user_roles_user_idTousers")
+
+  @@index([status], map: "idx_users_status")
+}
+
+enum aksi_persetujuan {
+  create
+  update
+  delete
+}
+
+enum jenis_kelamin {
+  L
+  P
+}
+
+enum jenis_semester {
+  ganjil
+  genap
+}
+
+enum kondisi_buku {
+  baik
+  rusak_ringan
+  rusak_berat
+  hilang
+}
+
+enum nama_hari {
+  senin
+  selasa
+  rabu
+  kamis
+  jumat
+  sabtu
+}
+
+enum status_absensi {
+  hadir
+  sakit
+  izin
+  alpa
+}
+
+enum status_inventaris_buku {
+  tersedia
+  dipinjam
+  perbaikan
+  hilang
+  nonaktif
+}
+
+enum status_keanggotaan {
+  aktif
+  nonaktif
+  lulus
+  keluar
+}
+
+enum status_persetujuan {
+  draft
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum status_user {
+  aktif
+  nonaktif
+  ditangguhkan
+}
+
+enum visibilitas_konseling {
+  rahasia
+  internal_bk
+  siswa
+}
