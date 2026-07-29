@@ -1,122 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router";
+import SignIn from "./pages/AuthPages/SignIn";
+import SignUp from "./pages/AuthPages/SignUp";
+import NotFound from "./pages/OtherPage/NotFound";
+import UserProfiles from "./pages/UserProfiles";
+import Videos from "./pages/UiElements/Videos";
+import Images from "./pages/UiElements/Images";
+import Alerts from "./pages/UiElements/Alerts";
+import Badges from "./pages/UiElements/Badges";
+import Avatars from "./pages/UiElements/Avatars";
+import Buttons from "./pages/UiElements/Buttons";
+import LineChart from "./pages/Charts/LineChart";
+import BarChart from "./pages/Charts/BarChart";
+import Calendar from "./pages/Calendar";
+import BasicTables from "./pages/Tables/BasicTables";
+import FormElements from "./pages/Forms/FormElements";
+import Blank from "./pages/Blank";
+import AppLayout from "./layout/AppLayout";
+import { ScrollToTop } from "./components/common/ScrollToTop";
+import Home from "./pages/Dashboard/Home";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          {/* Dashboard Layout */}
+          <Route element={<AppLayout />}>
+            <Route index path="/" element={<Home />} />
 
-      <div className="ticks"></div>
+            {/* Others Page */}
+            <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/blank" element={<Blank />} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            {/* Forms */}
+            <Route path="/form-elements" element={<FormElements />} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+            {/* Tables */}
+            <Route path="/basic-tables" element={<BasicTables />} />
+
+            {/* Ui Elements */}
+            <Route path="/alerts" element={<Alerts />} />
+            <Route path="/avatars" element={<Avatars />} />
+            <Route path="/badge" element={<Badges />} />
+            <Route path="/buttons" element={<Buttons />} />
+            <Route path="/images" element={<Images />} />
+            <Route path="/videos" element={<Videos />} />
+
+            {/* Charts */}
+            <Route path="/line-chart" element={<LineChart />} />
+            <Route path="/bar-chart" element={<BarChart />} />
+          </Route>
+
+          {/* Auth Layout */}
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
     </>
-  )
+  );
 }
-
-export default App
