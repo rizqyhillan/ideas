@@ -1,14 +1,31 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!signIn(email, password, isChecked)) {
+      setError("Email atau password dummy tidak sesuai.");
+      return;
+    }
+    const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? "/";
+    navigate(from, { replace: true });
+  }
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -83,13 +100,13 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="Masukkan email Anda" />
+                  <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Masukkan email Anda" />
                 </div>
                 <div>
                   <Label>
@@ -98,6 +115,8 @@ export default function SignInForm() {
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
                       placeholder="Masukkan password Anda"
                     />
                     <span
@@ -126,6 +145,7 @@ export default function SignInForm() {
                     Lupa password?
                   </Link>
                 </div>
+                {error && <p className="text-sm text-error-500">{error}</p>}
                 <div>
                   <Button className="w-full" size="sm">
                     Masuk
@@ -133,6 +153,12 @@ export default function SignInForm() {
                 </div>
               </div>
             </form>
+{/* 
+            <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50 p-3 text-sm text-gray-700 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-gray-300">
+              <p className="font-medium">Akun dummy sementara</p>
+              <p>Email: admin@ideas.id</p>
+              <p>Password: password123</p>
+            </div> */}
 
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
