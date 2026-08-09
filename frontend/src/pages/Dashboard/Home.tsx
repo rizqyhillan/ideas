@@ -10,8 +10,8 @@ export default function Home() {
   return (
     <>
       <PageMeta
-        title="SPLASMA | IdEaS - Indonesian Education Management System"
-        description="This is React.js Ecommerce Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="SPLASMA - Home | IdEaS - Indonesian Education Management System"
+        description="The dashboard provides an overview of key metrics, sales data, and recent orders, allowing users to monitor performance and make informed decisions."
       />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 space-y-6 xl:col-span-7">
