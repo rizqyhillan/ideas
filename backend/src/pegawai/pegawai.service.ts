@@ -1,21 +1,14 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  IsNull,
-  Repository,
-} from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { Pegawai } from '../database/entities/entities/Pegawai';
 
 import { QueryPegawaiDto } from './dto/query-pegawai.dto';
 import { CreatePegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
-
 
 @Injectable()
 export class PegawaiService {
@@ -24,26 +17,12 @@ export class PegawaiService {
     private readonly pegawaiRepository: Repository<Pegawai>,
   ) {}
 
-  async findAll(
-    query: QueryPegawaiDto,
-  ) {
-    const {
-      page,
-      limit,
-      search,
-      statusAktif,
-      sort,
-      order,
-    } = query;
+  async findAll(query: QueryPegawaiDto) {
+    const { page, limit, search, statusAktif, sort, order } = query;
 
-    const qb =
-      this.pegawaiRepository.createQueryBuilder(
-        'pegawai',
-      );
+    const qb = this.pegawaiRepository.createQueryBuilder('pegawai');
 
-    qb.andWhere(
-      'pegawai.deletedAt IS NULL',
-    );
+    qb.andWhere('pegawai.deletedAt IS NULL');
 
     if (search) {
       qb.andWhere(
@@ -58,39 +37,24 @@ export class PegawaiService {
       );
     }
 
-    if (
-      statusAktif !== undefined
-    ) {
-      qb.andWhere(
-        'pegawai.statusAktif = :statusAktif',
-        {
-          statusAktif,
-        },
-      );
+    if (statusAktif !== undefined) {
+      qb.andWhere('pegawai.statusAktif = :statusAktif', {
+        statusAktif,
+      });
     }
 
-    qb.orderBy(
-      `pegawai.${sort}`,
-      order,
-    );
+    qb.orderBy(`pegawai.${sort}`, order);
 
-    qb.skip(
-      (page - 1) * limit,
-    );
+    qb.skip((page - 1) * limit);
 
     qb.take(limit);
 
-    const [
-      pegawai,
-      total,
-    ] =
-      await qb.getManyAndCount();
+    const [pegawai, total] = await qb.getManyAndCount();
 
     return {
       success: true,
 
-      message:
-        'Pegawai retrieved successfully',
+      message: 'Pegawai retrieved successfully',
 
       data: pegawai,
 
@@ -101,9 +65,7 @@ export class PegawaiService {
 
         total,
 
-        lastPage: Math.ceil(
-          total / limit,
-        ),
+        lastPage: Math.ceil(total / limit),
       },
     };
   }
@@ -117,11 +79,8 @@ export class PegawaiService {
     });
   }
 
-  async create(
-  dto: CreatePegawaiDto,
-) {
-  const cekNip =
-    dto.nip
+  async create(dto: CreatePegawaiDto) {
+    const cekNip = dto.nip
       ? await this.pegawaiRepository.findOne({
           where: {
             nip: dto.nip,
@@ -129,14 +88,11 @@ export class PegawaiService {
         })
       : null;
 
-  if (cekNip) {
-    throw new BadRequestException(
-      'NIP sudah digunakan',
-    );
-  }
+    if (cekNip) {
+      throw new BadRequestException('NIP sudah digunakan');
+    }
 
-  const cekNuptk =
-    dto.nuptk
+    const cekNuptk = dto.nuptk
       ? await this.pegawaiRepository.findOne({
           where: {
             nuptk: dto.nuptk,
@@ -144,122 +100,84 @@ export class PegawaiService {
         })
       : null;
 
-  if (cekNuptk) {
-    throw new BadRequestException(
-      'NUPTK sudah digunakan',
-    );
-  }
+    if (cekNuptk) {
+      throw new BadRequestException('NUPTK sudah digunakan');
+    }
 
-  const pegawai =
-    this.pegawaiRepository.create({
+    const pegawai = this.pegawaiRepository.create({
       ...dto,
 
-      statusAktif:
-        dto.statusAktif ?? true,
+      statusAktif: dto.statusAktif ?? true,
     });
 
-  await this.pegawaiRepository.save(
-    pegawai,
-  );
+    await this.pegawaiRepository.save(pegawai);
 
-  return {
-    success: true,
+    return {
+      success: true,
 
-    message:
-      'Pegawai created successfully',
+      message: 'Pegawai created successfully',
 
-    data: pegawai,
-  };
-}
-async update(
-  id: number,
-  dto: UpdatePegawaiDto,
-) {
-  const pegawai =
-    await this.findById(id);
-
-  if (!pegawai) {
-    throw new BadRequestException(
-      'Pegawai tidak ditemukan',
-    );
+      data: pegawai,
+    };
   }
+  async update(id: number, dto: UpdatePegawaiDto) {
+    const pegawai = await this.findById(id);
 
-  if (
-    dto.nip &&
-    dto.nip !== pegawai.nip
-  ) {
-    const cek =
-      await this.pegawaiRepository.findOne({
+    if (!pegawai) {
+      throw new BadRequestException('Pegawai tidak ditemukan');
+    }
+
+    if (dto.nip && dto.nip !== pegawai.nip) {
+      const cek = await this.pegawaiRepository.findOne({
         where: {
           nip: dto.nip,
         },
       });
 
-    if (cek) {
-      throw new BadRequestException(
-        'NIP sudah digunakan',
-      );
+      if (cek) {
+        throw new BadRequestException('NIP sudah digunakan');
+      }
     }
-  }
 
-  if (
-    dto.nuptk &&
-    dto.nuptk !== pegawai.nuptk
-  ) {
-    const cek =
-      await this.pegawaiRepository.findOne({
+    if (dto.nuptk && dto.nuptk !== pegawai.nuptk) {
+      const cek = await this.pegawaiRepository.findOne({
         where: {
           nuptk: dto.nuptk,
         },
       });
 
-    if (cek) {
-      throw new BadRequestException(
-        'NUPTK sudah digunakan',
-      );
+      if (cek) {
+        throw new BadRequestException('NUPTK sudah digunakan');
+      }
     }
+
+    Object.assign(pegawai, dto);
+
+    await this.pegawaiRepository.save(pegawai);
+
+    return {
+      success: true,
+
+      message: 'Pegawai updated successfully',
+
+      data: pegawai,
+    };
   }
+  async remove(id: number) {
+    const pegawai = await this.findById(id);
 
-  Object.assign(
-    pegawai,
-    dto,
-  );
+    if (!pegawai) {
+      throw new BadRequestException('Pegawai tidak ditemukan');
+    }
 
-  await this.pegawaiRepository.save(
-    pegawai,
-  );
+    pegawai.deletedAt = new Date();
 
-  return {
-    success: true,
+    await this.pegawaiRepository.save(pegawai);
 
-    message:
-      'Pegawai updated successfully',
+    return {
+      success: true,
 
-    data: pegawai,
-  };
-}
-async remove(id: number) {
-  const pegawai =
-    await this.findById(id);
-
-  if (!pegawai) {
-    throw new BadRequestException(
-      'Pegawai tidak ditemukan',
-    );
+      message: 'Pegawai deleted successfully',
+    };
   }
-
-  pegawai.deletedAt =
-    new Date();
-
-  await this.pegawaiRepository.save(
-    pegawai,
-  );
-
-  return {
-    success: true,
-
-    message:
-      'Pegawai deleted successfully',
-  };
-}
 }

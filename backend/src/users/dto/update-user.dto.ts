@@ -1,9 +1,4 @@
-import {
-  IsEmail,
-  IsIn,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -14,13 +9,9 @@ export class UpdateUserDto {
   @IsEmail()
   email?: string;
 
-@IsOptional()
-@IsIn([
-  'aktif',
-  'nonaktif',
-  'ditangguhkan',
-])
-status?: 'aktif' | 'nonaktif' | 'ditangguhkan';
+  @IsOptional()
+  @IsIn(['aktif', 'nonaktif', 'ditangguhkan'])
+  status?: 'aktif' | 'nonaktif' | 'ditangguhkan';
 
   @IsOptional()
   @IsString()

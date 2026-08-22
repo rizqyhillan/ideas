@@ -23,24 +23,17 @@ import { UpdateGuruDto } from './dto/update-guru.dto';
 import { QueryGuruDto } from './dto/query-guru.dto';
 
 @Controller('guru')
-@UseGuards(
-  JwtAuthGuard,
-  RolesGuard,
-)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class GuruController {
-  constructor(
-    private readonly guruService: GuruService,
-  ) {}
+  constructor(private readonly guruService: GuruService) {}
 
   @Post()
   create(
     @Body()
     dto: CreateGuruDto,
   ) {
-    return this.guruService.create(
-      dto,
-    );
+    return this.guruService.create(dto);
   }
 
   @Get()
@@ -48,51 +41,33 @@ export class GuruController {
     @Query()
     query: QueryGuruDto,
   ) {
-    return this.guruService.findAll(
-      query,
-    );
+    return this.guruService.findAll(query);
   }
 
   @Get(':id')
   findOne(
-    @Param(
-      'id',
-      ParseIntPipe,
-    )
+    @Param('id', ParseIntPipe)
     id: number,
   ) {
-    return this.guruService.findOne(
-      id,
-    );
+    return this.guruService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param(
-      'id',
-      ParseIntPipe,
-    )
+    @Param('id', ParseIntPipe)
     id: number,
 
     @Body()
     dto: UpdateGuruDto,
   ) {
-    return this.guruService.update(
-      id,
-      dto,
-    );
+    return this.guruService.update(id, dto);
   }
 
   @Delete(':id')
   remove(
-    @Param(
-      'id',
-      ParseIntPipe,
-    )
+    @Param('id', ParseIntPipe)
     id: number,
   ) {
-    return this.guruService.remove(
-      id,
-    );
+    return this.guruService.remove(id);
   }
 }

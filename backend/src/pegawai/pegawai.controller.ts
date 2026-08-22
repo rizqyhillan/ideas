@@ -23,23 +23,14 @@ import { CreatePegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 
 @Controller('pegawai')
-@UseGuards(
-  JwtAuthGuard,
-  RolesGuard,
-)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class PegawaiController {
-  constructor(
-    private readonly pegawaiService: PegawaiService,
-  ) {}
+  constructor(private readonly pegawaiService: PegawaiService) {}
 
   @Get()
-  findAll(
-    @Query() query: QueryPegawaiDto,
-  ) {
-    return this.pegawaiService.findAll(
-      query,
-    );
+  findAll(@Query() query: QueryPegawaiDto) {
+    return this.pegawaiService.findAll(query);
   }
 
   @Get(':id')
@@ -47,9 +38,7 @@ export class PegawaiController {
     @Param('id', ParseIntPipe)
     id: number,
   ) {
-    return this.pegawaiService.findById(
-      id,
-    );
+    return this.pegawaiService.findById(id);
   }
 
   @Post()
@@ -57,30 +46,23 @@ export class PegawaiController {
     @Body()
     dto: CreatePegawaiDto,
   ) {
-    return this.pegawaiService.create(
-      dto,
-    );
+    return this.pegawaiService.create(dto);
   }
   @Patch(':id')
-update(
-  @Param('id', ParseIntPipe)
-  id: number,
+  update(
+    @Param('id', ParseIntPipe)
+    id: number,
 
-  @Body()
-  dto: UpdatePegawaiDto,
-) {
-  return this.pegawaiService.update(
-    id,
-    dto,
-  );
-}
-@Delete(':id')
-remove(
-  @Param('id', ParseIntPipe)
-  id: number,
-) {
-  return this.pegawaiService.remove(
-    id,
-  );
-}
+    @Body()
+    dto: UpdatePegawaiDto,
+  ) {
+    return this.pegawaiService.update(id, dto);
+  }
+  @Delete(':id')
+  remove(
+    @Param('id', ParseIntPipe)
+    id: number,
+  ) {
+    return this.pegawaiService.remove(id);
+  }
 }

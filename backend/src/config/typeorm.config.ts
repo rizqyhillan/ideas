@@ -7,22 +7,20 @@ export const typeormConfig: TypeOrmModuleAsyncOptions = {
   inject: [ConfigService],
 
   useFactory: (config: ConfigService) => ({
-  type: 'postgres',
+    type: 'postgres',
 
-  host: config.getOrThrow<string>('database.host'),
+    host: config.getOrThrow<string>('database.host'),
 
-  port: config.getOrThrow<number>('database.port'),
+    port: config.getOrThrow<number>('database.port'),
 
-  username: config.getOrThrow<string>('database.username'),
+    username: config.getOrThrow<string>('database.username'),
 
-  password: config.getOrThrow<string>('database.password'),
+    password: config.getOrThrow<string>('database.password'),
 
-  database: config.getOrThrow<string>('database.database'),
+    database: config.getOrThrow<string>('database.database'),
 
-  entities: [
-    join(__dirname, '../database/entities/entities/*.{ts,js}'),
-  ],
+    entities: [join(__dirname, '../database/entities/entities/*.{ts,js}')],
 
-  synchronize: false,
-}),
+    synchronize: false,
+  }),
 };

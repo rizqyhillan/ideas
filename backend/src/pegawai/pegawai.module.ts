@@ -7,22 +7,12 @@ import { PegawaiController } from './pegawai.controller';
 import { PegawaiService } from './pegawai.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Pegawai,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([Pegawai])],
 
-  controllers: [
-    PegawaiController,
-  ],
+  controllers: [PegawaiController],
 
-  providers: [
-    PegawaiService,
-  ],
+  providers: [PegawaiService],
 
-  exports: [
-    PegawaiService,
-  ],
+  exports: [PegawaiService],
 })
 export class PegawaiModule {}

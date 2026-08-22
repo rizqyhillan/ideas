@@ -7,8 +7,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
-  const app =
-    await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,17 +17,11 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(
-    new ResponseInterceptor(),
-  );
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(
-    process.env.PORT ?? 3000,
-  );
+  await app.listen(process.env.PORT ?? 3000);
 }
 
 bootstrap();

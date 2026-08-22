@@ -31,26 +31,10 @@ export class QuerySiswaDto {
   statusAktif?: string;
 
   @IsOptional()
-  @IsIn([
-    'namaLengkap',
-    'nis',
-    'nisn',
-    'createdAt',
-  ])
-  sort:
-    | 'namaLengkap'
-    | 'nis'
-    | 'nisn'
-    | 'createdAt' =
-    'createdAt';
+  @IsIn(['namaLengkap', 'nis', 'nisn', 'createdAt'])
+  sort: 'namaLengkap' | 'nis' | 'nisn' | 'createdAt' = 'createdAt';
 
   @IsOptional()
-  @IsIn([
-    'ASC',
-    'DESC',
-  ])
-  order:
-    | 'ASC'
-    | 'DESC' =
-    'DESC';
+  @IsIn(['ASC', 'DESC'])
+  order: 'ASC' | 'DESC' = 'DESC';
 }

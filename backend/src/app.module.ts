@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -10,15 +10,16 @@ import { typeormConfig } from './config/typeorm.config';
 import { PegawaiModule } from './pegawai/pegawai.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { GuruModule } from './guru/guru.module';
+import { TahunAjaranModule } from './tahun-ajaran/tahun-ajaran.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-  isGlobal: true,
-  load: [configuration],
-  validationSchema: envValidationSchema,
-}),
-TypeOrmModule.forRootAsync(typeormConfig),
+      isGlobal: true,
+      load: [configuration],
+      validationSchema: envValidationSchema,
+    }),
+    TypeOrmModule.forRootAsync(typeormConfig),
 
     UsersModule,
 
@@ -29,6 +30,8 @@ TypeOrmModule.forRootAsync(typeormConfig),
     SiswaModule,
 
     GuruModule,
+
+    TahunAjaranModule,
   ],
 })
 export class AppModule {}

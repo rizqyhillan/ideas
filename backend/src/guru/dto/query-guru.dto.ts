@@ -1,11 +1,4 @@
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 import { Transform } from 'class-transformer';
 
@@ -28,17 +21,10 @@ export class QueryGuruDto {
   search?: string;
 
   @IsOptional()
-  @IsIn([
-    'id',
-    'kodeGuru',
-    'createdAt',
-  ])
+  @IsIn(['id', 'kodeGuru', 'createdAt'])
   sort: string = 'id';
 
   @IsOptional()
-  @IsIn([
-    'ASC',
-    'DESC',
-  ])
+  @IsIn(['ASC', 'DESC'])
   order: 'ASC' | 'DESC' = 'ASC';
 }

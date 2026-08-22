@@ -9,23 +9,12 @@ import { GuruController } from './guru.controller';
 import { GuruService } from './guru.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Guru,
-      Pegawai,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([Guru, Pegawai])],
 
-  controllers: [
-    GuruController,
-  ],
+  controllers: [GuruController],
 
-  providers: [
-    GuruService,
-  ],
+  providers: [GuruService],
 
-  exports: [
-    GuruService,
-  ],
+  exports: [GuruService],
 })
 export class GuruModule {}
