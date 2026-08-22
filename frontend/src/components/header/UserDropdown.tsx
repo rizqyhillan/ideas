@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   function toggleDropdown() {
@@ -21,17 +21,22 @@ export default function UserDropdown() {
     closeDropdown();
     navigate("/signin", { replace: true });
   }
+
+  const roleName = user?.userRoles2?.[0]?.role?.name;
+
   return (
     <div className="relative">
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <img src="/images/user/owner.jpg" alt="User" />
+        <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-brand-100 flex items-center justify-center text-brand-600 font-semibold uppercase">
+          {user?.username?.[0] || "U"}
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">
+          {user?.username || "Pengguna"}
+        </span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -58,11 +63,18 @@ export default function UserDropdown() {
         className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
         <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
+              {user?.username || "Pengguna"}
+            </span>
+            {roleName && (
+              <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+                {roleName}
+              </span>
+            )}
+          </div>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+            {user?.email || "-"}
           </span>
         </div>
 

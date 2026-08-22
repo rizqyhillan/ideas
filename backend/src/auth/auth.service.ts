@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { JwtPayload } from './types/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -13,12 +14,12 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const { username, password } = dto;
+    const { email, password } = dto;
 
-    const user = await this.usersService.findByUsername(username);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('Username atau password salah');
+      throw new UnauthorizedException('Email atau password salah');
     }
 
     if (user.status !== 'aktif') {
@@ -28,14 +29,15 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-      throw new UnauthorizedException('Username atau password salah');
+      throw new UnauthorizedException('Email atau password salah');
     }
 
     await this.usersService.updateLastLogin(user.id);
 
-    const payload = {
+    const payload: JwtPayload = {
       sub: user.id,
       username: user.username,
+      email: user.email,
       status: user.status,
     };
 

@@ -1,38 +1,109 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import {
+  authService,
+  UserProfile,
+} from "../services/auth.service";
+import {
+  getStoredToken,
+  getStoredUser,
+  setStoredToken,
+  setStoredUser,
+  clearStoredAuth,
+} from "../services/api";
 
 type AuthContextValue = {
+  user: UserProfile | null;
+  token: string | null;
   isAuthenticated: boolean;
-  signIn: (email: string, password: string, remember: boolean) => boolean;
+  isLoading: boolean;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<void>;
   signOut: () => void;
+  refreshUser: () => Promise<void>;
 };
 
-const SESSION_KEY = "ideas-demo-session";
-const DEMO_EMAIL = "admin@ideas.id";
-const DEMO_PASSWORD = "admin123";
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => sessionStorage.getItem(SESSION_KEY) === "true" || localStorage.getItem(SESSION_KEY) === "true",
-  );
+  const [token, setToken] = useState<string | null>(() => getStoredToken());
+  const [user, setUser] = useState<UserProfile | null>(() => getStoredUser<UserProfile>());
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  function signIn(email: string, password: string, remember: boolean) {
-    const valid = email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD;
-    if (!valid) return false;
+  const isAuthenticated = Boolean(token);
 
-    const storage = remember ? localStorage : sessionStorage;
-    storage.setItem(SESSION_KEY, "true");
-    setIsAuthenticated(true);
-    return true;
+  useEffect(() => {
+    async function initAuth() {
+      const storedToken = getStoredToken();
+      if (!storedToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const currentUser = await authService.me();
+        setUser(currentUser);
+        // Persist updated user details
+        const isLocalStorage = Boolean(localStorage.getItem("ideas_access_token"));
+        setStoredUser(currentUser, isLocalStorage);
+      } catch (error) {
+        console.error("Auth session expired or invalid:", error);
+        clearStoredAuth();
+        setToken(null);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    initAuth();
+  }, []);
+
+  async function signIn(email: string, password: string, remember = false) {
+    const result = await authService.login(email.trim(), password);
+    setStoredToken(result.accessToken, remember);
+    setStoredUser(result.user, remember);
+    setToken(result.accessToken);
+    setUser(result.user);
   }
 
   function signOut() {
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
-    setIsAuthenticated(false);
+    clearStoredAuth();
+    setToken(null);
+    setUser(null);
   }
 
-  return <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>{children}</AuthContext.Provider>;
+  async function refreshUser() {
+    try {
+      const currentUser = await authService.me();
+      setUser(currentUser);
+      const isLocalStorage = Boolean(localStorage.getItem("ideas_access_token"));
+      setStoredUser(currentUser, isLocalStorage);
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+      signOut();
+    }
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated,
+        isLoading,
+        signIn,
+        signOut,
+        refreshUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
