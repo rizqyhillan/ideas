@@ -24,9 +24,7 @@ import { QuerySiswaDto } from './dto/query-siswa.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class SiswaController {
-  constructor(
-    private readonly siswaService: SiswaService,
-  ) {}
+  constructor(private readonly siswaService: SiswaService) {}
 
   @Post()
   create(@Body() dto: CreateSiswaDto) {

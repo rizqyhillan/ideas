@@ -50,14 +50,14 @@ export class AuthService {
   }
 
   async me(userId: number) {
-  const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId);
 
-  if (!user) {
-    throw new UnauthorizedException('User tidak ditemukan');
+    if (!user) {
+      throw new UnauthorizedException('User tidak ditemukan');
+    }
+
+    const { passwordHash, deletedAt, ...userData } = user;
+
+    return userData;
   }
-
-  const { passwordHash, deletedAt, ...userData } = user;
-
-  return userData;
-}
 }

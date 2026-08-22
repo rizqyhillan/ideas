@@ -11,7 +11,7 @@ export const jwtConfig: JwtModuleAsyncOptions = {
     secret: config.getOrThrow<string>('jwt.secret'),
 
     signOptions: {
-      expiresIn: config.getOrThrow('jwt.expiresIn') as StringValue,
+      expiresIn: config.getOrThrow('jwt.expiresIn'),
     },
   }),
 };

@@ -1,11 +1,4 @@
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 import { Transform } from 'class-transformer';
 
@@ -36,18 +29,10 @@ export class QueryPegawaiDto {
   statusAktif?: boolean;
 
   @IsOptional()
-  @IsIn([
-    'id',
-    'namaLengkap',
-    'nip',
-    'createdAt',
-  ])
+  @IsIn(['id', 'namaLengkap', 'nip', 'createdAt'])
   sort: string = 'id';
 
   @IsOptional()
-  @IsIn([
-    'ASC',
-    'DESC',
-  ])
+  @IsIn(['ASC', 'DESC'])
   order: 'ASC' | 'DESC' = 'ASC';
 }

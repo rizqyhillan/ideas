@@ -7,9 +7,7 @@ import { SiswaController } from './siswa.controller';
 import { SiswaService } from './siswa.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Siswa]),
-  ],
+  imports: [TypeOrmModule.forFeature([Siswa])],
   controllers: [SiswaController],
   providers: [SiswaService],
 })

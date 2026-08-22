@@ -1,15 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  DataSource,
-  IsNull,
-  Repository,
-} from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 
@@ -24,300 +17,220 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UsersService {
   constructor(
-  @InjectRepository(Users)
-  private readonly usersRepository: Repository<Users>,
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
 
-  @InjectRepository(Roles)
-  private readonly rolesRepository: Repository<Roles>,
+    @InjectRepository(Roles)
+    private readonly rolesRepository: Repository<Roles>,
 
-  @InjectRepository(UserRoles)
-  private readonly userRolesRepository: Repository<UserRoles>,
+    @InjectRepository(UserRoles)
+    private readonly userRolesRepository: Repository<UserRoles>,
 
-  private readonly dataSource: DataSource,
-) {}
+    private readonly dataSource: DataSource,
+  ) {}
 
-async create(dto: CreateUserDto) {
-  const queryRunner =
-    this.dataSource.createQueryRunner();
+  async create(dto: CreateUserDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
 
-  await queryRunner.connect();
+    await queryRunner.connect();
 
-  await queryRunner.startTransaction();
+    await queryRunner.startTransaction();
 
-  try {
-    const usernameExists =
-      await this.findByUsername(dto.username);
+    try {
+      const usernameExists = await this.findByUsername(dto.username);
 
-    if (usernameExists) {
-      throw new BadRequestException(
-        'Username sudah digunakan',
-      );
-    }
+      if (usernameExists) {
+        throw new BadRequestException('Username sudah digunakan');
+      }
 
-    const emailExists =
-      await this.findByEmail(dto.email);
+      const emailExists = await this.findByEmail(dto.email);
 
-    if (emailExists) {
-      throw new BadRequestException(
-        'Email sudah digunakan',
-      );
-    }
+      if (emailExists) {
+        throw new BadRequestException('Email sudah digunakan');
+      }
 
-    const role =
-      await this.rolesRepository.findOne({
+      const role = await this.rolesRepository.findOne({
         where: {
           code: dto.role,
         },
       });
 
-    if (!role) {
-      throw new BadRequestException(
-        'Role tidak ditemukan',
-      );
+      if (!role) {
+        throw new BadRequestException('Role tidak ditemukan');
+      }
+
+      const passwordHash = await bcrypt.hash(dto.password, 10);
+
+      const user = queryRunner.manager.create(Users, {
+        username: dto.username,
+        email: dto.email,
+        passwordHash,
+      });
+
+      await queryRunner.manager.save(user);
+
+      const userRole = queryRunner.manager.create(UserRoles, {
+        userId: user.id,
+        roleId: role.id,
+      });
+
+      await queryRunner.manager.save(userRole);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        message: 'User created successfully',
+        data: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          status: user.status,
+        },
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    const passwordHash =
-      await bcrypt.hash(dto.password, 10);
-
-    const user =
-      queryRunner.manager.create(
-        Users,
-        {
-          username: dto.username,
-          email: dto.email,
-          passwordHash,
-        },
-      );
-
-    await queryRunner.manager.save(user);
-
-    const userRole =
-      queryRunner.manager.create(
-        UserRoles,
-        {
-          userId: user.id,
-          roleId: role.id,
-        },
-      );
-
-    await queryRunner.manager.save(
-      userRole,
-    );
-
-    await queryRunner.commitTransaction();
-
-    return {
-      success: true,
-      message:
-        'User created successfully',
-      data: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        status: user.status,
-      },
-    };
-  } catch (error) {
-    await queryRunner.rollbackTransaction();
-
-    throw error;
-  } finally {
-    await queryRunner.release();
   }
-}
 
-async update(
-  id: number,
-  dto: UpdateUserDto,
-) {
-  const queryRunner =
-    this.dataSource.createQueryRunner();
+  async update(id: number, dto: UpdateUserDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
 
-  await queryRunner.connect();
+    await queryRunner.connect();
 
-  await queryRunner.startTransaction();
+    await queryRunner.startTransaction();
 
-  try {
-    const user =
-      await this.usersRepository.findOne({
+    try {
+      const user = await this.usersRepository.findOne({
         where: { id },
       });
 
-    if (!user) {
-      throw new BadRequestException(
-        'User tidak ditemukan',
-      );
-    }
-
-    if (
-      dto.username &&
-      dto.username !== user.username
-    ) {
-      const usernameExists =
-        await this.findByUsername(
-          dto.username,
-        );
-
-      if (usernameExists) {
-        throw new BadRequestException(
-          'Username sudah digunakan',
-        );
+      if (!user) {
+        throw new BadRequestException('User tidak ditemukan');
       }
 
-      user.username = dto.username;
-    }
+      if (dto.username && dto.username !== user.username) {
+        const usernameExists = await this.findByUsername(dto.username);
 
-    if (
-      dto.email &&
-      dto.email !== user.email
-    ) {
-      const emailExists =
-        await this.findByEmail(dto.email);
+        if (usernameExists) {
+          throw new BadRequestException('Username sudah digunakan');
+        }
 
-      if (emailExists) {
-        throw new BadRequestException(
-          'Email sudah digunakan',
-        );
+        user.username = dto.username;
       }
 
-      user.email = dto.email;
-    }
+      if (dto.email && dto.email !== user.email) {
+        const emailExists = await this.findByEmail(dto.email);
 
-    if (dto.status) {
-      user.status = dto.status;
-    }
+        if (emailExists) {
+          throw new BadRequestException('Email sudah digunakan');
+        }
 
-    await queryRunner.manager.save(user);
+        user.email = dto.email;
+      }
 
-    if (dto.role) {
-      const role =
-        await this.rolesRepository.findOne({
+      if (dto.status) {
+        user.status = dto.status;
+      }
+
+      await queryRunner.manager.save(user);
+
+      if (dto.role) {
+        const role = await this.rolesRepository.findOne({
           where: {
             code: dto.role,
           },
         });
 
-      if (!role) {
-        throw new BadRequestException(
-          'Role tidak ditemukan',
+        if (!role) {
+          throw new BadRequestException('Role tidak ditemukan');
+        }
+
+        await queryRunner.manager.update(
+          UserRoles,
+          {
+            userId: id,
+          },
+          {
+            roleId: role.id,
+          },
         );
       }
 
-      await queryRunner.manager.update(
-        UserRoles,
-        {
-          userId: id,
-        },
-        {
-          roleId: role.id,
-        },
-      );
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        message: 'User updated successfully',
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async remove(id: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User tidak ditemukan');
     }
 
-    await queryRunner.commitTransaction();
+    if (user.deletedAt) {
+      throw new BadRequestException('User sudah dihapus');
+    }
+
+    user.deletedAt = new Date();
+
+    await this.usersRepository.save(user);
 
     return {
       success: true,
-      message:
-        'User updated successfully',
+      message: 'User deleted successfully',
     };
-  } catch (error) {
-    await queryRunner.rollbackTransaction();
-
-    throw error;
-  } finally {
-    await queryRunner.release();
   }
-}
-
-async remove(id: number) {
-  const user = await this.usersRepository.findOne({
-    where: { id },
-  });
-
-  if (!user) {
-    throw new BadRequestException(
-      'User tidak ditemukan',
-    );
-  }
-
-  if (user.deletedAt) {
-    throw new BadRequestException(
-      'User sudah dihapus',
-    );
-  }
-
-  user.deletedAt = new Date();
-
-  await this.usersRepository.save(user);
-
-  return {
-    success: true,
-    message: 'User deleted successfully',
-  };
-}
   async findAll(query: QueryUserDto) {
-    const {
-      page,
-      limit,
-      search,
-      status,
-      sort,
-      order,
-    } = query;
+    const { page, limit, search, status, sort, order } = query;
 
-    const qb =
-  this.usersRepository.createQueryBuilder(
-    'user',
-  );
+    const qb = this.usersRepository.createQueryBuilder('user');
 
-qb.andWhere(
-  'user.deletedAt IS NULL',
-);
+    qb.andWhere('user.deletedAt IS NULL');
 
     if (search) {
-      qb.andWhere(
-        '(user.username ILIKE :search OR user.email ILIKE :search)',
-        {
-          search: `%${search}%`,
-        },
-      );
+      qb.andWhere('(user.username ILIKE :search OR user.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
     }
 
     if (status) {
-      qb.andWhere(
-        'user.status = :status',
-        {
-          status,
-        },
-      );
+      qb.andWhere('user.status = :status', {
+        status,
+      });
     }
 
-    qb.orderBy(
-      `user.${sort}`,
-      order,
-    );
+    qb.orderBy(`user.${sort}`, order);
 
     qb.skip((page - 1) * limit);
 
     qb.take(limit);
 
-    const [users, total] =
-      await qb.getManyAndCount();
+    const [users, total] = await qb.getManyAndCount();
 
-    const data = users.map(
-      ({
-        passwordHash,
-        deletedAt,
-        ...user
-      }) => user,
-    );
+    const data = users.map(({ passwordHash, deletedAt, ...user }) => user);
 
     return {
       success: true,
 
-      message:
-        'Users retrieved successfully',
+      message: 'Users retrieved successfully',
 
       data,
 
@@ -328,36 +241,27 @@ qb.andWhere(
 
         total,
 
-        lastPage: Math.ceil(
-          total / limit,
-        ),
+        lastPage: Math.ceil(total / limit),
       },
     };
   }
 
   async findOne(id: number) {
-    const user =
-      await this.findById(id);
+    const user = await this.findById(id);
 
     if (!user) {
       return {
         success: false,
-        message:
-          'User tidak ditemukan',
+        message: 'User tidak ditemukan',
       };
     }
 
-    const {
-      passwordHash,
-      deletedAt,
-      ...data
-    } = user;
+    const { passwordHash, deletedAt, ...data } = user;
 
     return {
       success: true,
 
-      message:
-        'User retrieved successfully',
+      message: 'User retrieved successfully',
 
       data,
     };
@@ -386,9 +290,7 @@ qb.andWhere(
     });
   }
 
-  async findByUsername(
-    username: string,
-  ) {
+  async findByUsername(username: string) {
     return this.usersRepository.findOne({
       where: {
         username,
@@ -396,9 +298,7 @@ qb.andWhere(
     });
   }
 
-  async findByEmail(
-    email: string,
-  ) {
+  async findByEmail(email: string) {
     return this.usersRepository.findOne({
       where: {
         email,
@@ -406,14 +306,9 @@ qb.andWhere(
     });
   }
 
-  async updateLastLogin(
-    id: number,
-  ) {
-    await this.usersRepository.update(
-      id,
-      {
-        lastLoginAt: new Date(),
-      },
-    );
+  async updateLastLogin(id: number) {
+    await this.usersRepository.update(id, {
+      lastLoginAt: new Date(),
+    });
   }
 }
