@@ -120,6 +120,6 @@ export class Siswa {
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: Users;
 
-  @OneToOne(() => SiswaKelas, (siswaKelas) => siswaKelas.siswa)
-  siswaKelas: SiswaKelas;
+  @OneToMany(() => SiswaKelas, (siswaKelas) => siswaKelas.siswa)
+  siswaKelas: SiswaKelas[];
 }
