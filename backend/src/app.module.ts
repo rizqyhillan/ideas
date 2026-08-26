@@ -11,6 +11,7 @@ import { PegawaiModule } from './pegawai/pegawai.module';
 import { SiswaModule } from './siswa/siswa.module';
 import { GuruModule } from './guru/guru.module';
 import { TahunAjaranModule } from './tahun-ajaran/tahun-ajaran.module';
+import { ClassesModule } from './classes/classes.module';
 
 @Module({
   imports: [
@@ -32,6 +33,8 @@ import { TahunAjaranModule } from './tahun-ajaran/tahun-ajaran.module';
     GuruModule,
 
     TahunAjaranModule,
+
+    ClassesModule,
   ],
 })
 export class AppModule {}

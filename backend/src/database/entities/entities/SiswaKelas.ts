@@ -4,7 +4,6 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Users } from './Users';
@@ -20,10 +19,10 @@ export class SiswaKelas {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
-  @Column('integer', { name: 'siswa_id', unique: true })
+  @Column('integer', { name: 'siswa_id' })
   siswaId: number;
 
-  @Column('integer', { name: 'kelas_id', unique: true })
+  @Column('integer', { name: 'kelas_id' })
   kelasId: number;
 
   @Column('date', { name: 'tanggal_masuk' })
@@ -55,7 +54,7 @@ export class SiswaKelas {
   @JoinColumn([{ name: 'kelas_id', referencedColumnName: 'id' }])
   kelas: Kelas;
 
-  @OneToOne(() => Siswa, (siswa) => siswa.siswaKelas, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Siswa, (siswa) => siswa.siswaKelas, { onDelete: 'RESTRICT' })
   @JoinColumn([{ name: 'siswa_id', referencedColumnName: 'id' }])
   siswa: Siswa;
 }

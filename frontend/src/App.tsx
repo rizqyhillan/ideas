@@ -3,22 +3,20 @@ import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
-import Videos from "./pages/UiElements/Videos";
-import Images from "./pages/UiElements/Images";
-import Alerts from "./pages/UiElements/Alerts";
-import Badges from "./pages/UiElements/Badges";
-import Avatars from "./pages/UiElements/Avatars";
-import Buttons from "./pages/UiElements/Buttons";
-import LineChart from "./pages/Charts/LineChart";
-import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
-import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+// Academic & Master Data Pages
+import TahunAjaranPage from "./pages/Academic/TahunAjaranPage";
+import ClassesPage from "./pages/Academic/ClassesPage";
+import SiswaPage from "./pages/Master/SiswaPage";
+import GuruPage from "./pages/Master/GuruPage";
+import PegawaiPage from "./pages/Master/PegawaiPage";
+import UsersPage from "./pages/Master/UsersPage";
 
 export default function App() {
   return (
@@ -26,33 +24,28 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
+          {/* Protected Dashboard & App Layout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+              {/* Akademik Routes */}
+              <Route
+                path="/academic/tahun-ajaran"
+                element={<TahunAjaranPage />}
+              />
+              <Route path="/academic/classes" element={<ClassesPage />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+              {/* Master Data Routes */}
+              <Route path="/master/siswa" element={<SiswaPage />} />
+              <Route path="/master/guru" element={<GuruPage />} />
+              <Route path="/master/pegawai" element={<PegawaiPage />} />
+              <Route path="/master/users" element={<UsersPage />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
-
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-              <Route path="/bar-chart" element={<BarChart />} />
+              {/* Utility Pages */}
+              <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/blank" element={<Blank />} />
             </Route>
           </Route>
 

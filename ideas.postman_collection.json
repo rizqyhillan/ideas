@@ -1,0 +1,465 @@
+{
+  "info": {
+    "_postman_id": "8f3b2a5c-6b3a-4e2a-9f5b-1c3d5e7f9a1b",
+    "name": "IdEaS API - School Management System",
+    "description": "Koleksi endpoint API untuk pengujian sistem manajemen sekolah IdEaS (Auth, Tahun Ajaran, Kelas, Siswa, Guru, Pegawai, Users).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.accessToken) {",
+                  "    pm.collectionVariables.set('token', res.data.accessToken);",
+                  "    console.log('Token automatically saved to collection variable {{token}}');",
+                  "} else if (res.accessToken) {",
+                  "    pm.collectionVariables.set('token', res.accessToken);",
+                  "    console.log('Token automatically saved to collection variable {{token}}');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@ideas.id\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login menggunakan email dan password admin. Token JWT akan otomatis tersimpan di variable {{token}}."
+          }
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Mengambil data profil user yang sedang login menggunakan token JWT."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Tahun Ajaran",
+      "item": [
+        {
+          "name": "Get All Tahun Ajaran",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran?page=1&limit=10&search=&isActive=&sort=id&order=ASC",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "isActive", "value": "" },
+                { "key": "sort", "value": "id" },
+                { "key": "order", "value": "ASC" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Tahun Ajaran",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran", "active"]
+            },
+            "description": "Mengambil tahun ajaran yang sedang berstatus aktif (isActive = true)."
+          }
+        },
+        {
+          "name": "Get Tahun Ajaran by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Tahun Ajaran",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"2024/2025\",\n  \"tanggalMulai\": \"2024-07-01\",\n  \"tanggalSelesai\": \"2025-06-30\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran"]
+            }
+          }
+        },
+        {
+          "name": "Update Tahun Ajaran",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"2024/2025\",\n  \"tanggalMulai\": \"2024-07-15\",\n  \"tanggalSelesai\": \"2025-06-30\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Tahun Ajaran",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tahun-ajaran/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["tahun-ajaran", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Kelas (Classes)",
+      "item": [
+        {
+          "name": "Get All Classes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes?page=1&limit=10&search=&tahunAjaranId=&tingkat=&statusAktif=true&sort=id&order=ASC",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "tahunAjaranId", "value": "" },
+                { "key": "tingkat", "value": "" },
+                { "key": "statusAktif", "value": "true" },
+                { "key": "sort", "value": "id" },
+                { "key": "order", "value": "ASC" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Class by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tahunAjaranId\": 1,\n  \"nama\": \"VII-A\",\n  \"tingkat\": 7,\n  \"waliKelasId\": 1,\n  \"kapasitas\": 32,\n  \"ruang\": \"R.101\",\n  \"statusAktif\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes"]
+            }
+          }
+        },
+        {
+          "name": "Update Class",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"VII-A Unggulan\",\n  \"kapasitas\": 35,\n  \"ruang\": \"R.102\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Class (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Assign Students to Class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siswaIds\": [1, 2],\n  \"tanggalMasuk\": \"2024-07-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes/1/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1", "students"]
+            }
+          }
+        },
+        {
+          "name": "Get Class Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/1/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1", "students"]
+            }
+          }
+        },
+        {
+          "name": "Remove Student from Class",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggalKeluar\": \"2024-12-20\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes/1/students/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "1", "students", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Master Siswa",
+      "item": [
+        {
+          "name": "Get All Siswa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/siswa?page=1&limit=10&search=&statusAktif=&sort=id&order=ASC",
+              "host": ["{{baseUrl}}"],
+              "path": ["siswa"]
+            }
+          }
+        },
+        {
+          "name": "Get Siswa by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/siswa/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["siswa", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Siswa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nisn\": \"0081234567\",\n  \"nis\": \"2024001\",\n  \"namaLengkap\": \"Ahmad Fauzi\",\n  \"jenisKelamin\": \"L\",\n  \"tempatLahir\": \"Jakarta\",\n  \"tanggalLahir\": \"2010-05-15\",\n  \"email\": \"ahmad.fauzi@ideas.id\",\n  \"noTelepon\": \"081234567890\",\n  \"alamat\": \"Jl. Sudirman No. 10\",\n  \"namaWali\": \"Bambang\",\n  \"noTeleponWali\": \"081298765432\",\n  \"statusAktif\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/siswa",
+              "host": ["{{baseUrl}}"],
+              "path": ["siswa"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Master Guru & Pegawai",
+      "item": [
+        {
+          "name": "Get All Pegawai",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pegawai?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["pegawai"]
+            }
+          }
+        },
+        {
+          "name": "Create Pegawai",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nip\": \"198501012010011001\",\n  \"namaLengkap\": \"Budi Santoso, S.Pd\",\n  \"jenisKelamin\": \"L\",\n  \"tempatLahir\": \"Bandung\",\n  \"tanggalLahir\": \"1985-01-01\",\n  \"jabatan\": \"Guru Matematika\",\n  \"statusKepegawaian\": \"PNS\",\n  \"statusAktif\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pegawai",
+              "host": ["{{baseUrl}}"],
+              "path": ["pegawai"]
+            }
+          }
+        },
+        {
+          "name": "Get All Guru",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/guru?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["guru"]
+            }
+          }
+        },
+        {
+          "name": "Create Guru (dari Pegawai)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pegawaiId\": 1,\n  \"kodeGuru\": \"G01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guru",
+              "host": ["{{baseUrl}}"],
+              "path": ["guru"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
