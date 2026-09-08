@@ -27,6 +27,7 @@ export default function PegawaiPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<CreatePegawaiPayload>({
     nip: "",
+    nuptk: "",
     namaLengkap: "",
     jenisKelamin: "L",
     tempatLahir: "",
@@ -35,7 +36,6 @@ export default function PegawaiPage() {
     noTelepon: "",
     alamat: "",
     jabatan: "Guru",
-    statusKepegawaian: "PNS",
     statusAktif: true,
   });
   const [formError, setFormError] = useState("");
@@ -65,6 +65,7 @@ export default function PegawaiPage() {
     setEditingId(null);
     setFormData({
       nip: "",
+      nuptk: "",
       namaLengkap: "",
       jenisKelamin: "L",
       tempatLahir: "",
@@ -73,7 +74,6 @@ export default function PegawaiPage() {
       noTelepon: "",
       alamat: "",
       jabatan: "Guru",
-      statusKepegawaian: "PNS",
       statusAktif: true,
     });
     setFormError("");
@@ -84,6 +84,7 @@ export default function PegawaiPage() {
     setEditingId(item.id);
     setFormData({
       nip: item.nip || "",
+      nuptk: item.nuptk || "",
       namaLengkap: item.namaLengkap,
       jenisKelamin: item.jenisKelamin,
       tempatLahir: item.tempatLahir || "",
@@ -92,7 +93,6 @@ export default function PegawaiPage() {
       noTelepon: item.noTelepon || "",
       alamat: item.alamat || "",
       jabatan: item.jabatan || "",
-      statusKepegawaian: item.statusKepegawaian || "",
       statusAktif: item.statusAktif,
     });
     setFormError("");
@@ -245,9 +245,11 @@ export default function PegawaiPage() {
                       <div className="font-medium text-gray-800 dark:text-gray-200">
                         {item.jabatan || "-"}
                       </div>
-                      <span className="text-gray-400">
-                        Status: {item.statusKepegawaian || "-"}
-                      </span>
+                      {item.nuptk && (
+                        <span className="text-gray-400">
+                          NUPTK: {item.nuptk}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-xs">
                       <div>{item.noTelepon || "-"}</div>
@@ -359,15 +361,15 @@ export default function PegawaiPage() {
               </select>
             </div>
             <div>
-              <Label>Status Kepegawaian</Label>
+              <Label>NUPTK (Opsional)</Label>
               <Input
                 type="text"
-                placeholder="PNS / PPPK / Honorer / GTY"
-                value={formData.statusKepegawaian || ""}
+                placeholder="16 digit NUPTK"
+                value={formData.nuptk || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    statusKepegawaian: e.target.value,
+                    nuptk: e.target.value,
                   })
                 }
               />

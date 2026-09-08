@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Tahun Ajaran", path: "/academic/tahun-ajaran", pro: false },
       { name: "Kelas & Rombel", path: "/academic/classes", pro: false },
+      { name: "Absensi Siswa", path: "/academic/absensi", pro: false },
     ],
   },
   {

@@ -54,7 +54,7 @@ export default function SiswaPage() {
         limit: 10,
         search,
         statusAktif: statusFilter === "" ? undefined : Boolean(statusFilter),
-        sort: "id",
+        sort: "createdAt",
         order: "DESC",
       });
       setData(res.data);

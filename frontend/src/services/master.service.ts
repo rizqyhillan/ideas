@@ -1,5 +1,21 @@
 import { apiFetch, ApiResponse } from "./api";
 
+function cleanPayload<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined || value === null) continue;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed !== "") {
+        result[key] = trimmed;
+      }
+    } else {
+      result[key] = value;
+    }
+  }
+  return result as Partial<T>;
+}
+
 // ==========================================
 // SISWA TYPES & SERVICE
 // ==========================================
@@ -38,14 +54,14 @@ export interface CreateSiswaPayload {
   statusAktif?: boolean;
 }
 
-export interface UpdateSiswaPayload extends Partial<CreateSiswaPayload> {}
+export type UpdateSiswaPayload = Partial<CreateSiswaPayload>;
 
 export interface QuerySiswaParams {
   page?: number;
   limit?: number;
   search?: string;
   statusAktif?: boolean;
-  sort?: string;
+  sort?: "namaLengkap" | "nis" | "nisn" | "createdAt";
   order?: "ASC" | "DESC";
 }
 
@@ -79,17 +95,19 @@ export const siswaService = {
   },
 
   async create(payload: CreateSiswaPayload): Promise<SiswaItem> {
+    const cleaned = cleanPayload(payload);
     const res = await apiFetch<ApiResponse<SiswaItem>>("/siswa", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
 
   async update(id: number, payload: UpdateSiswaPayload): Promise<SiswaItem> {
+    const cleaned = cleanPayload(payload);
     const res = await apiFetch<ApiResponse<SiswaItem>>(`/siswa/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
@@ -109,6 +127,7 @@ export interface PegawaiItem {
   id: number;
   userId?: number | null;
   nip?: string | null;
+  nuptk?: string | null;
   namaLengkap: string;
   jenisKelamin: "L" | "P";
   tempatLahir?: string | null;
@@ -117,7 +136,6 @@ export interface PegawaiItem {
   noTelepon?: string | null;
   alamat?: string | null;
   jabatan?: string | null;
-  statusKepegawaian?: string | null;
   statusAktif: boolean;
   createdAt: string;
   updatedAt: string;
@@ -125,6 +143,7 @@ export interface PegawaiItem {
 
 export interface CreatePegawaiPayload {
   nip?: string;
+  nuptk?: string;
   namaLengkap: string;
   jenisKelamin: "L" | "P";
   tempatLahir?: string;
@@ -133,11 +152,10 @@ export interface CreatePegawaiPayload {
   noTelepon?: string;
   alamat?: string;
   jabatan?: string;
-  statusKepegawaian?: string;
   statusAktif?: boolean;
 }
 
-export interface UpdatePegawaiPayload extends Partial<CreatePegawaiPayload> {}
+export type UpdatePegawaiPayload = Partial<CreatePegawaiPayload>;
 
 export const pegawaiService = {
   async getAll(params?: {
@@ -145,6 +163,8 @@ export const pegawaiService = {
     limit?: number;
     search?: string;
     statusAktif?: boolean;
+    sort?: "id" | "namaLengkap" | "nip" | "createdAt";
+    order?: "ASC" | "DESC";
   }): Promise<{
     data: PegawaiItem[];
     meta?: { page: number; limit: number; total: number; lastPage: number };
@@ -155,6 +175,8 @@ export const pegawaiService = {
     if (params?.search) searchParams.append("search", params.search);
     if (params?.statusAktif !== undefined)
       searchParams.append("statusAktif", String(params.statusAktif));
+    if (params?.sort) searchParams.append("sort", params.sort);
+    if (params?.order) searchParams.append("order", params.order);
 
     const queryStr = searchParams.toString();
     const endpoint = `/pegawai${queryStr ? `?${queryStr}` : ""}`;
@@ -172,17 +194,26 @@ export const pegawaiService = {
   },
 
   async create(payload: CreatePegawaiPayload): Promise<PegawaiItem> {
+    // Hilangkan field non-whitelist seperti statusKepegawaian agar tidak memicu 400 forbidden error di backend
+    const { statusKepegawaian, ...rest } = payload as any;
+    void statusKepegawaian;
+    const cleaned = cleanPayload(rest);
+
     const res = await apiFetch<ApiResponse<PegawaiItem>>("/pegawai", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
 
   async update(id: number, payload: UpdatePegawaiPayload): Promise<PegawaiItem> {
+    const { statusKepegawaian, ...rest } = payload as any;
+    void statusKepegawaian;
+    const cleaned = cleanPayload(rest);
+
     const res = await apiFetch<ApiResponse<PegawaiItem>>(`/pegawai/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
@@ -214,6 +245,7 @@ export interface CreateGuruPayload {
 
 export interface UpdateGuruPayload {
   kodeGuru?: string;
+  pegawaiId?: number;
 }
 
 export const guruService = {
@@ -221,6 +253,8 @@ export const guruService = {
     page?: number;
     limit?: number;
     search?: string;
+    sort?: "id" | "kodeGuru" | "createdAt";
+    order?: "ASC" | "DESC";
   }): Promise<{
     data: GuruItem[];
     meta?: { page: number; limit: number; total: number; lastPage: number };
@@ -229,6 +263,8 @@ export const guruService = {
     if (params?.page) searchParams.append("page", String(params.page));
     if (params?.limit) searchParams.append("limit", String(params.limit));
     if (params?.search) searchParams.append("search", params.search);
+    if (params?.sort) searchParams.append("sort", params.sort);
+    if (params?.order) searchParams.append("order", params.order);
 
     const queryStr = searchParams.toString();
     const endpoint = `/guru${queryStr ? `?${queryStr}` : ""}`;
@@ -246,17 +282,19 @@ export const guruService = {
   },
 
   async create(payload: CreateGuruPayload): Promise<GuruItem> {
+    const cleaned = cleanPayload(payload);
     const res = await apiFetch<ApiResponse<GuruItem>>("/guru", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
 
   async update(id: number, payload: UpdateGuruPayload): Promise<GuruItem> {
+    const cleaned = cleanPayload(payload);
     const res = await apiFetch<ApiResponse<GuruItem>>(`/guru/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleaned),
     });
     return res.data!;
   },
@@ -276,7 +314,7 @@ export interface UserAccountItem {
   id: number;
   username: string;
   email: string;
-  status: string;
+  status: "aktif" | "nonaktif" | "ditangguhkan";
   lastLoginAt?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -286,7 +324,7 @@ export interface UserAccountItem {
 export interface CreateUserPayload {
   username: string;
   email: string;
-  password?: string;
+  password: string;
   role: string;
   status?: string;
 }
@@ -294,8 +332,7 @@ export interface CreateUserPayload {
 export interface UpdateUserPayload {
   username?: string;
   email?: string;
-  password?: string;
-  status?: string;
+  status?: "aktif" | "nonaktif" | "ditangguhkan";
   role?: string;
 }
 
@@ -305,6 +342,8 @@ export const usersService = {
     limit?: number;
     search?: string;
     status?: string;
+    sort?: string;
+    order?: "ASC" | "DESC";
   }): Promise<{
     data: UserAccountItem[];
     meta?: { page: number; limit: number; total: number; lastPage: number };
@@ -314,6 +353,8 @@ export const usersService = {
     if (params?.limit) searchParams.append("limit", String(params.limit));
     if (params?.search) searchParams.append("search", params.search);
     if (params?.status) searchParams.append("status", params.status);
+    if (params?.sort) searchParams.append("sort", params.sort);
+    if (params?.order) searchParams.append("order", params.order);
 
     const queryStr = searchParams.toString();
     const endpoint = `/users${queryStr ? `?${queryStr}` : ""}`;
@@ -331,17 +372,33 @@ export const usersService = {
   },
 
   async create(payload: CreateUserPayload): Promise<UserAccountItem> {
+    // Backend CreateUserDto hanya menerima: username, email, password, role
+    // Mengirim status akan memicu 400 (forbidNonWhitelisted)
+    const body: Record<string, string> = {
+      username: payload.username.trim(),
+      email: payload.email.trim(),
+      password: payload.password,
+      role: payload.role,
+    };
+
     const res = await apiFetch<ApiResponse<UserAccountItem>>("/users", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
     return res.data!;
   },
 
   async update(id: number, payload: UpdateUserPayload): Promise<UserAccountItem> {
+    // Backend UpdateUserDto menerima: username, email, status, role (tanpa password)
+    const body: Record<string, any> = {};
+    if (payload.username?.trim()) body.username = payload.username.trim();
+    if (payload.email?.trim()) body.email = payload.email.trim();
+    if (payload.status) body.status = payload.status;
+    if (payload.role) body.role = payload.role;
+
     const res = await apiFetch<ApiResponse<UserAccountItem>>(`/users/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
     return res.data!;
   },

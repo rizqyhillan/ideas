@@ -245,9 +245,9 @@ export default function UsersPage() {
                         <Badge color="success" size="sm">
                           Aktif
                         </Badge>
-                      ) : item.status === "terkunci" ? (
+                      ) : item.status === "ditangguhkan" ? (
                         <Badge color="warning" size="sm">
-                          Terkunci
+                          Ditangguhkan
                         </Badge>
                       ) : (
                         <Badge color="light" size="sm">

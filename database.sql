@@ -1,8 +1,8 @@
 DO $$
 BEGIN
-    IF current_database() <> 'splasma_db' THEN
+    IF current_database() <> 'ideas' THEN
         RAISE EXCEPTION
-            'Database aktif adalah %, seharusnya splasma_db. Ubah koneksi DBeaver terlebih dahulu.',
+            'Database aktif adalah %, seharusnya ideas. Ubah koneksi DBeaver terlebih dahulu.',
             current_database();
     END IF;
 

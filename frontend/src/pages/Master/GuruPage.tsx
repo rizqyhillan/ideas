@@ -206,9 +206,11 @@ export default function GuruPage() {
                     </td>
                     <td className="px-4 py-3.5 text-xs">
                       <div>{item.pegawai?.jabatan || "Guru"}</div>
-                      <span className="text-gray-400">
-                        {item.pegawai?.statusKepegawaian || "PNS/Honorer"}
-                      </span>
+                      {item.pegawai?.nuptk && (
+                        <span className="text-gray-400">
+                          NUPTK: {item.pegawai.nuptk}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-xs">
                       <div>{item.pegawai?.noTelepon || "-"}</div>

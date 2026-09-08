@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 // Academic & Master Data Pages
 import TahunAjaranPage from "./pages/Academic/TahunAjaranPage";
 import ClassesPage from "./pages/Academic/ClassesPage";
+import AbsensiPage from "./pages/Academic/AbsensiPage";
 import SiswaPage from "./pages/Master/SiswaPage";
 import GuruPage from "./pages/Master/GuruPage";
 import PegawaiPage from "./pages/Master/PegawaiPage";
@@ -35,6 +36,8 @@ export default function App() {
                 element={<TahunAjaranPage />}
               />
               <Route path="/academic/classes" element={<ClassesPage />} />
+              <Route path="/academic/absensi" element={<AbsensiPage />} />
+              <Route path="/absensi" element={<AbsensiPage />} />
 
               {/* Master Data Routes */}
               <Route path="/master/siswa" element={<SiswaPage />} />
