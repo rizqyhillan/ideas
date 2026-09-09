@@ -1,4 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': false
   bcrypt: false
   esbuild: false
   sqlite3: false

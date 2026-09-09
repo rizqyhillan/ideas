@@ -1,6 +1,8 @@
 import { AppDataSource } from '../datasource';
 
 import { adminSeeder } from './admin.seeder';
+import { guruPegawaiSeeder } from './pegawaiguru.seeder';
+import { siswaSeeder } from './siswa..seeder';
 
 async function runSeed() {
   try {
@@ -8,7 +10,9 @@ async function runSeed() {
 
     console.log('Database Connected');
 
-    await adminSeeder();
+    // await adminSeeder();
+    // await siswaSeeder();
+    await guruPegawaiSeeder();
 
     console.log('Seeder selesai');
 
