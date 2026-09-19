@@ -145,22 +145,22 @@ export default function GuruPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <Input
               type="text"
-              placeholder="Cari guru..."
+              placeholder="Cari kode/nama guru..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-48 sm:w-64"
+              className="w-full sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal}>
+            <Button size="sm" onClick={openCreateModal} className="w-full sm:w-auto justify-center">
               + Tambah Guru
             </Button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table (Desktop & Tablet) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
               <tr>
@@ -249,13 +249,80 @@ export default function GuruPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards View */}
+        <div className="block md:hidden space-y-3 mt-4">
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">Memuat data guru...</div>
+          ) : data.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">Belum ada data guru pengajar.</div>
+          ) : (
+            data.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {item.pegawai?.namaLengkap}
+                    </h4>
+                    <span className="text-xs font-mono text-brand-600 dark:text-brand-400 font-bold">
+                      {item.kodeGuru || "-"}
+                    </span>
+                    {item.pegawai?.nip && (
+                      <span className="text-xs font-mono text-gray-500 dark:text-gray-400 ml-2">
+                        NIP: {item.pegawai.nip}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-xs mb-3">
+                  <span className="text-gray-400">Jabatan:</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item.pegawai?.jabatan || "Guru"}
+                  </span>
+                  {item.pegawai?.nuptk && (
+                    <span className="text-gray-400 block">NUPTK: {item.pegawai.nuptk}</span>
+                  )}
+                </div>
+                <div className="text-xs mb-3">
+                  <span className="text-gray-400">Kontak:</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item.pegawai?.noTelepon || "-"}
+                  </span>
+                  <span className="text-gray-400 block">{item.pegawai?.email || ""}</span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <Badge color={item.pegawai?.statusAktif ? "success" : "light"} size="sm">
+                    {item.pegawai?.statusAktif ? "Aktif" : "Nonaktif"}
+                  </Badge>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Modal Create / Edit Guru */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-md p-6"
+        className="max-w-md p-4 sm:p-6 w-full"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">

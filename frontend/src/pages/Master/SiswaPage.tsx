@@ -184,7 +184,7 @@ export default function SiswaPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <select
               value={statusFilter === "" ? "" : String(statusFilter)}
               onChange={(e) =>
@@ -192,7 +192,7 @@ export default function SiswaPage() {
                   e.target.value === "" ? "" : e.target.value === "true",
                 )
               }
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
             >
               <option value="">Semua Status</option>
               <option value="true">Aktif</option>
@@ -207,16 +207,16 @@ export default function SiswaPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-40 sm:w-56"
+              className="w-full sm:w-56"
             />
-            <Button size="sm" onClick={openCreateModal}>
+            <Button size="sm" onClick={openCreateModal} className="w-full sm:w-auto justify-center">
               + Tambah Siswa
             </Button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Table (Desktop & Tablet) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
               <tr>
@@ -312,6 +312,78 @@ export default function SiswaPage() {
           </table>
         </div>
 
+        {/* Mobile Cards View */}
+        <div className="block md:hidden space-y-3 mt-4">
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">Memuat data siswa...</div>
+          ) : data.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">Tidak ada data siswa ditemukan.</div>
+          ) : (
+            data.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">{item.namaLengkap}</h4>
+                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                      NISN: {item.nisn} {item.nis ? `• NIS: ${item.nis}` : ""}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                      item.jenisKelamin === "L"
+                        ? "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+                        : "bg-pink-50 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400"
+                    }`}
+                  >
+                    {item.jenisKelamin}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  <div>
+                    <span className="text-gray-400">Kontak:</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {item.noTelepon || item.email || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Wali:</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {item.namaWali || "-"}
+                    </span>
+                  </div>
+                </div>
+                {item.alamat && (
+                  <div className="text-xs text-gray-400 mb-3 truncate">
+                    Alamat: {item.alamat}
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                  <Badge color={item.statusAktif ? "success" : "light"} size="sm">
+                    {item.statusAktif ? "Aktif" : "Nonaktif"}
+                  </Badge>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500">
@@ -342,7 +414,7 @@ export default function SiswaPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-xl p-6"
+        className="max-w-xl p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">

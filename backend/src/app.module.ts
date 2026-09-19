@@ -12,6 +12,7 @@ import { SiswaModule } from './siswa/siswa.module';
 import { GuruModule } from './guru/guru.module';
 import { TahunAjaranModule } from './tahun-ajaran/tahun-ajaran.module';
 import { ClassesModule } from './classes/classes.module';
+import { AbsensiModule } from './absensi/absensi.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ClassesModule } from './classes/classes.module';
     TahunAjaranModule,
 
     ClassesModule,
+    AbsensiModule,
   ],
 })
 export class AppModule {}

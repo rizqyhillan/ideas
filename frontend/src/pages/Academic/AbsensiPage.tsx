@@ -547,13 +547,14 @@ export default function AbsensiPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={handleMarkAllHadir}
               disabled={loadingStudents || students.length === 0}
               startIcon={<CheckLineIcon className="h-4 w-4 text-success-500" />}
+              className="w-full sm:w-auto justify-center"
             >
               Tandai Semua Hadir
             </Button>
@@ -564,6 +565,7 @@ export default function AbsensiPage() {
               onClick={handleSaveAttendance}
               disabled={loadingStudents || isSaving || students.length === 0}
               startIcon={<CheckCircleIcon className="h-4 w-4" />}
+              className="w-full sm:w-auto justify-center"
             >
               {isSaving ? "Menyimpan..." : "Simpan Absensi"}
             </Button>
@@ -606,8 +608,8 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        {/* Tabel Data */}
-        <div className="overflow-x-auto">
+        {/* Tabel Data (Desktop & Tablet) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
               <tr>
@@ -819,6 +821,135 @@ export default function AbsensiPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View (Dioptimalkan Khusus Smartphone Guru) */}
+        <div className="block md:hidden p-3 sm:p-4 space-y-3">
+          {loadingStudents ? (
+            <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>
+              <p className="mt-2 text-xs">Memuat daftar siswa kelas...</p>
+            </div>
+          ) : filteredStudents.length === 0 ? (
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              <p className="text-sm">Tidak ada data siswa ditemukan.</p>
+              <p className="text-xs text-gray-400 mt-1">Pastikan kelas memiliki siswa aktif.</p>
+            </div>
+          ) : (
+            filteredStudents.map((student, idx) => {
+              const isHadir = student.status === "hadir";
+              const isSakit = student.status === "sakit";
+              const isIzin = student.status === "izin";
+              const isAlpa = student.status === "alpa";
+
+              return (
+                <div
+                  key={student.siswaId}
+                  className={`p-3.5 rounded-xl border transition-all ${
+                    isHadir
+                      ? "bg-white border-gray-200 dark:bg-gray-800/40 dark:border-gray-700"
+                      : isSakit
+                      ? "bg-warning-50/40 border-warning-200 dark:bg-warning-950/20 dark:border-warning-900/40"
+                      : isIzin
+                      ? "bg-blue-50/40 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/40"
+                      : "bg-error-50/40 border-error-200 dark:bg-error-950/20 dark:border-error-900/40"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                          {student.namaLengkap}
+                        </h4>
+                        <span className="text-[11px] text-gray-400 font-mono">
+                          NISN: {student.nisn} {student.nis ? `• NIS: ${student.nis}` : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                        student.jenisKelamin === "L"
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                          : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300"
+                      }`}
+                    >
+                      {student.jenisKelamin}
+                    </span>
+                  </div>
+
+                  {/* 4 Tombol Status Tap-Friendly */}
+                  <div className="grid grid-cols-4 gap-1.5 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSetSpecificStatus(student.siswaId, "hadir")}
+                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                        isHadir
+                          ? "bg-success-600 text-white border-success-600 shadow-xs"
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-success-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      Hadir
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetSpecificStatus(student.siswaId, "sakit")}
+                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                        isSakit
+                          ? "bg-warning-500 text-white border-warning-500 shadow-xs"
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-warning-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      Sakit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetSpecificStatus(student.siswaId, "izin")}
+                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                        isIzin
+                          ? "bg-blue-500 text-white border-blue-500 shadow-xs"
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-blue-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      Izin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetSpecificStatus(student.siswaId, "alpa")}
+                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                        isAlpa
+                          ? "bg-error-500 text-white border-error-500 shadow-xs"
+                          : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-error-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      Alpa
+                    </button>
+                  </div>
+
+                  {/* Keterangan input if not hadir */}
+                  {!isHadir && (
+                    <input
+                      type="text"
+                      value={student.keterangan || ""}
+                      onChange={(e) =>
+                        handleUpdateKeterangan(student.siswaId, e.target.value)
+                      }
+                      placeholder={
+                        isSakit
+                          ? "Alasan sakit (cth: Demam, surat dokter)..."
+                          : isIzin
+                          ? "Alasan izin (cth: Acara keluarga)..."
+                          : "Alasan tanpa keterangan (alpa)..."
+                      }
+                      className="h-8 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-xs text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                    />
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Footer info & Simpan Button */}

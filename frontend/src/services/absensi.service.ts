@@ -68,15 +68,11 @@ export const absensiService = {
         localStorage.setItem(indexKey, JSON.stringify(historyList));
       }
 
-      // 2. Jika ada backend endpoint sesi-absensi, coba kirim
-      try {
-        await apiFetch("/absensi/siswa", {
-          method: "POST",
-          body: JSON.stringify(record),
-        });
-      } catch {
-        // Abaikan jika backend belum memiliki controller absensi, data lokal tetap aman tersimpan
-      }
+      // 2. Kirim ke backend (endpoint /absensi/siswa)
+      await apiFetch("/absensi/siswa", {
+        method: "POST",
+        body: JSON.stringify(record),
+      });
 
       return {
         success: true,
@@ -98,15 +94,11 @@ export const absensiService = {
     const key = `${STORAGE_KEY_PREFIX}${kelasId}_${tanggal}`;
     const dataJson = localStorage.getItem(key);
     if (!dataJson) {
-      // Coba fetch dari backend jika ada
-      try {
-        const res = await apiFetch<ApiResponse<AttendanceSessionRecord>>(
-          `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}`,
-        );
-        if (res.data) return res.data;
-      } catch {
-        return null;
-      }
+      // Coba fetch dari backend
+      const res = await apiFetch<ApiResponse<AttendanceSessionRecord>>(
+        `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}`,
+      );
+      if (res.data) return res.data;
       return null;
     }
 

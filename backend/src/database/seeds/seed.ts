@@ -10,8 +10,8 @@ async function runSeed() {
 
     console.log('Database Connected');
 
-    // await adminSeeder();
-    // await siswaSeeder();
+    await adminSeeder();
+    await siswaSeeder();
     await guruPegawaiSeeder();
 
     console.log('Seeder selesai');
