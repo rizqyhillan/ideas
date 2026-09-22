@@ -174,7 +174,7 @@ export default function UsersPage() {
               <option value="">Semua Status</option>
               <option value="aktif">Aktif</option>
               <option value="nonaktif">Nonaktif</option>
-              <option value="terkunci">Terkunci</option>
+              <option value="ditangguhkan">Ditangguhkan</option>
             </select>
 
             <Input
@@ -433,9 +433,6 @@ export default function UsersPage() {
                 <option value="admin">Admin</option>
                 <option value="guru">Guru</option>
                 <option value="guru_bk">Guru BK</option>
-                <option value="staff_perpustakaan">Staff Perpustakaan</option>
-                <option value="staff_ekstrakurikuler">Staff Ekstrakurikuler</option>
-                <option value="kepala_sekolah">Kepala Sekolah</option>
                 <option value="siswa">Siswa</option>
               </select>
             </div>
@@ -451,7 +448,7 @@ export default function UsersPage() {
               >
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>
-                <option value="terkunci">Terkunci</option>
+                <option value="ditangguhkan">Ditangguhkan</option>
               </select>
             </div>
           </div>

@@ -118,8 +118,6 @@ export default function SignUpForm() {
                     >
                       <option value="guru">Guru Pengajar</option>
                       <option value="guru_bk">Guru Bimbingan Konseling (BK)</option>
-                      <option value="staff_perpustakaan">Staf Perpustakaan</option>
-                      <option value="staff_ekstrakurikuler">Staf Ekstrakurikuler</option>
                       <option value="siswa">Siswa Pelajar</option>
                     </select>
                   </div>

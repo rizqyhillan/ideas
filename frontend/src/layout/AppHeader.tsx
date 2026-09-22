@@ -60,8 +60,8 @@ const AppHeader: React.FC = () => {
       navigate("/academic/tahun-ajaran");
     } else if (query.includes("user") || query.includes("pengguna") || query.includes("akun")) {
       navigate("/master/users");
-    } else if (query.includes("kalender") || query.includes("jadwal") || query.includes("agenda")) {
-      navigate("/calendar");
+    } else if (query.includes("jadwal") || query.includes("agenda")) {
+      navigate("/academic/classes");
     } else if (query.includes("profil") || query.includes("saya")) {
       navigate("/profile");
     } else {

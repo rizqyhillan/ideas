@@ -15,12 +15,15 @@ export interface UserProfile {
   id: number;
   username: string;
   email: string;
+  namaLengkap?: string;
   status: string;
   lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
   userRoles2?: UserRole[];
   userPermissions2?: any[];
+  roles?: string[];
+  permissions?: string[];
 }
 
 export interface LoginResult {

@@ -66,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string, remember = false) {
     const result = await authService.login(email.trim(), password);
     setStoredToken(result.accessToken, remember);
-    setStoredUser(result.user, remember);
+    const currentUser = await authService.me();
+    setStoredUser(currentUser, remember);
     setToken(result.accessToken);
-    setUser(result.user);
+    setUser(currentUser);
   }
 
   function signOut() {
@@ -109,5 +110,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");
-  return context;
+  const rolesFromRelations =
+    context.user?.userRoles2?.map((r: any) => r.role?.code).filter(Boolean) || [];
+  const permissionsFromRelations =
+    context.user?.userRoles2
+      ?.flatMap((r: any) =>
+        r.role?.rolePermissions?.map((rp: any) => rp.permission?.code) || [],
+      )
+      .filter(Boolean) || [];
+  const userWithRoles = {
+    ...context.user,
+    roles: [
+      ...(context.user?.roles?.map((r: any) => r.code || r) || []),
+      ...rolesFromRelations,
+    ],
+    permissions: [
+      ...(context.user?.permissions?.map((p: any) => p.code || p) || []),
+      ...permissionsFromRelations,
+    ],
+  };
+  return {
+    ...context,
+    user: userWithRoles,
+  };
 }

@@ -30,8 +30,12 @@ const navItems: NavItem[] = [
     name: "Akademik",
     subItems: [
       { name: "Tahun Ajaran", path: "/academic/tahun-ajaran", pro: false },
+      { name: "Semester", path: "/academic/semester", pro: false },
       { name: "Kelas & Rombel", path: "/academic/classes", pro: false },
+      { name: "Mata Pelajaran", path: "/academic/mata-pelajaran", pro: false },
+      { name: "Jadwal Pelajaran", path: "/academic/jadwal", pro: false },
       { name: "Absensi Siswa", path: "/academic/absensi", pro: false },
+      { name: "Konseling (BK)", path: "/academic/konseling", pro: false },
     ],
   },
   {
@@ -42,16 +46,13 @@ const navItems: NavItem[] = [
       { name: "Data Guru", path: "/master/guru", pro: false },
       { name: "Data Pegawai", path: "/master/pegawai", pro: false },
       { name: "Data Pengguna", path: "/master/users", pro: false },
+      { name: "Role & Hak Akses", path: "/master/roles", pro: false },
+      { name: "Permissions", path: "/master/permissions", pro: false },
     ],
   },
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <CalenderIcon />,
-    name: "Kalender",
-    path: "/calendar",
-  },
   {
     icon: <UserCircleIcon />,
     name: "Profil Saya",

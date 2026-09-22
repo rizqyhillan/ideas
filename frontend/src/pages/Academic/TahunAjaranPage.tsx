@@ -165,7 +165,7 @@ export default function TahunAjaranPage() {
         </div>
       )}
 
-      {/* Main Table Card */}
+      {/* Main Card */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -191,8 +191,8 @@ export default function TahunAjaranPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
               <tr>
@@ -265,6 +265,70 @@ export default function TahunAjaranPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">
+              Memuat data tahun ajaran...
+            </div>
+          ) : data.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">
+              Belum ada data tahun ajaran.
+            </div>
+          ) : (
+            data.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {item.nama}
+                      </span>
+                      {item.isActive && (
+                        <Badge color="success" size="sm">Aktif</Badge>
+                      )}
+                      {!item.isActive && (
+                        <Badge color="light" size="sm">Selesai</Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                      <p>
+                        Mulai:{" "}
+                        {item.tanggalMulai
+                          ? item.tanggalMulai.split("T")[0]
+                          : "-"}
+                      </p>
+                      <p>
+                        Selesai:{" "}
+                        {item.tanggalSelesai
+                          ? item.tanggalSelesai.split("T")[0]
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="px-3 py-1.5 text-xs font-medium text-error-600 bg-error-50 rounded-lg hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

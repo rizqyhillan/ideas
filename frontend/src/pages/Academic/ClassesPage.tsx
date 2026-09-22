@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
@@ -67,7 +67,7 @@ export default function ClassesPage() {
       const [taRes, guruRes, siswaRes] = await Promise.all([
         tahunAjaranService.getAll({ sort: "id", order: "DESC" }),
         guruService.getAll({ limit: 100 }),
-        siswaService.getAll({ limit: 200, statusAktif: true }),
+        siswaService.getAll({ limit: 500, statusAktif: true }),
       ]);
       setTahunAjarans(taRes.data);
       setGurus(guruRes.data);
@@ -233,6 +233,13 @@ export default function ClassesPage() {
     }
   }
 
+  // Filter siswa yang belum di kelas ini
+  const availableSiswa = useMemo(() => {
+    return allSiswa.filter(
+      (s) => !classStudents.some((cs) => cs.siswaId === s.id)
+    );
+  }, [allSiswa, classStudents]);
+
   return (
     <>
       <PageMeta
@@ -278,7 +285,7 @@ export default function ClassesPage() {
               <option value="">Semua Tahun Ajaran</option>
               {tahunAjarans.map((ta) => (
                 <option key={ta.id} value={ta.id}>
-                  {ta.nama} {ta.isActive ? "(Aktif)" : ""}
+                  {ta.nama} {ta.isActive ? " (Aktif)" : ""}
                 </option>
               ))}
             </select>
@@ -311,8 +318,8 @@ export default function ClassesPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
               <tr>
@@ -418,6 +425,83 @@ export default function ClassesPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">
+              Memuat data kelas...
+            </div>
+          ) : classes.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">
+              Tidak ada data kelas yang sesuai filter.
+            </div>
+          ) : (
+            classes.map((cls) => (
+              <div
+                key={cls.id}
+                className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {cls.nama}
+                      </span>
+                      <span className="px-2 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        Kelas {cls.tingkat}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-0.5">
+                      <p>
+                        TA: {cls.tahunAjaran?.nama || "-"}
+                      </p>
+                      <p>
+                        Ruang: {cls.ruang || "-"} | Kapasitas:{" "}
+                        {cls.kapasitas ? `${cls.kapasitas} siswa` : "Tanpa batas"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button
+                      onClick={() => openStudentsModal(cls)}
+                      className="px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                    >
+                      Kelola
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {cls.waliKelas?.pegawai?.namaLengkap ? (
+                      <>
+                        Wali: {cls.waliKelas.pegawai.namaLengkap}
+                        {cls.waliKelas.kodeGuru ? ` (${cls.waliKelas.kodeGuru})` : ""}
+                      </>
+                    ) : (
+                      <span className="italic">Belum ada wali kelas</span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditClassModal(cls)}
+                      className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClass(cls.id)}
+                      className="px-2 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Modal Create / Edit Class */}
@@ -460,7 +544,7 @@ export default function ClassesPage() {
               <option value="">Pilih Tahun Ajaran</option>
               {tahunAjarans.map((ta) => (
                 <option key={ta.id} value={ta.id}>
-                  {ta.nama} {ta.isActive ? "(Aktif)" : ""}
+                  {ta.nama} {ta.isActive ? " (Aktif)" : ""}
                 </option>
               ))}
             </select>
@@ -518,7 +602,7 @@ export default function ClassesPage() {
               <option value="">Pilih Guru Wali Kelas (Opsional)</option>
               {gurus.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.pegawai?.namaLengkap} {g.kodeGuru ? `(${g.kodeGuru})` : ""}
+                  {g.pegawai?.namaLengkap} {g.kodeGuru ? ` (${g.kodeGuru})` : ""}
                 </option>
               ))}
             </select>
@@ -620,50 +704,45 @@ export default function ClassesPage() {
               required
             >
               <option value="">Pilih Siswa untuk Ditambahkan...</option>
-              {allSiswa
-                .filter(
-                  (s) => !classStudents.some((cs) => cs.siswaId === s.id),
-                )
-                .map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.namaLengkap} (NISN: {s.nisn})
-                  </option>
-                ))}
+              {availableSiswa.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.namaLengkap} (NISN: {s.nisn})
+                </option>
+              ))}
             </select>
           </div>
-          <Button size="sm" disabled={isAddingStudent || !selectedSiswaId}>
+          <button
+            type="submit"
+            className="h-10 px-4 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isAddingStudent ? "Menambahkan..." : "+ Tambahkan Siswa"}
-          </Button>
+          </button>
         </form>
 
-        {/* Students List Table */}
+        {/* Students List */}
         <div className="max-h-72 overflow-y-auto border border-gray-100 rounded-xl dark:border-gray-800">
-          <table className="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-            <thead className="sticky top-0 border-b border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
-              <tr>
-                <th className="px-3 py-2.5">No</th>
-                <th className="px-3 py-2.5">NISN / NIS</th>
-                <th className="px-3 py-2.5">Nama Lengkap</th>
-                <th className="px-3 py-2.5">L/P</th>
-                <th className="px-3 py-2.5">Tgl Masuk</th>
-                <th className="px-3 py-2.5 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {loadingStudents ? (
+          {loadingStudents ? (
+            <div className="py-6 text-center text-gray-400">
+              Memuat daftar siswa...
+            </div>
+          ) : classStudents.length === 0 ? (
+            <div className="py-6 text-center text-gray-400">
+              Belum ada siswa yang ditempatkan di kelas ini.
+            </div>
+          ) : (
+            <table className="w-full text-left text-xs text-gray-600 dark:text-gray-300">
+              <thead className="sticky top-0 border-b border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-gray-400">
-                    Memuat daftar siswa...
-                  </td>
+                  <th className="px-3 py-2.5">No</th>
+                  <th className="px-3 py-2.5">NISN / NIS</th>
+                  <th className="px-3 py-2.5">Nama Lengkap</th>
+                  <th className="px-3 py-2.5">L/P</th>
+                  <th className="px-3 py-2.5">Tgl Masuk</th>
+                  <th className="px-3 py-2.5 text-center">Aksi</th>
                 </tr>
-              ) : classStudents.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-6 text-center text-gray-400">
-                    Belum ada siswa yang ditempatkan di kelas ini.
-                  </td>
-                </tr>
-              ) : (
-                classStudents.map((item, idx) => (
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {classStudents.map((item, idx) => (
                   <tr
                     key={item.id}
                     className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
@@ -690,10 +769,10 @@ export default function ClassesPage() {
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">

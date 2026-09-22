@@ -409,3 +409,118 @@ export const usersService = {
     });
   },
 };
+
+// ==========================================
+// ROLE & PERMISSION TYPES & SERVICE
+// ==========================================
+
+export type RoleCode = "admin" | "guru" | "siswa" | "ortu";
+
+export interface RoleItem {
+  id: number;
+  code: string;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PermissionItem {
+  id: number;
+  code: string;
+  module: string;
+  action: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface CreateRolePayload {
+  code: string;
+  name: string;
+  description?: string;
+  isSystem?: boolean;
+}
+
+export interface UpdateRolePayload {
+  code?: string;
+  name?: string;
+  description?: string;
+  isSystem?: boolean;
+}
+
+export const roleService = {
+  async getAll(): Promise<{ data: RoleItem[] }> {
+    const res = await apiFetch<ApiResponse<RoleItem[]>>("/roles");
+    return { data: res.data || [] };
+  },
+
+  async getById(id: number): Promise<RoleItem> {
+    const res = await apiFetch<ApiResponse<RoleItem>>(`/roles/${id}`);
+    return res.data!;
+  },
+
+  async create(payload: CreateRolePayload): Promise<RoleItem> {
+    const res = await apiFetch<ApiResponse<RoleItem>>("/roles", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res.data!;
+  },
+
+  async update(id: number, payload: UpdateRolePayload): Promise<RoleItem> {
+    const res = await apiFetch<ApiResponse<RoleItem>>(`/roles/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+    return res.data!;
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiFetch(`/roles/${id}`, { method: "DELETE" });
+  },
+
+  async getRolePermissions(roleId: number): Promise<PermissionItem[]> {
+    const res = await apiFetch<ApiResponse<PermissionItem[]>>(
+      `/roles/${roleId}/permissions`
+    );
+    return res.data || [];
+  },
+
+  async assignPermission(
+    roleId: number,
+    permissionId: number
+  ): Promise<void> {
+    await apiFetch(`/roles/${roleId}/permissions/${permissionId}`, {
+      method: "POST",
+    });
+  },
+
+  async removePermission(
+    roleId: number,
+    permissionId: number
+  ): Promise<void> {
+    await apiFetch(`/roles/${roleId}/permissions/${permissionId}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+export const permissionService = {
+  async getAll(): Promise<{ data: PermissionItem[] }> {
+    const res = await apiFetch<ApiResponse<PermissionItem[]>>("/permissions");
+    return { data: res.data || [] };
+  },
+
+  async getById(id: number): Promise<PermissionItem> {
+    const res = await apiFetch<ApiResponse<PermissionItem>>(`/permissions/${id}`);
+    return res.data!;
+  },
+
+  async getByModule(module: string): Promise<PermissionItem[]> {
+    const res = await apiFetch<ApiResponse<PermissionItem[]>>(
+      `/permissions?module=${module}`
+    );
+    return res.data || [];
+  },
+};

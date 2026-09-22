@@ -76,7 +76,7 @@ export default function AbsensiPage() {
           currentGuru = guruRes.data.find(
             (g) =>
               g.pegawai?.userId === user.id ||
-              (g.pegawai?.email && g.pegawai.email.toLowerCase() === user.email.toLowerCase()) ||
+              (g.pegawai?.email && user.email && g.pegawai.email.toLowerCase() === user.email.toLowerCase()) ||
               g.kodeGuru === user.username
           );
         }
@@ -84,7 +84,6 @@ export default function AbsensiPage() {
         if (currentGuru) {
           setSelectedGuruId(currentGuru.id);
         } else if (guruRes.data.length > 0) {
-          // Jika akun admin atau belum tertaut guru khusus, pilih guru pertama sebagai default
           setSelectedGuruId(guruRes.data[0].id);
         }
       } catch (err: unknown) {
@@ -104,19 +103,16 @@ export default function AbsensiPage() {
     return gurus.find((g) => g.id === Number(selectedGuruId)) || null;
   }, [selectedGuruId, gurus]);
 
-  // Daftar kelas yang relevan dengan guru yang sedang mengajar
-  // Jika guru adalah wali kelas dari suatu kelas, kelas tersebut diprioritaskan
+  // Daftar kelas yang relevan dengan guru
   const guruClasses = useMemo(() => {
     if (!activeGuru) return classes;
     const taughtClasses = classes.filter((c) => c.waliKelasId === activeGuru.id);
-    // Jika ada kelas binaan wali kelas, tampilkan; jika belum terdaftar spesifik, tampilkan seluruh kelas aktif
     return taughtClasses.length > 0 ? taughtClasses : classes;
   }, [activeGuru, classes]);
 
   // Set default kelas saat daftar kelas guru berubah
   useEffect(() => {
     if (guruClasses.length > 0) {
-      // Jika kelas saat ini tidak ada dalam daftar guruClasses, pilih kelas pertama
       const exists = guruClasses.some((c) => c.id === Number(selectedClassId));
       if (!exists) {
         setSelectedClassId(guruClasses[0].id);
@@ -126,7 +122,7 @@ export default function AbsensiPage() {
     }
   }, [guruClasses]);
 
-  // 2. Ambil siswa di kelas yang sedang diajar saat selectedClassId atau tanggal berubah
+  // 2. Ambil siswa di kelas yang sedang diajar
   useEffect(() => {
     if (!selectedClassId) {
       setStudents([]);
@@ -139,7 +135,7 @@ export default function AbsensiPage() {
         setErrorMsg("");
         setSuccessMsg("");
 
-        // Cek apakah ada riwayat tersimpan sebelumnya untuk kelas & tanggal ini
+        // Cek apakah ada riwayat tersimpan sebelumnya
         const existingSession = await absensiService.getAttendance(
           Number(selectedClassId),
           tanggal
@@ -154,7 +150,7 @@ export default function AbsensiPage() {
             `Memuat data absensi tersimpan untuk tanggal ${tanggal} (${existingSession.items.length} siswa).`
           );
         } else {
-          // Ambil siswa aktif di kelas yang dipilih dari backend
+          // Ambil siswa aktif di kelas dari backend
           const classStudents: ClassStudentItem[] = await classesService.getClassStudents(
             Number(selectedClassId)
           );
@@ -166,7 +162,7 @@ export default function AbsensiPage() {
             nis: cs.siswa.nis,
             namaLengkap: cs.siswa.namaLengkap,
             jenisKelamin: cs.siswa.jenisKelamin,
-            status: "hadir" as StatusAbsensi, // Sesuai enum 'status_absensi'
+            status: "hadir" as StatusAbsensi,
             keterangan: "",
           }));
 
@@ -189,13 +185,11 @@ export default function AbsensiPage() {
   }, [classes, selectedClassId]);
 
   // Handlers untuk mengubah status kehadiran siswa
-  // Sesuai permintaan: defaultnya adalah "hadir" lalu jika tidak hadir tinggal tekan tombol di tulisan "hadir" tersebut
   const handleToggleStatus = (siswaId: number) => {
     setStudents((prev) =>
       prev.map((student) => {
         if (student.siswaId !== siswaId) return student;
 
-        // Toggle sequence: hadir -> sakit -> izin -> alpa -> hadir
         let nextStatus: StatusAbsensi = "sakit";
         if (student.status === "hadir") {
           nextStatus = "sakit";
@@ -216,7 +210,6 @@ export default function AbsensiPage() {
     );
   };
 
-  // Set status spesifik secara langsung (Hadir, Sakit, Izin, Alpa)
   const handleSetSpecificStatus = (siswaId: number, status: StatusAbsensi) => {
     setStudents((prev) =>
       prev.map((student) => {
@@ -230,7 +223,6 @@ export default function AbsensiPage() {
     );
   };
 
-  // Update catatan keterangan tidak hadir
   const handleUpdateKeterangan = (siswaId: number, keterangan: string) => {
     setStudents((prev) =>
       prev.map((student) => {
@@ -243,7 +235,6 @@ export default function AbsensiPage() {
     );
   };
 
-  // Tandai Semua Hadir
   const handleMarkAllHadir = () => {
     setStudents((prev) =>
       prev.map((student) => ({
@@ -299,7 +290,7 @@ export default function AbsensiPage() {
     return absensiService.calculateSummary(students);
   }, [students]);
 
-  // Filtered students for search or status tab
+  // Filtered students
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       const matchSearch =
@@ -315,10 +306,9 @@ export default function AbsensiPage() {
   return (
     <>
       <PageMeta
-        title="Absensi Siswa - Splasma IDEAS"
+        title="Absensi Siswa - IdEaS"
         description="Pencatatan kehadiran siswa sesuai kelas dan akun guru pengajar"
       />
-
       <PageBreadcrumb pageTitle="Absensi Siswa" />
 
       {/* Alert Notifications */}
@@ -365,11 +355,11 @@ export default function AbsensiPage() {
                   {activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar"}
                 </h2>
                 {activeGuru?.kodeGuru && (
-                  <Badge variant="light" color="primary" size="sm">
+                  <Badge color="primary" size="sm">
                     Kode: {activeGuru.kodeGuru}
                   </Badge>
                 )}
-                <Badge variant="solid" color="success" size="sm">
+                <Badge color="success" size="sm">
                   Aktif Mengajar
                 </Badge>
               </div>
@@ -394,7 +384,7 @@ export default function AbsensiPage() {
               >
                 {gurus.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.pegawai?.namaLengkap || `Guru #${g.id}`} {g.kodeGuru ? `(${g.kodeGuru})` : ""}
+                    {g.pegawai?.namaLengkap || `Guru #${g.id}`} {g.kodeGuru ? ` (${g.kodeGuru})` : ""}
                   </option>
                 ))}
               </select>
@@ -402,7 +392,7 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        {/* Form Filter Sesi & Kelas yang Sedang Diajar */}
+        {/* Form Filter Sesi & Kelas */}
         <div className="mt-5 grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2 md:grid-cols-4 dark:border-gray-800">
           <div>
             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
@@ -485,7 +475,7 @@ export default function AbsensiPage() {
         <div className="rounded-xl border border-success-200 bg-success-50/50 p-4 shadow-theme-xs dark:border-success-900/30 dark:bg-success-950/20">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-success-700 dark:text-success-400">Hadir</p>
-            <Badge variant="solid" color="success" size="sm">
+            <Badge color="success" size="sm">
               {stats.total > 0 ? `${Math.round((stats.hadir / stats.total) * 100)}%` : "0%"}
             </Badge>
           </div>
@@ -543,7 +533,8 @@ export default function AbsensiPage() {
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Menampilkan {filteredStudents.length} siswa di kelas yang sedang diajar.
-              Tekan tombol pada tulisan <strong className="text-success-600 font-semibold">&quot;Hadir&quot;</strong> untuk menandai siswa tidak masuk.
+              Tekan tombol pada tulisan <strong className="text-success-600 font-semibold">"Hadir"</strong>{" "}
+              untuk menandai siswa tidak masuk.
             </p>
           </div>
 
@@ -670,12 +661,10 @@ export default function AbsensiPage() {
                           : ""
                       }`}
                     >
-                      {/* Nomor Absen */}
                       <td className="px-5 py-3.5 text-center font-semibold text-gray-700 dark:text-gray-300">
                         {idx + 1}
                       </td>
 
-                      {/* NISN / NIS */}
                       <td className="px-5 py-3.5 font-mono text-xs text-gray-500 dark:text-gray-400">
                         <div>{student.nisn}</div>
                         {student.nis && (
@@ -683,14 +672,10 @@ export default function AbsensiPage() {
                         )}
                       </td>
 
-                      {/* Nama Siswa */}
                       <td className="px-5 py-3.5 font-medium text-gray-800 dark:text-white">
-                        <div className="flex items-center gap-2">
-                          <span>{student.namaLengkap}</span>
-                        </div>
+                        <div>{student.namaLengkap}</div>
                       </td>
 
-                      {/* Jenis Kelamin */}
                       <td className="px-5 py-3.5 text-center">
                         <span
                           className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${
@@ -703,10 +688,8 @@ export default function AbsensiPage() {
                         </span>
                       </td>
 
-                      {/* Keterangan Masuk (Tombol Interaktif) */}
                       <td className="px-5 py-3.5 text-center">
                         <div className="inline-flex flex-col items-center gap-1.5">
-                          {/* Tombol Utama Status: Default "Hadir", tekan untuk mengubah */}
                           <button
                             type="button"
                             onClick={() => handleToggleStatus(student.siswaId)}
@@ -725,14 +708,12 @@ export default function AbsensiPage() {
                             {isSakit && <span className="font-bold">S</span>}
                             {isIzin && <span className="font-bold">I</span>}
                             {isAlpa && <CloseLineIcon className="h-3.5 w-3.5" />}
-
                             <span className="capitalize">{student.status}</span>
                             <span className="text-[10px] opacity-75 group-hover:opacity-100">
                               (Tekan)
                             </span>
                           </button>
 
-                          {/* Tombol Pilihan Cepat Spesifik (H | S | I | A) */}
                           <div className="flex items-center gap-1 text-[11px]">
                             <button
                               type="button"
@@ -789,7 +770,6 @@ export default function AbsensiPage() {
                         </div>
                       </td>
 
-                      {/* Catatan / Keterangan Alasan Tidak Hadir */}
                       <td className="px-5 py-3.5">
                         {!isHadir ? (
                           <div className="flex items-center gap-2">
@@ -823,7 +803,7 @@ export default function AbsensiPage() {
           </table>
         </div>
 
-        {/* Mobile Cards View (Dioptimalkan Khusus Smartphone Guru) */}
+        {/* Mobile Cards View */}
         <div className="block md:hidden p-3 sm:p-4 space-y-3">
           {loadingStudents ? (
             <div className="py-12 text-center text-gray-500 dark:text-gray-400">
@@ -880,7 +860,7 @@ export default function AbsensiPage() {
                     </span>
                   </div>
 
-                  {/* 4 Tombol Status Tap-Friendly */}
+                  {/* 4 Tombol Status */}
                   <div className="grid grid-cols-4 gap-1.5 mb-2">
                     <button
                       type="button"
@@ -928,7 +908,7 @@ export default function AbsensiPage() {
                     </button>
                   </div>
 
-                  {/* Keterangan input if not hadir */}
+                  {/* Keterangan input */}
                   {!isHadir && (
                     <input
                       type="text"
@@ -952,7 +932,7 @@ export default function AbsensiPage() {
           )}
         </div>
 
-        {/* Footer info & Simpan Button */}
+        {/* Footer */}
         <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 p-5 sm:flex-row dark:border-gray-800">
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Total Siswa: <strong>{stats.total}</strong> | Hadir:{" "}
