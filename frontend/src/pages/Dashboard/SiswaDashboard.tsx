@@ -1,52 +1,26 @@
 import { Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { CardIcon, Icon } from "../../components/icons/ideas-icon";
 import Badge from "../../components/ui/badge/Badge";
 
 export default function SiswaDashboard() {
   const { user } = useAuth();
-
   const namaSiswa = user?.namaLengkap || user?.username || "Siswa";
   const email = user?.email || "-";
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Dashboard Siswa" />
-
-      {/* Welcome Banner - Student Theme */}
-      <div className="mb-6 p-6 rounded-3xl bg-gradient-to-r from-blue-600 via-brand-500 to-indigo-600 text-white shadow-lg relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="inline-block px-3 py-1 mb-2 text-xs font-semibold uppercase tracking-wider bg-white/20 backdrop-blur-md rounded-full">
-              Akun Siswa
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Selamat Datang, {namaSiswa.split(" ")[0]}! 🎓
-            </h1>
-            <p className="mt-1 text-sm text-blue-100 max-w-xl">
-              Cek kehadiran kamu, lihat data kelas, dan kelola profil siswa.
-            </p>
-          </div>
-          <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-lg">
-              📚
-            </div>
-            <div>
-              <div className="text-[11px] uppercase font-semibold text-blue-200">
-                Status
-              </div>
-              <div className="text-base font-bold text-white">
-                Aktif
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Siswa</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          Cek kehadiran, lihat data kelas, dan kelola profil
+        </p>
       </div>
 
-      {/* Student Identity Card */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+      {/* Identity Card */}
+      <div className="mb-6 card-flat p-5">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-brand-500 text-white flex items-center justify-center text-xl font-bold shrink-0">
+          <div className="w-14 h-14 rounded-full bg-brand-100 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 flex items-center justify-center text-xl font-bold shrink-0">
             {namaSiswa.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
@@ -54,7 +28,7 @@ export default function SiswaDashboard() {
               {namaSiswa}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
                 {email}
               </span>
               <Badge color="success" size="sm">Siswa</Badge>
@@ -65,24 +39,21 @@ export default function SiswaDashboard() {
 
       {/* Informasi Akademik */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        {/* Kelas Terdaftar */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400 flex items-center justify-center text-lg font-bold">
-              🏫
+        <div className="card-flat p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="icon-box bg-purple-50 dark:bg-purple-900/20">
+              <CardIcon name="school" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-800 dark:text-white">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
                 Kelas Terdaftar
               </h3>
               <p className="text-xs text-gray-400">Rombongan belajar kamu</p>
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700">
+          <div className="p-4 rounded-md bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800">
             <div className="text-center py-2">
-              <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
-                -
-              </p>
+              <p className="text-2xl font-bold text-gray-400">-</p>
               <p className="text-xs text-gray-400 mt-1">
                 Data kelas akan ditampilkan setelah dikonfigurasi oleh admin.
               </p>
@@ -90,24 +61,21 @@ export default function SiswaDashboard() {
           </div>
         </div>
 
-        {/* Informasi Kelas */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 flex items-center justify-center text-lg font-bold">
-              🕐
+        <div className="card-flat p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="icon-box bg-amber-50 dark:bg-amber-900/20">
+              <CardIcon name="clock" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-800 dark:text-white">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
                 Data Kelas
               </h3>
               <p className="text-xs text-gray-400">Informasi rombongan belajar</p>
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700">
+          <div className="p-4 rounded-md bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800">
             <div className="text-center py-2">
-              <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
-                -
-              </p>
+              <p className="text-2xl font-bold text-gray-400">-</p>
               <p className="text-xs text-gray-400 mt-1">
                 Informasi kelas akan ditampilkan setelah dikonfigurasi oleh admin.
               </p>
@@ -117,71 +85,57 @@ export default function SiswaDashboard() {
       </div>
 
       {/* Cek Absensi Hari Ini */}
-      <div className="mb-6 rounded-2xl bg-gradient-to-r from-success-500 to-emerald-500 text-white p-5 shadow-lg">
+      <div className="mb-6 card-flat p-5 border-l-4 border-l-success-500 bg-success-50/30 dark:bg-success-950/10">
         <div className="flex items-center justify-between">
           <div>
-            <div className="inline-block px-2 py-0.5 text-xs font-semibold uppercase bg-white/20 backdrop-blur-md rounded-full mb-2">
-              Presensi
-            </div>
-            <h3 className="text-lg font-bold">Cek Absensi Hari Ini</h3>
-            <p className="text-sm text-white/80 mt-1">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">Cek Absensi Hari Ini</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
               Apakah kamu sudah menandatangani kehadiran hari ini?
             </p>
           </div>
-          <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl">
-            📝
+          <div className="icon-box bg-white/80 dark:bg-gray-800/80 shadow-sm">
+            <Icon name="clipboard" size={20} className="text-success-600 dark:text-success-400" />
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
-          Menu Cepat
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            to="/academic/absensi"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-blue-50 hover:border-blue-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-blue-500/10"
-          >
-            <span className="text-xl">📝</span>
-            <div>
-              <div className="font-medium">Cek Absensi</div>
-              <div className="text-xs text-gray-400">Lihat status kehadiran</div>
-            </div>
-          </Link>
-          <Link
-            to="/academic/classes"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-amber-50 hover:border-amber-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-amber-500/10"
-          >
-            <span className="text-xl">🕐</span>
-            <div>
-              <div className="font-medium">Data Kelas</div>
-              <div className="text-xs text-gray-400">Lihat rombongan belajar</div>
-            </div>
-          </Link>
-          <Link
-            to="/academic/tahun-ajaran"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-purple-50 hover:border-purple-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-purple-500/10"
-          >
-            <span className="text-xl">📅</span>
-            <div>
-              <div className="font-medium">Tahun Ajaran</div>
-              <div className="text-xs text-gray-400">Periode akademik</div>
-            </div>
-          </Link>
-          <Link
-            to="/profile"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100 hover:border-gray-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <span className="text-xl">👤</span>
-            <div>
-              <div className="font-medium">Profil Saya</div>
-              <div className="text-xs text-gray-400">Edit data pribadi</div>
-            </div>
-          </Link>
+      {/* Menu Cepat */}
+      <div className="card-flat p-5">
+        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Menu Cepat</h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          <QuickLink icon="clipboard" label="Cek Absensi" sub="Lihat status kehadiran" link="/academic/absensi" />
+          <QuickLink icon="school" label="Data Kelas" sub="Lihat rombongan belajar" link="/academic/classes" />
+          <QuickLink icon="calendar" label="Tahun Ajaran" sub="Periode akademik" link="/academic/tahun-ajaran" />
+          <QuickLink icon="user" label="Profil Saya" sub="Edit data pribadi" link="/profile" />
         </div>
       </div>
     </>
+  );
+}
+
+function QuickLink({
+  icon,
+  label,
+  sub,
+  link,
+}: {
+  icon: string;
+  label: string;
+  sub: string;
+  link: string;
+}) {
+  return (
+    <Link
+      to={link}
+      className="flex items-center gap-3 p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm dark:bg-gray-900 dark:border-gray-800"
+    >
+      <div className="icon-box bg-gray-100 dark:bg-gray-800 shrink-0">
+        <CardIcon name={icon} />
+      </div>
+      <div>
+        <div className="font-medium text-gray-900 dark:text-white text-sm">{label}</div>
+        <div className="text-xs text-gray-400">{sub}</div>
+      </div>
+    </Link>
   );
 }

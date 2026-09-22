@@ -7,6 +7,7 @@ import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Checkbox from "../../components/form/input/Checkbox";
+import { Icon } from "../../components/icons/ideas-icon";
 import {
   tahunAjaranService,
   TahunAjaranItem,
@@ -127,12 +128,21 @@ export default function TahunAjaranPage() {
 
       {/* Active Academic Year Banner */}
       {activeItem && (
-        <div className="mb-6 p-4 rounded-2xl border border-brand-200 bg-brand-50/70 dark:bg-brand-500/10 dark:border-brand-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="mb-6 card-flat border border-brand-200 dark:border-brand-900/50">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xl shadow-md">
-              {activeItem.nama.substring(0, 4)}
+            <div className="icon-box bg-brand-500 text-white shadow-sm">
+              <Icon name="GraduationCap" size={20} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
+              <div className="mb-6">
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Tahun Ajaran {activeItem.nama}
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Periode: {activeItem.tanggalMulai.split("T")[0]} s/d{" "}
+                  {activeItem.tanggalSelesai.split("T")[0]}
+                </p>
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
                   Tahun Ajaran Aktif
@@ -141,13 +151,6 @@ export default function TahunAjaranPage() {
                   Aktif
                 </Badge>
               </div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                Tahun Ajaran {activeItem.nama}
-              </h4>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Periode: {activeItem.tanggalMulai.split("T")[0]} s/d{" "}
-                {activeItem.tanggalSelesai.split("T")[0]}
-              </p>
             </div>
           </div>
         </div>
@@ -155,18 +158,18 @@ export default function TahunAjaranPage() {
 
       {/* Feedback Alerts */}
       {successMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-success-50 border border-success-200 text-success-700 text-sm font-medium dark:bg-success-500/10 dark:border-success-500/30 dark:text-success-400">
+        <div className="mb-4 p-3 rounded-lg alert-success-flat">
           {successMsg}
         </div>
       )}
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-error-50 border border-error-200 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">
+        <div className="mb-4 p-3 rounded-lg alert-error-flat">
           {error}
         </div>
       )}
 
       {/* Main Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div className="card-flat lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -194,7 +197,7 @@ export default function TahunAjaranPage() {
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-            <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
+            <thead className="table-head border-b border-gray-200 dark:border-gray-800">
               <tr>
                 <th className="px-4 py-3">No</th>
                 <th className="px-4 py-3">Nama Tahun Ajaran</th>
@@ -204,7 +207,7 @@ export default function TahunAjaranPage() {
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="table-body-row divide-y divide-gray-200 dark:divide-gray-800">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-gray-400">
@@ -219,10 +222,7 @@ export default function TahunAjaranPage() {
                 </tr>
               ) : (
                 data.map((item, idx) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
-                  >
+                  <tr key={item.id}>
                     <td className="px-4 py-3.5 font-medium">{idx + 1}</td>
                     <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">
                       {item.nama}
@@ -248,13 +248,13 @@ export default function TahunAjaranPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                          className="px-2.5 py-1 text-xs font-medium text-brand-600 rounded-lg hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                          className="px-2.5 py-1 text-xs font-medium text-error-600 rounded-lg hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-500/10"
                         >
                           Hapus
                         </button>
@@ -279,10 +279,7 @@ export default function TahunAjaranPage() {
             </div>
           ) : (
             data.map((item) => (
-              <div
-                key={item.id}
-                className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50"
-              >
+              <div key={item.id} className="card-flat">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -314,13 +311,13 @@ export default function TahunAjaranPage() {
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => openEditModal(item)}
-                      className="px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                      className="px-3 py-1.5 text-xs font-medium text-brand-600 rounded-lg hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-500/10"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-error-600 bg-error-50 rounded-lg hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                      className="px-3 py-1.5 text-xs font-medium text-error-600 rounded-lg hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-500/10"
                     >
                       Hapus
                     </button>
@@ -414,7 +411,7 @@ export default function TahunAjaranPage() {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+              className="px-4 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Batal
             </button>

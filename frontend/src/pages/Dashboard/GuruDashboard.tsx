@@ -1,30 +1,23 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { CardIcon, Icon } from "../../components/icons/ideas-icon";
 import Badge from "../../components/ui/badge/Badge";
 import { guruService, GuruItem } from "../../services/master.service";
-import {
-  classesService,
-  ClassItem,
-} from "../../services/academic.service";
+import { classesService, ClassItem } from "../../services/academic.service";
 
 export default function GuruDashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [myGuru, setMyGuru] = useState<GuruItem | null>(null);
   const [myClasses, setMyClasses] = useState<ClassItem[]>([]);
-  const [stats, setStats] = useState({
-    totalKelas: 0,
-    totalStudents: 0,
-  });
+  const [stats, setStats] = useState({ totalKelas: 0, totalStudents: 0 });
 
   useEffect(() => {
     async function loadData() {
       try {
         const guruRes = await guruService.getAll({ limit: 100 });
         const guruList = guruRes.data;
-
         let foundGuru: GuruItem | undefined;
         let guruClasses: ClassItem[] = [];
 
@@ -39,10 +32,7 @@ export default function GuruDashboard() {
 
         if (foundGuru) {
           setMyGuru(foundGuru);
-          const classesRes = await classesService.getAll({
-            waliKelasId: foundGuru.id,
-            limit: 50,
-          });
+          const classesRes = await classesService.getAll({ waliKelasId: foundGuru.id, limit: 50 });
           guruClasses = classesRes.data;
           setMyClasses(guruClasses);
           setStats({
@@ -63,50 +53,21 @@ export default function GuruDashboard() {
   }, [user]);
 
   const namaGuru = myGuru?.pegawai?.namaLengkap || user?.username || "Guru";
-  const nip = myGuru?.pegawai?.nip || "-";
   const kodeGuru = myGuru?.kodeGuru || "-";
-  const jabatan = myGuru?.pegawai?.jabatan || "Guru Pengajar";
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Dashboard Guru" />
-
-      {/* Welcome Banner - Teacher Theme */}
-      <div className="mb-6 p-6 rounded-3xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white shadow-lg relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="inline-block px-3 py-1 mb-2 text-xs font-semibold uppercase tracking-wider bg-white/20 backdrop-blur-md rounded-full">
-              Akun Guru Pengajar
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Hai, {namaGuru.split(" ")[0]}! 👨‍🏫
-            </h1>
-            <p className="mt-1 text-sm text-emerald-100 max-w-xl">
-              Kelola kelas yang diampu dan input absensi siswa.
-            </p>
-          </div>
-          {kodeGuru !== "-" && (
-            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center gap-3 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-lg">
-                🏫
-              </div>
-              <div>
-                <div className="text-[11px] uppercase font-semibold text-emerald-200">
-                  Kode Guru
-                </div>
-                <div className="text-base font-bold text-white">
-                  {kodeGuru}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="mb-6">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Guru</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          Kelola kelas yang diampu dan input absensi siswa
+        </p>
       </div>
 
-      {/* Guru Identity Card */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+      {/* Identity Card */}
+      <div className="mb-6 card-flat p-5">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl font-bold shrink-0">
+          <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xl font-bold shrink-0">
             {namaGuru.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
@@ -114,104 +75,73 @@ export default function GuruDashboard() {
               {namaGuru}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-1">
-              {nip !== "-" && (
-                <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
-                  NIP: {nip}
+              {myGuru?.pegawai?.nip && (
+                <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                  NIP: {myGuru.pegawai.nip}
                 </span>
               )}
-              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded font-bold">
+              <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md">
                 {kodeGuru}
               </span>
-              <Badge color="success" size="sm">{jabatan}</Badge>
+              <Badge color="success" size="sm">{myGuru?.pegawai?.jabatan || "Guru Pengajar"}</Badge>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Statistik Singkat */}
+      {/* Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="p-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-              Kelas Diampu
-            </span>
-            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
-              {loading ? "..." : stats.totalKelas}
-            </h3>
-            <p className="text-xs text-gray-400 mt-1">Ruang kelas yang aktif</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 flex items-center justify-center text-xl font-bold shrink-0">
-            🏫
-          </div>
-        </div>
-        <div className="p-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-              Total Siswa
-            </span>
-            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
-              {loading ? "..." : stats.totalStudents}
-            </h3>
-            <p className="text-xs text-gray-400 mt-1">Siswa di bawah tanggung jawab</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center text-xl font-bold shrink-0">
-            🎓
-          </div>
-        </div>
-        <div className="p-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-              Data Kelas
-            </span>
-            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
-              {loading ? "..." : "—"}
-            </h3>
-            <p className="text-xs text-gray-400 mt-1">Rombel yang dikelola</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 flex items-center justify-center text-xl font-bold shrink-0">
-            🕐
-          </div>
-        </div>
+        <StatCard
+          label="Kelas Diampu"
+          value={loading ? "-" : stats.totalKelas}
+          icon="school"
+          sub="Ruang kelas yang aktif"
+        />
+        <StatCard
+          label="Total Siswa"
+          value={loading ? "-" : stats.totalStudents}
+          icon="users"
+          sub="Siswa di bawah tanggung jawab"
+        />
+        <StatCard
+          label="Status"
+          value={myGuru?.aktif ? "Aktif" : "Nonaktif"}
+          icon="activity"
+          sub="Status akun guru"
+        />
       </div>
 
       {/* Kelas yang Diampu */}
-      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="mb-6 card-flat p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-gray-800 dark:text-white/90">
+          <h3 className="text-base font-semibold text-gray-800 dark:text-white">
             Kelas yang Diampu
           </h3>
-          <Link
-            to="/academic/absensi"
-            className="text-xs font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
-          >
-            Input Absensi → 
+          <Link to="/academic/absensi" className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+            Input Absensi →
           </Link>
         </div>
 
         {loading ? (
-          <div className="py-6 text-center text-gray-400 text-sm">
-            Memuat data kelas...
-          </div>
+          <div className="py-6 text-center text-gray-400 text-sm">Memuat data kelas...</div>
         ) : myClasses.length === 0 ? (
-          <div className="py-6 text-center text-gray-400">
-            <div className="text-4xl mb-3">🏫</div>
-            <p className="font-medium">Belum ada kelas yang diberikan.</p>
-            <p className="text-sm mt-1">Admin dapat menetapkan kelas untuk anda.</p>
+          <div className="py-6 text-center">
+            <CardIcon name="school" size={28} className="mx-auto mb-2 text-gray-400" />
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Belum ada kelas yang diberikan.</p>
+            <p className="text-xs mt-1 text-gray-400">Admin dapat menetapkan kelas untuk anda.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {myClasses.map((kelas) => {
               const studentCount = kelas.siswaKelas?.filter((s) => s.isActive).length || 0;
               return (
                 <div
                   key={kelas.id}
-                  className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-gray-50 dark:bg-gray-800/40 dark:border-gray-700 transition-colors"
+                  className="flex items-center justify-between gap-3 p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors dark:bg-gray-900 dark:border-gray-800"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-gray-900 dark:text-white">
-                        Kelas {kelas.nama}
-                      </h4>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Kelas {kelas.nama}</h4>
                       <Badge color={kelas.statusAktif ? "success" : "light"} size="sm">
                         {kelas.statusAktif ? "Aktif" : "Nonaktif"}
                       </Badge>
@@ -229,18 +159,20 @@ export default function GuruDashboard() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Link
                       to={`/academic/absensi?kelas=${kelas.id}`}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+                      className="btn-action-sm bg-emerald-600 text-white hover:bg-emerald-700 border-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
                     >
-                      📝 Absensi
+                      <Icon name="clipboard" size={13} />
+                      Absensi
                     </Link>
                     <Link
                       to="/academic/classes"
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="btn-action-sm border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
-                      🏫 Kelas
+                      <Icon name="school" size={13} />
+                      Kelas
                     </Link>
                   </div>
                 </div>
@@ -250,54 +182,70 @@ export default function GuruDashboard() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 className="text-base font-bold text-gray-800 dark:text-white/90 mb-4">
-          Menu Cepat
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            to="/academic/absensi"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-emerald-50 hover:border-emerald-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-emerald-500/10"
-          >
-            <span className="text-xl">📝</span>
-            <div>
-              <div className="font-medium">Absensi Siswa</div>
-              <div className="text-xs text-gray-400">Input kehadiran harian</div>
-            </div>
-          </Link>
-          <Link
-            to="/academic/classes"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-amber-50 hover:border-amber-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-amber-500/10"
-          >
-            <span className="text-xl">🕐</span>
-            <div>
-              <div className="font-medium">Kelas Diampu</div>
-              <div className="text-xs text-gray-400">Lihat rombel aktif</div>
-            </div>
-          </Link>
-          <Link
-            to="/academic/tahun-ajaran"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-brand-50 hover:border-brand-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-brand-500/10"
-          >
-            <span className="text-xl">📅</span>
-            <div>
-              <div className="font-medium">Tahun Ajaran</div>
-              <div className="text-xs text-gray-400">Informasi periode</div>
-            </div>
-          </Link>
-          <Link
-            to="/profile"
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100 hover:border-gray-200 transition-colors text-sm font-semibold text-gray-700 dark:bg-gray-800/40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <span className="text-xl">👤</span>
-            <div>
-              <div className="font-medium">Profil Saya</div>
-              <div className="text-xs text-gray-400">Edit data pribadi</div>
-            </div>
-          </Link>
+      {/* Menu Cepat */}
+      <div className="card-flat p-5">
+        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Menu Cepat</h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          <QuickLink icon="clipboard" label="Absensi Siswa" sub="Input kehadiran harian" link="/academic/absensi" />
+          <QuickLink icon="school" label="Kelas Diampu" sub="Lihat rombel aktif" link="/academic/classes" />
+          <QuickLink icon="calendar" label="Tahun Ajaran" sub="Informasi periode" link="/academic/tahun-ajaran" />
+          <QuickLink icon="user" label="Profil Saya" sub="Edit data pribadi" link="/profile" />
         </div>
       </div>
     </>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+  sub,
+}: {
+  label: string;
+  value: string | number;
+  icon: string;
+  sub: string;
+}) {
+  return (
+    <div className="card-flat p-4 flex items-start justify-between">
+      <div>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+          {label}
+        </span>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{value}</h3>
+        <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+      </div>
+      <div className="icon-box bg-emerald-50 dark:bg-emerald-900/20">
+        <CardIcon name={icon} />
+      </div>
+    </div>
+  );
+}
+
+function QuickLink({
+  icon,
+  label,
+  sub,
+  link,
+}: {
+  icon: string;
+  label: string;
+  sub: string;
+  link: string;
+}) {
+  return (
+    <Link
+      to={link}
+      className="flex items-center gap-3 p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm dark:bg-gray-900 dark:border-gray-800"
+    >
+      <div className="icon-box bg-gray-100 dark:bg-gray-800 shrink-0">
+        <CardIcon name={icon} />
+      </div>
+      <div>
+        <div className="font-medium text-gray-900 dark:text-white text-sm">{label}</div>
+        <div className="text-xs text-gray-400">{sub}</div>
+      </div>
+    </Link>
   );
 }

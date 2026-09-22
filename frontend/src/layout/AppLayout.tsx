@@ -9,7 +9,7 @@ const LayoutContent: React.FC = () => {
 
   return (
     <div className="min-h-screen xl:flex">
-      <div>
+      <div className="flex">
         <AppSidebar />
         <Backdrop />
       </div>
@@ -19,9 +19,9 @@ const LayoutContent: React.FC = () => {
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
-        <div className="p-4 mx-auto max-w-7xl md:p-6">
+        <main className="px-4 mx-auto max-w-7xl md:px-6 md:py-6">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

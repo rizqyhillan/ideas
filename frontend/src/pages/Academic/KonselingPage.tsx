@@ -3,6 +3,7 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
+import { Icon } from "../../components/icons/ideas-icon";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
@@ -145,21 +146,22 @@ export default function KonselingPage() {
       <PageBreadcrumb pageTitle="Catatan Konseling" />
 
       {successMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-success-50 border border-success-200 text-success-700 text-sm font-medium dark:bg-success-500/10 dark:border-success-500/30 dark:text-success-400">
+        <div className="mb-4 p-3 rounded-lg alert-success-flat">
           {successMsg}
         </div>
       )}
       {errorMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-error-50 border border-error-200 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">
+        <div className="mb-4 p-3 rounded-lg alert-error-flat">
           {errorMsg}
         </div>
       )}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 lg:p-6 card-flat">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Catatan Konseling</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Catatan konseling siswa oleh guru BK</p>
+            <Icon name="Brain" className="icon-box mr-2 align-middle" />
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 inline-flex items-center">Daftar Catatan Konseling</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Catatan konseling siswa oleh guru BK</p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <select
@@ -187,7 +189,7 @@ export default function KonselingPage() {
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-            <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
+            <thead className="border-b border-gray-200 table-head">
               <tr>
                 <th className="px-4 py-3">Tanggal</th>
                 <th className="px-4 py-3">Siswa</th>
@@ -197,7 +199,7 @@ export default function KonselingPage() {
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800 table-body-row">
               {loading ? (
                 <tr><td colSpan={6} className="py-8 text-center text-gray-400">Memuat data...</td></tr>
               ) : data.length === 0 ? (
@@ -222,8 +224,8 @@ export default function KonselingPage() {
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditModal(item)} className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400">Edit</button>
-                        <button onClick={() => handleDelete(item.id)} className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400">Hapus</button>
+                        <button onClick={() => openEditModal(item)} className="btn-action-sm text-brand-600">Edit</button>
+                        <button onClick={() => handleDelete(item.id)} className="btn-action-sm text-error-600">Hapus</button>
                       </div>
                     </td>
                   </tr>
@@ -240,10 +242,11 @@ export default function KonselingPage() {
             <div className="py-8 text-center text-gray-400">Tidak ada data ditemukan.</div>
           ) : (
             data.map((item) => (
-              <div key={item.id} className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40">
+              <div key={item.id} className="p-4 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 card-flat">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white truncate">{item.topik}</h4>
+                    <Icon name="BookOpen" size={18} className="icon-box mt-0.5 text-gray-500 dark:text-gray-400" />
+                    <h4 className="font-semibold text-gray-900 dark:text-white truncate ml-2">{item.topik}</h4>
                     <div className="text-xs text-gray-500">
                       <div>Siswa: {item.siswa?.namaLengkap || "-"}</div>
                       <div>{item.tanggal?.split("T")[0]}</div>
@@ -257,8 +260,8 @@ export default function KonselingPage() {
                   <div className="text-xs text-gray-600 dark:text-gray-300 mb-3">Tindak lanjut: {item.tindakLanjut}</div>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={() => openEditModal(item)} className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400">Edit</button>
-                  <button onClick={() => handleDelete(item.id)} className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400">Hapus</button>
+                  <button onClick={() => openEditModal(item)} className="btn-action-sm text-brand-600">Edit</button>
+                  <button onClick={() => handleDelete(item.id)} className="btn-action-sm text-error-600">Hapus</button>
                 </div>
               </div>
             ))
@@ -269,8 +272,8 @@ export default function KonselingPage() {
           <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500">
             <span>Halaman {page} dari {totalPages}</span>
             <div className="flex gap-2">
-              <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="px-3 py-1.5 rounded-lg border border-gray-200 disabled:opacity-50 dark:border-gray-700">Sebelumnya</button>
-              <button disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="px-3 py-1.5 rounded-lg border border-gray-200 disabled:opacity-50 dark:border-gray-700">Berikutnya</button>
+              <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="btn-action-sm">Sebelumnya</button>
+              <button disabled={page >= totalPages} onClick={() => setPage(page + 1)} className="btn-action-sm">Berikutnya</button>
             </div>
           </div>
         )}
@@ -282,7 +285,7 @@ export default function KonselingPage() {
           <p className="text-xs text-gray-500 dark:text-gray-400">Catat hasil konseling siswa</p>
         </div>
         {formError && (
-          <div className="mb-4 p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-xs font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">{formError}</div>
+          <div className="mb-4 p-3 rounded-lg alert-error-flat">{formError}</div>
         )}
         <form onSubmit={handleSave} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -327,8 +330,8 @@ export default function KonselingPage() {
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300">Batal</button>
-            <Button size="sm" disabled={isSaving}>{isSaving ? "Menyimpan..." : "Simpan Data"}</Button>
+            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-action-sm">Batal</button>
+            <Button size="sm" disabled={isSaving} className="btn-action-sm">{isSaving ? "Menyimpan..." : "Simpan Data"}</Button>
           </div>
         </form>
       </Modal>

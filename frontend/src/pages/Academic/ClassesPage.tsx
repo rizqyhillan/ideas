@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Icon } from '../../components/icons/ideas-icon';
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
@@ -250,31 +251,39 @@ export default function ClassesPage() {
 
       {/* Feedback Alerts */}
       {successMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-success-50 border border-success-200 text-success-700 text-sm font-medium dark:bg-success-500/10 dark:border-success-500/30 dark:text-success-400">
+        <div className="mb-4 p-3 rounded-lg alert-success-flat">
           {successMsg}
         </div>
       )}
       {errorMsg && (
-        <div className="mb-4 p-3 rounded-xl bg-error-50 border border-error-200 text-error-700 text-sm font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">
+        <div className="mb-4 p-3 rounded-lg alert-error-flat">
           {errorMsg}
         </div>
       )}
 
       {/* Main Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div className="card-flat lg:p-6">
         {/* Header & Filter Controls */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-              Daftar Rombongan Belajar (Kelas)
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Kelola kelas, penunjukan wali kelas, dan anggota rombel per tahun ajaran
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="icon-box">
+              <Icon name="clipboard" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                Daftar Rombongan Belajar (Kelas)
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Kelola kelas, penunjukan wali kelas, dan anggota rombel per tahun ajaran
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {/* Filter Tahun Ajaran */}
+            <div className="icon-box">
+              <Icon name="filter" size={18} />
+            </div>
             <select
               value={selectedTaId}
               onChange={(e) =>
@@ -291,6 +300,9 @@ export default function ClassesPage() {
             </select>
 
             {/* Filter Tingkat */}
+            <div className="icon-box">
+              <Icon name="filter" size={18} />
+            </div>
             <select
               value={selectedTingkat}
               onChange={(e) =>
@@ -304,6 +316,9 @@ export default function ClassesPage() {
               <option value="9">Kelas 9</option>
             </select>
 
+            <div className="icon-box">
+              <Icon name="search" size={18} />
+            </div>
             <Input
               type="text"
               placeholder="Cari kelas..."
@@ -312,8 +327,12 @@ export default function ClassesPage() {
               className="w-36 sm:w-48"
             />
 
-            <Button size="sm" onClick={openCreateClassModal}>
-              + Tambah Kelas
+            <Button
+              size="sm"
+              startIcon={<Icon name="plus" size={16} />}
+              onClick={openCreateClassModal}
+            >
+              Tambah Kelas
             </Button>
           </div>
         </div>
@@ -321,7 +340,7 @@ export default function ClassesPage() {
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-            <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
+            <thead className="table-head border-b border-gray-200 dark:border-gray-800">
               <tr>
                 <th className="px-4 py-3">Nama Kelas</th>
                 <th className="px-4 py-3">Tingkat</th>
@@ -332,15 +351,15 @@ export default function ClassesPage() {
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="table-body-row divide-y divide-gray-200 dark:divide-gray-800">
               {loading ? (
-                <tr>
+                <tr className="table-body-row">
                   <td colSpan={7} className="py-8 text-center text-gray-400">
                     Memuat data kelas...
                   </td>
                 </tr>
               ) : classes.length === 0 ? (
-                <tr>
+                <tr className="table-body-row">
                   <td colSpan={7} className="py-8 text-center text-gray-400">
                     Tidak ada data kelas yang sesuai filter.
                   </td>
@@ -349,13 +368,13 @@ export default function ClassesPage() {
                 classes.map((cls) => (
                   <tr
                     key={cls.id}
-                    className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
+                    className="table-body-row hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
                   >
                     <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
                       {cls.nama}
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                         Kelas {cls.tingkat}
                       </span>
                     </td>
@@ -401,20 +420,23 @@ export default function ClassesPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => openStudentsModal(cls)}
-                          className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                          className="btn-action-sm text-brand-600"
                         >
+                          <Icon name="users" size={14} />
                           Kelola Siswa
                         </button>
                         <button
                           onClick={() => openEditClassModal(cls)}
-                          className="px-2.5 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                          className="btn-action-sm"
                         >
+                          <Icon name="edit" size={14} />
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteClass(cls.id)}
-                          className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                          className="btn-action-sm text-error-600"
                         >
+                          <Icon name="trash" size={14} />
                           Hapus
                         </button>
                       </div>
@@ -440,7 +462,7 @@ export default function ClassesPage() {
             classes.map((cls) => (
               <div
                 key={cls.id}
-                className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50"
+                className="card-flat p-4"
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
@@ -448,7 +470,7 @@ export default function ClassesPage() {
                       <span className="font-bold text-gray-900 dark:text-white">
                         {cls.nama}
                       </span>
-                      <span className="px-2 py-0.5 text-xs font-semibold rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                         Kelas {cls.tingkat}
                       </span>
                     </div>
@@ -465,8 +487,9 @@ export default function ClassesPage() {
                   <div className="flex gap-1.5 shrink-0">
                     <button
                       onClick={() => openStudentsModal(cls)}
-                      className="px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                      className="btn-action-sm text-brand-600"
                     >
+                      <Icon name="users" size={14} />
                       Kelola
                     </button>
                   </div>
@@ -486,14 +509,16 @@ export default function ClassesPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => openEditClassModal(cls)}
-                      className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                      className="btn-action-sm"
                     >
+                      <Icon name="edit" size={14} />
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteClass(cls.id)}
-                      className="px-2 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                      className="btn-action-sm text-error-600"
                     >
+                      <Icon name="trash" size={14} />
                       Hapus
                     </button>
                   </div>
@@ -511,16 +536,23 @@ export default function ClassesPage() {
         className="max-w-lg p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {editingClassId ? "Edit Rombongan Belajar" : "Tambah Rombongan Belajar"}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Tentukan nama kelas, tahun ajaran, dan penunjukan wali kelas
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="icon-box">
+              <Icon name="book" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                {editingClassId ? "Edit Rombongan Belajar" : "Tambah Rombongan Belajar"}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Tentukan nama kelas, tahun ajaran, dan penunjukan wali kelas
+              </p>
+            </div>
+          </div>
         </div>
 
         {classFormError && (
-          <div className="mb-4 p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-xs font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">
+          <div className="mb-4 p-3 rounded-lg alert-error-flat">
             {classFormError}
           </div>
         )}
@@ -652,11 +684,15 @@ export default function ClassesPage() {
             <button
               type="button"
               onClick={() => setIsClassModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+              className="btn-action-sm"
             >
               Batal
             </button>
-            <Button size="sm" disabled={isSavingClass}>
+            <Button
+              size="sm"
+              startIcon={<Icon name="check" size={16} />}
+              disabled={isSavingClass}
+            >
               {isSavingClass ? "Menyimpan..." : "Simpan Kelas"}
             </Button>
           </div>
@@ -670,21 +706,26 @@ export default function ClassesPage() {
         className="max-w-2xl p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              Kelola Siswa - Kelas {selectedClass?.nama}
-            </h3>
+          <div className="flex items-center gap-3">
+            <div className="icon-box">
+              <Icon name="users" size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Kelola Siswa - Kelas {selectedClass?.nama}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Daftar siswa aktif terdaftar pada rombel ini
+              </p>
+            </div>
             <Badge color="light" size="sm">
               Total: {classStudents.length} Siswa
             </Badge>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Daftar siswa aktif terdaftar pada rombel ini
-          </p>
         </div>
 
         {studentModalError && (
-          <div className="mb-4 p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-xs font-medium dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400">
+          <div className="mb-4 p-3 rounded-lg alert-error-flat">
             {studentModalError}
           </div>
         )}
@@ -692,8 +733,11 @@ export default function ClassesPage() {
         {/* Add Student Form */}
         <form
           onSubmit={handleAddStudent}
-          className="mb-5 p-3.5 rounded-xl border border-brand-100 bg-brand-50/50 dark:bg-brand-500/5 dark:border-brand-900/40 flex flex-col sm:flex-row items-center gap-3"
+          className="card-flat mb-5 p-3 flex flex-col sm:flex-row items-center gap-3"
         >
+          <div className="icon-box">
+            <Icon name="plus" size={18} />
+          </div>
           <div className="flex-1 w-full">
             <select
               value={selectedSiswaId}
@@ -713,14 +757,14 @@ export default function ClassesPage() {
           </div>
           <button
             type="submit"
-            className="h-10 px-4 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-action-sm bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isAddingStudent ? "Menambahkan..." : "+ Tambahkan Siswa"}
+            {isAddingStudent ? "Menambahkan..." : "Tambahkan Siswa"}
           </button>
         </form>
 
         {/* Students List */}
-        <div className="max-h-72 overflow-y-auto border border-gray-100 rounded-xl dark:border-gray-800">
+        <div className="card-flat max-h-72 overflow-y-auto">
           {loadingStudents ? (
             <div className="py-6 text-center text-gray-400">
               Memuat daftar siswa...
@@ -731,7 +775,7 @@ export default function ClassesPage() {
             </div>
           ) : (
             <table className="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-              <thead className="sticky top-0 border-b border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
+              <thead className="table-head sticky top-0 border-b border-gray-200 dark:border-gray-800">
                 <tr>
                   <th className="px-3 py-2.5">No</th>
                   <th className="px-3 py-2.5">NISN / NIS</th>
@@ -741,11 +785,11 @@ export default function ClassesPage() {
                   <th className="px-3 py-2.5 text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody className="table-body-row divide-y divide-gray-100 dark:divide-gray-800">
                 {classStudents.map((item, idx) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                    className="table-body-row hover:bg-gray-50 dark:hover:bg-white/[0.02]"
                   >
                     <td className="px-3 py-2.5 font-medium">{idx + 1}</td>
                     <td className="px-3 py-2.5 font-mono">
@@ -763,8 +807,9 @@ export default function ClassesPage() {
                       <button
                         type="button"
                         onClick={() => handleRemoveStudent(item.siswaId)}
-                        className="px-2 py-0.5 text-[11px] font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                        className="btn-action-sm text-error-600"
                       >
+                        <Icon name="trash" size={13} />
                         Keluarkan
                       </button>
                     </td>
@@ -779,7 +824,7 @@ export default function ClassesPage() {
           <button
             type="button"
             onClick={() => setIsStudentsModalOpen(false)}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+            className="btn-action-sm"
           >
             Tutup
           </button>

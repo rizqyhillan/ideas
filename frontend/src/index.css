@@ -298,7 +298,61 @@ layer(base);
   @apply border-brand-500 bg-brand-500;
 }
 
-/* third-party libraries CSS */
+/* ============ IDEaS Design System ============ */
+/* Gelombang 1: Custom utilities — radius 8px, card flats */
+
+@utility radius-8 {
+  @apply rounded-lg;  /* 8px — satu-satunya radius standar */
+}
+
+@utility radius-6 {
+  @apply rounded-md;
+}
+
+@utility card-flat {
+  @apply bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800
+     rounded-lg shadow-sm;
+}
+
+@utility alert-success-flat {
+  @apply bg-success-50 border border-success-200 text-success-700
+     dark:bg-success-950/25 dark:border-success-800/30 dark:text-success-300
+     rounded-md px-3 py-2 text-sm font-medium;
+}
+
+@utility alert-error-flat {
+  @apply bg-error-50 border border-error-200 text-error-700
+     dark:bg-error-950/25 dark:border-error-800/30 dark:text-error-300
+     rounded-md px-3 py-2 text-sm font-medium;
+}
+
+@utility alert-info-flat {
+  @apply bg-blue-50 border border-blue-200 text-blue-700
+     dark:bg-blue-950/25 dark:border-blue-800/30 dark:text-blue-300
+     rounded-md px-3 py-2 text-sm font-medium;
+}
+
+@utility table-head {
+  @apply px-4 py-3 text-xs font-semibold uppercase text-gray-500
+     border-b border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-400;
+}
+
+@utility table-body-row {
+  @apply divide-y divide-gray-200 dark:divide-gray-800 hover:bg-gray-50/50
+     dark:hover:bg-gray-800/20 transition-colors;
+}
+
+@utility btn-action-sm {
+  @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium
+     rounded-md border transition-colors;
+}
+
+@utility icon-box {
+  @apply inline-flex items-center justify-center rounded-lg
+     w-9 h-9 shrink-0;
+}
+
+/* ============ END Design System ============ */
 .apexcharts-legend-text {
   @apply !text-gray-700 dark:!text-gray-400;
 }
