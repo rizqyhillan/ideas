@@ -57,92 +57,92 @@ export default function Home() {
         description="Ringkasan Statistik dan Aktivitas Sistem Informasi Manajemen Sekolah"
       />
 
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Dashboard Utama
-        </h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {user?.username || "Admin"} — Kelola data akademik dan civitas sekolah
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            Dashboard Utama
+          </h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data civitas dan kegiatan akademik
+          </p>
+        </div>
+        {activeTa && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 w-fit">
+            <Icon name="calendar" size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <span>Tahun Ajaran Aktif: <strong className="text-gray-900 dark:text-white">{activeTa.nama}</strong></span>
+          </div>
+        )}
       </div>
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="card-flat p-4">
+        <Link to="/master/siswa" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Total Siswa
               </span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {loading ? "-" : totalSiswa}
-              </h3>
-              <Link to="/master/siswa" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400 mt-1.5 inline-block">
-                Lihat data →
-              </Link>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Buku Induk Siswa</p>
             </div>
-            <div className="icon-box bg-blue-50 dark:bg-blue-900/20">
-              <CardIcon name="users" />
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 transition-colors shrink-0">
+              <CardIcon name="users" size={18} />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="card-flat p-4">
+        <Link to="/master/guru" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Total Guru
               </span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {loading ? "-" : totalGuru}
-              </h3>
-              <Link to="/master/guru" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400 mt-1.5 inline-block">
-                Lihat data →
-              </Link>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Data Guru Pengajar</p>
             </div>
-            <div className="icon-box bg-emerald-50 dark:bg-emerald-900/20">
-              <CardIcon name="award" />
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 transition-colors shrink-0">
+              <CardIcon name="award" size={18} />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="card-flat p-4">
+        <Link to="/master/pegawai" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Total Pegawai
               </span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {loading ? "-" : totalPegawai}
-              </h3>
-              <Link to="/master/pegawai" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400 mt-1.5 inline-block">
-                Lihat data →
-              </Link>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Staf & Kependidikan</p>
             </div>
-            <div className="icon-box bg-amber-50 dark:bg-amber-900/20">
-              <CardIcon name="user" />
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 transition-colors shrink-0">
+              <CardIcon name="user" size={18} />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="card-flat p-4">
+        <Link to="/academic/classes" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
           <div className="flex items-start justify-between">
             <div>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Rombel / Kelas
               </span>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {loading ? "-" : totalKelas}
-              </h3>
-              <Link to="/academic/classes" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400 mt-1.5 inline-block">
-                Kelola →
-              </Link>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Ruang Kelas Aktif</p>
             </div>
-            <div className="icon-box bg-purple-50 dark:bg-purple-900/20">
-              <CardIcon name="school" />
+            <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 transition-colors shrink-0">
+              <CardIcon name="school" size={18} />
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Content Grid */}
@@ -223,13 +223,11 @@ function QuickLink({ icon, label, link }: { icon: string; label: string; link: s
   return (
     <Link
       to={link}
-      className="flex items-center justify-between p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-xs font-medium text-gray-700 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300"
+      className="flex items-center gap-3 py-2 px-2.5 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60 text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
     >
-      <span className="flex items-center gap-2">
-        <CardIcon name={icon} />
-        {label}
-      </span>
-      <Icon name="chevronRight" size={14} className="text-gray-400" />
+      <CardIcon name={icon} size={15} className="text-gray-400 shrink-0" />
+      <span className="flex-1">{label}</span>
+      <Icon name="chevronRight" size={14} className="text-gray-400 shrink-0" />
     </Link>
   );
 }

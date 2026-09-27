@@ -17,13 +17,7 @@ import {
   StudentAttendanceItem,
 } from "../../services/absensi.service";
 import { useAuth } from "../../context/AuthContext";
-import {
-  CheckCircleIcon,
-  CheckLineIcon,
-  CloseLineIcon,
-  InfoIcon,
-  UserIcon,
-} from "../../icons";
+import { Icon } from "../../components/icons/ideas-icon";
 
 export default function AbsensiPage() {
   const { user } = useAuth();
@@ -315,14 +309,14 @@ export default function AbsensiPage() {
       {successMsg && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-success-200 bg-success-50 p-4 text-sm text-success-800 dark:border-success-800 dark:bg-success-900/20 dark:text-success-400">
           <div className="flex items-center gap-2">
-            <CheckCircleIcon className="h-5 w-5 text-success-500" />
+            <Icon name="checkcircle" className="h-5 w-5 text-success-500" />
             <span>{successMsg}</span>
           </div>
           <button
             onClick={() => setSuccessMsg("")}
-            className="text-success-500 hover:text-success-700"
+            className="text-success-600 hover:text-success-800"
           >
-            <CloseLineIcon className="h-4 w-4" />
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -330,24 +324,24 @@ export default function AbsensiPage() {
       {errorMsg && (
         <div className="mb-4 flex items-center justify-between rounded-lg border border-error-200 bg-error-50 p-4 text-sm text-error-800 dark:border-error-800 dark:bg-error-900/20 dark:text-error-400">
           <div className="flex items-center gap-2">
-            <InfoIcon className="h-5 w-5 text-error-500" />
+            <Icon name="alertcircle" className="h-5 w-5 text-error-500" />
             <span>{errorMsg}</span>
           </div>
           <button
             onClick={() => setErrorMsg("")}
-            className="text-error-500 hover:text-error-700"
+            className="text-error-600 hover:text-error-800"
           >
-            <CloseLineIcon className="h-4 w-4" />
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {/* Banner Informasi Guru & Sesi Mengajar */}
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-              <UserIcon className="h-6 w-6" />
+      {/* Hero Guru Aktif Banner */}
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400">
+              <Icon name="user" className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -544,7 +538,7 @@ export default function AbsensiPage() {
               size="sm"
               onClick={handleMarkAllHadir}
               disabled={loadingStudents || students.length === 0}
-              startIcon={<CheckLineIcon className="h-4 w-4 text-success-500" />}
+              startIcon={<Icon name="check" className="h-4 w-4 text-success-500" />}
               className="w-full sm:w-auto justify-center"
             >
               Tandai Semua Hadir
@@ -555,7 +549,7 @@ export default function AbsensiPage() {
               size="sm"
               onClick={handleSaveAttendance}
               disabled={loadingStudents || isSaving || students.length === 0}
-              startIcon={<CheckCircleIcon className="h-4 w-4" />}
+              startIcon={<Icon name="checkcircle" className="h-4 w-4" />}
               className="w-full sm:w-auto justify-center"
             >
               {isSaving ? "Menyimpan..." : "Simpan Absensi"}
@@ -704,10 +698,10 @@ export default function AbsensiPage() {
                                 : "border border-error-400 bg-error-500 text-white hover:bg-error-600"
                             }`}
                           >
-                            {isHadir && <CheckLineIcon className="h-3.5 w-3.5" />}
+                            {isHadir && <Icon name="check" className="h-3.5 w-3.5" />}
                             {isSakit && <span className="font-bold">S</span>}
                             {isIzin && <span className="font-bold">I</span>}
-                            {isAlpa && <CloseLineIcon className="h-3.5 w-3.5" />}
+                            {isAlpa && <Icon name="x" className="h-3.5 w-3.5" />}
                             <span className="capitalize">{student.status}</span>
                             <span className="text-[10px] opacity-75 group-hover:opacity-100">
                               (Tekan)
@@ -944,21 +938,21 @@ export default function AbsensiPage() {
 
           <div className="flex items-center gap-3">
             <Button
-              variant="outline"
               size="sm"
-              onClick={handleMarkAllHadir}
-              disabled={loadingStudents || students.length === 0}
+              variant="outline"
+              onClick={handleMarkAllPresent}
+              disabled={students.length === 0}
+              startIcon={<Icon name="check" className="h-4 w-4 text-success-500" />}
             >
-              Reset Semua Hadir
+              Hadir Semua
             </Button>
             <Button
-              variant="primary"
               size="sm"
               onClick={handleSaveAttendance}
-              disabled={loadingStudents || isSaving || students.length === 0}
-              startIcon={<CheckCircleIcon className="h-4 w-4" />}
+              disabled={isSaving || students.length === 0}
+              startIcon={<Icon name="checkcircle" className="h-4 w-4" />}
             >
-              {isSaving ? "Menyimpan..." : "Simpan Data Absensi"}
+              {isSaving ? "Menyimpan..." : "Simpan Presensi"}
             </Button>
           </div>
         </div>

@@ -54,13 +54,21 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Dashboard Admin
-        </h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {user?.namaLengkap || user?.username || "Admin"} — Kelola data sekolah
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            Dashboard Admin
+          </h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data civitas dan kegiatan akademik
+          </p>
+        </div>
+        {stats.tahunAjaran && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 w-fit">
+            <Icon name="calendar" size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <span>Tahun Ajaran Aktif: <strong className="text-gray-900 dark:text-white">{stats.tahunAjaran.nama}</strong></span>
+          </div>
+        )}
       </div>
 
       {/* Metric Cards */}
@@ -214,28 +222,25 @@ function MetricCard({
   sub: string;
 }) {
   return (
-    <div className="card-flat p-4">
-      <div className="flex items-start justify-between gap-3">
+    <Link
+      to={link}
+      className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
+    >
+      <div className="flex items-start justify-between">
         <div>
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             {label}
           </span>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {value}
-          </h3>
-          <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
-          <Link
-            to={link}
-            className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400 mt-1.5 inline-block"
-          >
-            Kelola →
-          </Link>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">{sub}</p>
         </div>
-        <div className="icon-box bg-gray-100 dark:bg-gray-800">
-          <CardIcon name={icon} />
+        <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 transition-colors shrink-0">
+          <CardIcon name={icon} size={18} />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -251,11 +256,11 @@ function QuickAction({
   return (
     <Link
       to={link}
-      className="flex items-center gap-2.5 px-3 py-2 rounded-md border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors text-xs font-medium text-gray-700 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
+      className="flex items-center gap-3 py-2 px-2.5 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60 text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
     >
-      <CardIcon name={icon} className="shrink-0" />
-      <span>{label}</span>
-      <Icon name="chevronRight" size={14} className="ml-auto text-gray-400 shrink-0" />
+      <CardIcon name={icon} size={15} className="text-gray-400 shrink-0" />
+      <span className="flex-1">{label}</span>
+      <Icon name="chevronRight" size={14} className="text-gray-400 shrink-0" />
     </Link>
   );
 }

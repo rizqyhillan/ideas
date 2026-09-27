@@ -241,14 +241,26 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        className={`py-5 px-4 flex items-center border-b border-gray-100 dark:border-gray-800 ${
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-between"
         }`}
       >
-        <Link to="/">
-          <div className="flex items-center justify-center w-9 h-9 rounded-md bg-brand-50 dark:bg-brand-900/20">
-            <Icon name="school" size={20} className="text-brand-600 dark:text-brand-400" />
-          </div>
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src="/images/logo/Logo-Splasma-kotak.png"
+            alt="Logo Splasma"
+            className="w-8 h-8 rounded-md object-contain shrink-0"
+          />
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <div className="flex flex-col">
+              <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-white leading-none">
+                IDEAS SPLASMA
+              </span>
+              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-1">
+                Sistem Sekolah
+              </span>
+            </div>
+          )}
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">

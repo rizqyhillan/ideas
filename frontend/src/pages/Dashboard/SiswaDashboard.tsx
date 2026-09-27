@@ -127,14 +127,14 @@ function QuickLink({
   return (
     <Link
       to={link}
-      className="flex items-center gap-3 p-3 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm dark:bg-gray-900 dark:border-gray-800"
+      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700 bg-white hover:bg-gray-50/50 transition-colors dark:bg-gray-900"
     >
-      <div className="icon-box bg-gray-100 dark:bg-gray-800 shrink-0">
-        <CardIcon name={icon} />
+      <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0">
+        <CardIcon name={icon} size={18} />
       </div>
       <div>
-        <div className="font-medium text-gray-900 dark:text-white text-sm">{label}</div>
-        <div className="text-xs text-gray-400">{sub}</div>
+        <div className="font-semibold text-gray-900 dark:text-white text-xs">{label}</div>
+        <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>
       </div>
     </Link>
   );

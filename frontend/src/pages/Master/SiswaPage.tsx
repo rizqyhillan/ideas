@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Icon } from "../../components/icons/ideas-icon";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
@@ -173,13 +174,14 @@ export default function SiswaPage() {
       )}
 
       {/* Main Table Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div className="card-flat p-5 lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            <h3 className="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Icon name="users" size={18} className="text-brand-600 dark:text-brand-400" />
               Daftar Siswa (Total: {totalCount})
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Kelola data induk pelajar dan informasi kontak wali
             </p>
           </div>
@@ -209,8 +211,13 @@ export default function SiswaPage() {
               }}
               className="w-full sm:w-56"
             />
-            <Button size="sm" onClick={openCreateModal} className="w-full sm:w-auto justify-center">
-              + Tambah Siswa
+            <Button
+              size="sm"
+              onClick={openCreateModal}
+              className="w-full sm:w-auto justify-center"
+              startIcon={<Icon name="plus" size={15} />}
+            >
+              Tambah Siswa
             </Button>
           </div>
         </div>
