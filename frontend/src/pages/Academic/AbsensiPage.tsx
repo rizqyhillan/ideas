@@ -859,46 +859,50 @@ export default function AbsensiPage() {
                     <button
                       type="button"
                       onClick={() => handleSetSpecificStatus(student.siswaId, "hadir")}
-                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                      className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isHadir
                           ? "bg-success-600 text-white border-success-600 shadow-xs"
                           : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-success-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
                       }`}
+                      title="Hadir"
                     >
-                      Hadir
+                      <Icon name="check" className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSetSpecificStatus(student.siswaId, "sakit")}
-                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                      className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isSakit
                           ? "bg-warning-500 text-white border-warning-500 shadow-xs"
                           : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-warning-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
                       }`}
+                      title="Sakit"
                     >
-                      Sakit
+                      <Icon name="plus" className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSetSpecificStatus(student.siswaId, "izin")}
-                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                      className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isIzin
-                          ? "bg-blue-500 text-white border-blue-500 shadow-xs"
+                          ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                           : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-blue-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
                       }`}
+                      title="Izin"
                     >
-                      Izin
+                      <Icon name="mail" className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSetSpecificStatus(student.siswaId, "alpa")}
-                      className={`py-2 px-1 text-xs font-bold rounded-lg border transition active:scale-95 text-center ${
+                      className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isAlpa
-                          ? "bg-error-500 text-white border-error-500 shadow-xs"
+                          ? "bg-error-600 text-white border-error-600 shadow-xs"
                           : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-error-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
                       }`}
+                      title="Alpa"
                     >
-                      Alpa
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   </div>
 

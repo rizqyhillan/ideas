@@ -247,20 +247,18 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/" className="flex items-center gap-3">
           <img
-            src="/images/logo/Logo-Splasma-kotak.png"
+            src={
+              isExpanded || isHovered || isMobileOpen
+                ? "/images/logo/Logo-Splasma-Website.png"
+                : "/images/logo/Logo-Splasma-kotak.png"
+            }
             alt="Logo Splasma"
-            className="w-8 h-8 rounded-md object-contain shrink-0"
+            className={
+              isExpanded || isHovered || isMobileOpen
+                ? "h-11 w-auto object-contain shrink-0"
+                : "w-8 h-8 rounded-md object-contain shrink-0"
+            }
           />
-          {(isExpanded || isHovered || isMobileOpen) && (
-            <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-white leading-none">
-                IDEAS SPLASMA
-              </span>
-              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-1">
-                Sistem Sekolah
-              </span>
-            </div>
-          )}
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
