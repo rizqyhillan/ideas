@@ -138,24 +138,6 @@ export default function SignInForm() {
                 </div>
               </div>
             </form>
-
-            <div className="mt-5 p-3 rounded-lg border border-brand-100 bg-brand-50/70 text-xs text-gray-700 dark:border-brand-900/50 dark:bg-brand-500/10 dark:text-gray-300">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-brand-700 dark:text-brand-400">
-                  Akun Default Seeder
-                </span>
-                <button
-                  type="button"
-                  onClick={handleQuickFillAdmin}
-                  className="text-xs font-medium underline text-brand-600 hover:text-brand-800 dark:text-brand-400"
-                >
-                  Gunakan Akun Ini
-                </button>
-              </div>
-              <p className="mt-1">Email: <code className="font-mono bg-white/70 dark:bg-gray-800 px-1 py-0.5 rounded">admin@ideas.id</code></p>
-              <p className="mt-0.5">Password: <code className="font-mono bg-white/70 dark:bg-gray-800 px-1 py-0.5 rounded">admin123</code></p>
-            </div>
-
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                 Tidak punya akun?{" "}
