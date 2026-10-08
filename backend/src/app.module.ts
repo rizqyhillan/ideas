@@ -13,6 +13,10 @@ import { GuruModule } from './guru/guru.module';
 import { TahunAjaranModule } from './tahun-ajaran/tahun-ajaran.module';
 import { ClassesModule } from './classes/classes.module';
 import { AbsensiModule } from './absensi/absensi.module';
+import { SemesterModule } from './semester/semester.module';
+import { MataPelajaranModule } from './mata-pelajaran/mata-pelajaran.module';
+import { JadwalModule } from './jadwal/jadwal.module';
+import { KonselingModule } from './konseling/konseling.module';
 
 @Module({
   imports: [
@@ -37,6 +41,10 @@ import { AbsensiModule } from './absensi/absensi.module';
 
     ClassesModule,
     AbsensiModule,
+    SemesterModule,
+    MataPelajaranModule,
+    JadwalModule,
+    KonselingModule,
   ],
 })
 export class AppModule {}
