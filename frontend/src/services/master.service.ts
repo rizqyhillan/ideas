@@ -206,7 +206,10 @@ export const pegawaiService = {
     return res.data!;
   },
 
-  async update(id: number, payload: UpdatePegawaiPayload): Promise<PegawaiItem> {
+  async update(
+    id: number,
+    payload: UpdatePegawaiPayload,
+  ): Promise<PegawaiItem> {
     const { statusKepegawaian, ...rest } = payload as any;
     void statusKepegawaian;
     const cleaned = cleanPayload(rest);
@@ -388,7 +391,10 @@ export const usersService = {
     return res.data!;
   },
 
-  async update(id: number, payload: UpdateUserPayload): Promise<UserAccountItem> {
+  async update(
+    id: number,
+    payload: UpdateUserPayload,
+  ): Promise<UserAccountItem> {
     // Backend UpdateUserDto menerima: username, email, status, role (tanpa password)
     const body: Record<string, any> = {};
     if (payload.username?.trim()) body.username = payload.username.trim();
@@ -482,24 +488,18 @@ export const roleService = {
 
   async getRolePermissions(roleId: number): Promise<PermissionItem[]> {
     const res = await apiFetch<ApiResponse<PermissionItem[]>>(
-      `/roles/${roleId}/permissions`
+      `/roles/${roleId}/permissions`,
     );
     return res.data || [];
   },
 
-  async assignPermission(
-    roleId: number,
-    permissionId: number
-  ): Promise<void> {
+  async assignPermission(roleId: number, permissionId: number): Promise<void> {
     await apiFetch(`/roles/${roleId}/permissions/${permissionId}`, {
       method: "POST",
     });
   },
 
-  async removePermission(
-    roleId: number,
-    permissionId: number
-  ): Promise<void> {
+  async removePermission(roleId: number, permissionId: number): Promise<void> {
     await apiFetch(`/roles/${roleId}/permissions/${permissionId}`, {
       method: "DELETE",
     });
@@ -513,13 +513,15 @@ export const permissionService = {
   },
 
   async getById(id: number): Promise<PermissionItem> {
-    const res = await apiFetch<ApiResponse<PermissionItem>>(`/permissions/${id}`);
+    const res = await apiFetch<ApiResponse<PermissionItem>>(
+      `/permissions/${id}`,
+    );
     return res.data!;
   },
 
   async getByModule(module: string): Promise<PermissionItem[]> {
     const res = await apiFetch<ApiResponse<PermissionItem[]>>(
-      `/permissions?module=${module}`
+      `/permissions?module=${module}`,
     );
     return res.data || [];
   },

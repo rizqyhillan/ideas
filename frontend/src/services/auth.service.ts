@@ -33,10 +33,13 @@ export interface LoginResult {
 
 export const authService = {
   async login(email: string, password: string): Promise<LoginResult> {
-    const res = await apiFetch<ApiResponse<LoginResult> | LoginResult>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    const res = await apiFetch<ApiResponse<LoginResult> | LoginResult>(
+      "/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      },
+    );
 
     if ("data" in res && res.data) {
       return res.data;
@@ -45,9 +48,12 @@ export const authService = {
   },
 
   async me(): Promise<UserProfile> {
-    const res = await apiFetch<ApiResponse<UserProfile> | UserProfile>("/auth/me", {
-      method: "GET",
-    });
+    const res = await apiFetch<ApiResponse<UserProfile> | UserProfile>(
+      "/auth/me",
+      {
+        method: "GET",
+      },
+    );
 
     if ("data" in res && res.data) {
       return res.data;

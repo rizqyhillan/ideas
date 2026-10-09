@@ -61,7 +61,11 @@ export default function SignUpForm() {
                 Permohonan Akun Terkirim
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                Permohonan pembuatan akun dengan username <strong>{username}</strong> ({email}) untuk peran <strong>{role.toUpperCase()}</strong> telah dicatat. Administrator Sekolah akan memverifikasi dan mengaktifkan akun Anda.
+                Permohonan pembuatan akun dengan username{" "}
+                <strong>{username}</strong> ({email}) untuk peran{" "}
+                <strong>{role.toUpperCase()}</strong> telah dicatat.
+                Administrator Sekolah akan memverifikasi dan mengaktifkan akun
+                Anda.
               </p>
               <Link
                 to="/signin"
@@ -82,7 +86,8 @@ export default function SignUpForm() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="signup-username">
-                      Nama Pengguna (Username)<span className="text-error-500">*</span>
+                      Nama Pengguna (Username)
+                      <span className="text-error-500">*</span>
                     </Label>
                     <Input
                       type="text"
@@ -117,7 +122,9 @@ export default function SignUpForm() {
                       className="h-10 w-full rounded-lg border border-gray-200 bg-transparent px-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     >
                       <option value="guru">Guru Pengajar</option>
-                      <option value="guru_bk">Guru Bimbingan Konseling (BK)</option>
+                      <option value="guru_bk">
+                        Guru Bimbingan Konseling (BK)
+                      </option>
                       <option value="siswa">Siswa Pelajar</option>
                     </select>
                   </div>
@@ -154,7 +161,8 @@ export default function SignUpForm() {
                       onChange={setIsChecked}
                     />
                     <p className="inline-block text-xs font-normal text-gray-500 dark:text-gray-400">
-                      Dengan mendaftar, Anda menyetujui kebijakan operasional dan keamanan data sekolah.
+                      Dengan mendaftar, Anda menyetujui kebijakan operasional
+                      dan keamanan data sekolah.
                     </p>
                   </div>
 

@@ -72,7 +72,9 @@ export default function TahunAjaranPage() {
     setFormData({
       nama: item.nama,
       tanggalMulai: item.tanggalMulai ? item.tanggalMulai.split("T")[0] : "",
-      tanggalSelesai: item.tanggalSelesai ? item.tanggalSelesai.split("T")[0] : "",
+      tanggalSelesai: item.tanggalSelesai
+        ? item.tanggalSelesai.split("T")[0]
+        : "",
       isActive: item.isActive,
     });
     setFormError("");
@@ -107,7 +109,8 @@ export default function TahunAjaranPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Apakah Anda yakin ingin menghapus data tahun ajaran ini?")) return;
+    if (!confirm("Apakah Anda yakin ingin menghapus data tahun ajaran ini?"))
+      return;
     try {
       await tahunAjaranService.delete(id);
       setSuccessMsg("Tahun ajaran berhasil dihapus!");
@@ -163,9 +166,7 @@ export default function TahunAjaranPage() {
         </div>
       )}
       {error && (
-        <div className="mb-4 p-3 rounded-lg alert-error-flat">
-          {error}
-        </div>
+        <div className="mb-4 p-3 rounded-lg alert-error-flat">{error}</div>
       )}
 
       {/* Main Card */}
@@ -228,10 +229,14 @@ export default function TahunAjaranPage() {
                       {item.nama}
                     </td>
                     <td className="px-4 py-3.5">
-                      {item.tanggalMulai ? item.tanggalMulai.split("T")[0] : "-"}
+                      {item.tanggalMulai
+                        ? item.tanggalMulai.split("T")[0]
+                        : "-"}
                     </td>
                     <td className="px-4 py-3.5">
-                      {item.tanggalSelesai ? item.tanggalSelesai.split("T")[0] : "-"}
+                      {item.tanggalSelesai
+                        ? item.tanggalSelesai.split("T")[0]
+                        : "-"}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       {item.isActive ? (
@@ -287,10 +292,14 @@ export default function TahunAjaranPage() {
                         {item.nama}
                       </span>
                       {item.isActive && (
-                        <Badge color="success" size="sm">Aktif</Badge>
+                        <Badge color="success" size="sm">
+                          Aktif
+                        </Badge>
                       )}
                       {!item.isActive && (
-                        <Badge color="light" size="sm">Selesai</Badge>
+                        <Badge color="light" size="sm">
+                          Selesai
+                        </Badge>
                       )}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
@@ -340,7 +349,8 @@ export default function TahunAjaranPage() {
             {editingId ? "Edit Tahun Ajaran" : "Tambah Tahun Ajaran"}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Format nama tahun ajaran harus berupa format YYYY/YYYY (contoh: 2024/2025)
+            Format nama tahun ajaran harus berupa format YYYY/YYYY (contoh:
+            2024/2025)
           </p>
         </div>
 

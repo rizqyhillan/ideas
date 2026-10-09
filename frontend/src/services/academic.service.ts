@@ -64,7 +64,9 @@ export const tahunAjaranService = {
 
   async getActive(): Promise<TahunAjaranItem | null> {
     try {
-      const res = await apiFetch<ApiResponse<TahunAjaranItem>>("/tahun-ajaran/active");
+      const res = await apiFetch<ApiResponse<TahunAjaranItem>>(
+        "/tahun-ajaran/active",
+      );
       return res.data || null;
     } catch {
       return null;
@@ -72,7 +74,9 @@ export const tahunAjaranService = {
   },
 
   async getById(id: number): Promise<TahunAjaranItem> {
-    const res = await apiFetch<ApiResponse<TahunAjaranItem>>(`/tahun-ajaran/${id}`);
+    const res = await apiFetch<ApiResponse<TahunAjaranItem>>(
+      `/tahun-ajaran/${id}`,
+    );
     return res.data!;
   },
 
@@ -84,11 +88,17 @@ export const tahunAjaranService = {
     return res.data!;
   },
 
-  async update(id: number, payload: UpdateTahunAjaranPayload): Promise<TahunAjaranItem> {
-    const res = await apiFetch<ApiResponse<TahunAjaranItem>>(`/tahun-ajaran/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
+  async update(
+    id: number,
+    payload: UpdateTahunAjaranPayload,
+  ): Promise<TahunAjaranItem> {
+    const res = await apiFetch<ApiResponse<TahunAjaranItem>>(
+      `/tahun-ajaran/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    );
     return res.data!;
   },
 

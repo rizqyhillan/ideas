@@ -25,20 +25,25 @@ export default function GuruDashboard() {
           foundGuru = guruList.find(
             (g) =>
               g.pegawai?.userId === user.id ||
-              (g.pegawai?.email && g.pegawai.email.toLowerCase() === user.email?.toLowerCase()) ||
-              g.kodeGuru === user.username
+              (g.pegawai?.email &&
+                g.pegawai.email.toLowerCase() === user.email?.toLowerCase()) ||
+              g.kodeGuru === user.username,
           );
         }
 
         if (foundGuru) {
           setMyGuru(foundGuru);
-          const classesRes = await classesService.getAll({ waliKelasId: foundGuru.id, limit: 50 });
+          const classesRes = await classesService.getAll({
+            waliKelasId: foundGuru.id,
+            limit: 50,
+          });
           guruClasses = classesRes.data;
           setMyClasses(guruClasses);
           setStats({
             totalKelas: guruClasses.length,
             totalStudents: guruClasses.reduce((acc, cls) => {
-              const count = cls.siswaKelas?.filter((s) => s.isActive).length || 0;
+              const count =
+                cls.siswaKelas?.filter((s) => s.isActive).length || 0;
               return acc + count;
             }, 0),
           });
@@ -58,7 +63,9 @@ export default function GuruDashboard() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Guru</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Dashboard Guru
+        </h1>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           Kelola kelas yang diampu dan input absensi siswa
         </p>
@@ -83,7 +90,9 @@ export default function GuruDashboard() {
               <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md">
                 {kodeGuru}
               </span>
-              <Badge color="success" size="sm">{myGuru?.pegawai?.jabatan || "Guru Pengajar"}</Badge>
+              <Badge color="success" size="sm">
+                {myGuru?.pegawai?.jabatan || "Guru Pengajar"}
+              </Badge>
             </div>
           </div>
         </div>
@@ -117,23 +126,37 @@ export default function GuruDashboard() {
           <h3 className="text-base font-semibold text-gray-800 dark:text-white">
             Kelas yang Diampu
           </h3>
-          <Link to="/academic/absensi" className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+          <Link
+            to="/academic/absensi"
+            className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+          >
             Input Absensi →
           </Link>
         </div>
 
         {loading ? (
-          <div className="py-6 text-center text-gray-400 text-sm">Memuat data kelas...</div>
+          <div className="py-6 text-center text-gray-400 text-sm">
+            Memuat data kelas...
+          </div>
         ) : myClasses.length === 0 ? (
           <div className="py-6 text-center">
-            <CardIcon name="school" size={28} className="mx-auto mb-2 text-gray-400" />
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Belum ada kelas yang diberikan.</p>
-            <p className="text-xs mt-1 text-gray-400">Admin dapat menetapkan kelas untuk anda.</p>
+            <CardIcon
+              name="school"
+              size={28}
+              className="mx-auto mb-2 text-gray-400"
+            />
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Belum ada kelas yang diberikan.
+            </p>
+            <p className="text-xs mt-1 text-gray-400">
+              Admin dapat menetapkan kelas untuk anda.
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
             {myClasses.map((kelas) => {
-              const studentCount = kelas.siswaKelas?.filter((s) => s.isActive).length || 0;
+              const studentCount =
+                kelas.siswaKelas?.filter((s) => s.isActive).length || 0;
               return (
                 <div
                   key={kelas.id}
@@ -141,8 +164,13 @@ export default function GuruDashboard() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-semibold text-gray-900 dark:text-white">Kelas {kelas.nama}</h4>
-                      <Badge color={kelas.statusAktif ? "success" : "light"} size="sm">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                        Kelas {kelas.nama}
+                      </h4>
+                      <Badge
+                        color={kelas.statusAktif ? "success" : "light"}
+                        size="sm"
+                      >
                         {kelas.statusAktif ? "Aktif" : "Nonaktif"}
                       </Badge>
                     </div>
@@ -184,12 +212,34 @@ export default function GuruDashboard() {
 
       {/* Menu Cepat */}
       <div className="card-flat p-5">
-        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Menu Cepat</h3>
+        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">
+          Menu Cepat
+        </h3>
         <div className="grid grid-cols-2 gap-2.5">
-          <QuickLink icon="clipboard" label="Absensi Siswa" sub="Input kehadiran harian" link="/academic/absensi" />
-          <QuickLink icon="school" label="Kelas Diampu" sub="Lihat rombel aktif" link="/academic/classes" />
-          <QuickLink icon="calendar" label="Tahun Ajaran" sub="Informasi periode" link="/academic/tahun-ajaran" />
-          <QuickLink icon="user" label="Profil Saya" sub="Edit data pribadi" link="/profile" />
+          <QuickLink
+            icon="clipboard"
+            label="Absensi Siswa"
+            sub="Input kehadiran harian"
+            link="/academic/absensi"
+          />
+          <QuickLink
+            icon="school"
+            label="Kelas Diampu"
+            sub="Lihat rombel aktif"
+            link="/academic/classes"
+          />
+          <QuickLink
+            icon="calendar"
+            label="Tahun Ajaran"
+            sub="Informasi periode"
+            link="/academic/tahun-ajaran"
+          />
+          <QuickLink
+            icon="user"
+            label="Profil Saya"
+            sub="Edit data pribadi"
+            link="/profile"
+          />
         </div>
       </div>
     </>
@@ -213,7 +263,9 @@ function StatCard({
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
           {label}
         </span>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{value}</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">
+          {value}
+        </h3>
         <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
       </div>
       <div className="icon-box bg-emerald-50 dark:bg-emerald-900/20">
@@ -243,7 +295,9 @@ function QuickLink({
         <CardIcon name={icon} size={18} />
       </div>
       <div>
-        <div className="font-semibold text-gray-900 dark:text-white text-xs">{label}</div>
+        <div className="font-semibold text-gray-900 dark:text-white text-xs">
+          {label}
+        </div>
         <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>
       </div>
     </Link>

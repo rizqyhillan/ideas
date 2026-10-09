@@ -155,7 +155,11 @@ export default function GuruPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal} className="w-full sm:w-auto justify-center">
+            <Button
+              size="sm"
+              onClick={openCreateModal}
+              className="w-full sm:w-auto justify-center"
+            >
               + Tambah Guru
             </Button>
           </div>
@@ -216,7 +220,9 @@ export default function GuruPage() {
                     </td>
                     <td className="px-4 py-3.5 text-xs">
                       <div>{item.pegawai?.noTelepon || "-"}</div>
-                      <div className="text-gray-400">{item.pegawai?.email || ""}</div>
+                      <div className="text-gray-400">
+                        {item.pegawai?.email || ""}
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       {item.pegawai?.statusAktif ? (
@@ -255,9 +261,13 @@ export default function GuruPage() {
         {/* Mobile Cards View */}
         <div className="block md:hidden space-y-3 mt-4">
           {loading ? (
-            <div className="py-8 text-center text-gray-400">Memuat data guru...</div>
+            <div className="py-8 text-center text-gray-400">
+              Memuat data guru...
+            </div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Belum ada data guru pengajar.</div>
+            <div className="py-8 text-center text-gray-400">
+              Belum ada data guru pengajar.
+            </div>
           ) : (
             data.map((item) => (
               <div
@@ -285,7 +295,9 @@ export default function GuruPage() {
                     {item.pegawai?.jabatan || "Guru"}
                   </span>
                   {item.pegawai?.nuptk && (
-                    <span className="text-gray-400 block">NUPTK: {item.pegawai.nuptk}</span>
+                    <span className="text-gray-400 block">
+                      NUPTK: {item.pegawai.nuptk}
+                    </span>
                   )}
                 </div>
                 <div className="text-xs mb-3">
@@ -293,10 +305,15 @@ export default function GuruPage() {
                   <span className="text-gray-700 dark:text-gray-300">
                     {item.pegawai?.noTelepon || "-"}
                   </span>
-                  <span className="text-gray-400 block">{item.pegawai?.email || ""}</span>
+                  <span className="text-gray-400 block">
+                    {item.pegawai?.email || ""}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <Badge color={item.pegawai?.statusAktif ? "success" : "light"} size="sm">
+                  <Badge
+                    color={item.pegawai?.statusAktif ? "success" : "light"}
+                    size="sm"
+                  >
                     {item.pegawai?.statusAktif ? "Aktif" : "Nonaktif"}
                   </Badge>
                   <div className="flex gap-2">

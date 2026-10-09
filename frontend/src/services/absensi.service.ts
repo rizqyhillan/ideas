@@ -8,12 +8,7 @@ export type StatusAbsensi = "hadir" | "sakit" | "izin" | "alpa";
 
 // CREATE TYPE nama_hari AS ENUM ('senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu');
 export type NamaHari =
-  | "senin"
-  | "selasa"
-  | "rabu"
-  | "kamis"
-  | "jumat"
-  | "sabtu";
+  "senin" | "selasa" | "rabu" | "kamis" | "jumat" | "sabtu";
 
 // CREATE TYPE jenis_semester AS ENUM ('ganjil', 'genap');
 export type JenisSemester = "ganjil" | "genap";

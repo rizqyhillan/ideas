@@ -25,20 +25,28 @@ export default function ProfilePage() {
         </div>
 
         <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-          <h2 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Informasi Akun</h2>
+          <h2 className="text-base font-semibold text-gray-800 dark:text-white mb-4">
+            Informasi Akun
+          </h2>
           <dl className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="text-gray-500 dark:text-gray-400">Username</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{user.username}</dd>
+              <dd className="font-medium text-gray-900 dark:text-white">
+                {user.username}
+              </dd>
             </div>
             <div>
               <dt className="text-gray-500 dark:text-gray-400">Email</dt>
-              <dd className="font-medium text-gray-900 dark:text-white">{user.email}</dd>
+              <dd className="font-medium text-gray-900 dark:text-white">
+                {user.email}
+              </dd>
             </div>
             <div>
               <dt className="text-gray-500 dark:text-gray-400">Status</dt>
               <dd className="font-medium">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.status === "aktif" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.status === "aktif" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                >
                   {user.status}
                 </span>
               </dd>
@@ -46,7 +54,8 @@ export default function ProfilePage() {
             <div>
               <dt className="text-gray-500 dark:text-gray-400">Peran</dt>
               <dd className="font-medium text-gray-900 dark:text-white">
-                {user.roles?.map((r: any) => r.name || r.code).join(", ") || "Tidak ada"}
+                {user.roles?.map((r: any) => r.name || r.code).join(", ") ||
+                  "Tidak ada"}
               </dd>
             </div>
           </dl>

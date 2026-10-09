@@ -51,15 +51,27 @@ const AppHeader: React.FC = () => {
       navigate("/master/siswa");
     } else if (query.includes("gur") || query.includes("pengajar")) {
       navigate("/master/guru");
-    } else if (query.includes("peg") || query.includes("staf") || query.includes("staff")) {
+    } else if (
+      query.includes("peg") ||
+      query.includes("staf") ||
+      query.includes("staff")
+    ) {
       navigate("/master/pegawai");
     } else if (query.includes("kel") || query.includes("rombel")) {
       navigate("/academic/classes");
     } else if (query.includes("absen") || query.includes("presensi")) {
       navigate("/academic/absensi");
-    } else if (query.includes("tahun") || query.includes("ajar") || query.includes("ta")) {
+    } else if (
+      query.includes("tahun") ||
+      query.includes("ajar") ||
+      query.includes("ta")
+    ) {
       navigate("/academic/tahun-ajaran");
-    } else if (query.includes("user") || query.includes("pengguna") || query.includes("akun")) {
+    } else if (
+      query.includes("user") ||
+      query.includes("pengguna") ||
+      query.includes("akun")
+    ) {
       navigate("/master/users");
     } else if (query.includes("jadwal") || query.includes("agenda")) {
       navigate("/academic/classes");
@@ -77,7 +89,7 @@ const AppHeader: React.FC = () => {
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
-            className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
+            className="flex items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11 lg:border z-50"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
@@ -89,11 +101,13 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link to="/" className="lg:hidden flex items-center gap-2">
-            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-brand-50 dark:bg-brand-900/20">
-              <Icon name="school" size={16} className="text-brand-600 dark:text-brand-400" />
-            </div>
+            <img
+              src="/images/logo/Logo-Splasma-kotak.png"
+              alt="Logo Splasma"
+              className="w-8 h-8 rounded-md object-contain shrink-0"
+            />
             <span className="font-extrabold tracking-tight text-gray-900 dark:text-white text-base">
-              IdEaS
+              Splasma
             </span>
           </Link>
 

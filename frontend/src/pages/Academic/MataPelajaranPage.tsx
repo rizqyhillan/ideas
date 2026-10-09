@@ -5,7 +5,10 @@ import Badge from "../../components/ui/badge/Badge";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import { Modal } from "../../components/ui/modal";
-import { mataPelajaranService, MataPelajaranItem } from "../../services/academic-extras.service";
+import {
+  mataPelajaranService,
+  MataPelajaranItem,
+} from "../../services/academic-extras.service";
 
 export default function MataPelajaranPage() {
   const [data, setData] = useState<MataPelajaranItem[]>([]);
@@ -113,19 +116,29 @@ export default function MataPelajaranPage() {
         </div>
       )}
       {errorMsg && (
-        <div className="mb-4 p-3 rounded-lg alert-error-flat">
-          {errorMsg}
-        </div>
+        <div className="mb-4 p-3 rounded-lg alert-error-flat">{errorMsg}</div>
       )}
       <div className="card-flat lg:p-6 p-4">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Mata Pelajaran</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Kelola mata pelajaran yang diajarkan</p>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Daftar Mata Pelajaran
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Kelola mata pelajaran yang diajarkan
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <Input type="text" placeholder="Cari..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-48 sm:w-64" />
-            <Button size="sm" onClick={openCreateModal}>+ Tambah</Button>
+            <Input
+              type="text"
+              placeholder="Cari..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-48 sm:w-64"
+            />
+            <Button size="sm" onClick={openCreateModal}>
+              + Tambah
+            </Button>
           </div>
         </div>
         <div className="hidden md:block overflow-x-auto">
@@ -142,23 +155,58 @@ export default function MataPelajaranPage() {
             </thead>
             <tbody className="table-body-row">
               {loading ? (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-400">Memuat...</td></tr>
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                    Memuat...
+                  </td>
+                </tr>
               ) : data.length === 0 ? (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-400">Belum ada data</td></tr>
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                    Belum ada data
+                  </td>
+                </tr>
               ) : (
                 data.map((item, idx) => (
-                  <tr key={item.id} className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
+                  >
                     <td className="px-4 py-3.5 font-medium">{idx + 1}</td>
-                    <td className="px-4 py-3.5 font-mono text-xs bg-gray-100 dark:bg-gray-800">{item.kode}</td>
-                    <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">{item.nama}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">{item.deskripsi || "-"}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs bg-gray-100 dark:bg-gray-800">
+                      {item.kode}
+                    </td>
+                    <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">
+                      {item.nama}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                      {item.deskripsi || "-"}
+                    </td>
                     <td className="px-4 py-3.5 text-center">
-                      {item.isActive ? <Badge color="success" size="sm">Aktif</Badge> : <Badge color="light" size="sm">Nonaktif</Badge>}
+                      {item.isActive ? (
+                        <Badge color="success" size="sm">
+                          Aktif
+                        </Badge>
+                      ) : (
+                        <Badge color="light" size="sm">
+                          Nonaktif
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditModal(item)} className="btn-action-sm">Edit</button>
-                        <button onClick={() => handleDelete(item.id)} className="btn-action-sm">Hapus</button>
+                        <button
+                          onClick={() => openEditModal(item)}
+                          className="btn-action-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="btn-action-sm"
+                        >
+                          Hapus
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -168,39 +216,92 @@ export default function MataPelajaranPage() {
           </table>
         </div>
         <div className="md:hidden space-y-3">
-          {loading ? <div className="py-8 text-center text-gray-400">Memuat...</div> : data.length === 0 ? <div className="py-8 text-center text-gray-400">Belum ada data</div> : data.map((item) => (
-            <div key={item.id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-800 card-flat">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{item.kode}</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{item.nama}</span>
-                    {!item.isActive && <Badge color="light" size="sm">Nonaktif</Badge>}
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">Memuat...</div>
+          ) : data.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">Belum ada data</div>
+          ) : (
+            data.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-lg border border-gray-200 dark:border-gray-800 card-flat"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">
+                        {item.kode}
+                      </span>
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {item.nama}
+                      </span>
+                      {!item.isActive && (
+                        <Badge color="light" size="sm">
+                          Nonaktif
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.deskripsi || "-"}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.deskripsi || "-"}</p>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <button onClick={() => openEditModal(item)} className="btn-action-sm">Edit</button>
-                  <button onClick={() => handleDelete(item.id)} className="btn-action-sm">Hapus</button>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="btn-action-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="btn-action-sm"
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-lg p-6">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        className="max-w-lg p-6"
+      >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{editingId ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {editingId ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
+          </h3>
         </div>
-        {formError && <div className="mb-4 p-3 rounded-lg alert-error-flat">{formError}</div>}
+        {formError && (
+          <div className="mb-4 p-3 rounded-lg alert-error-flat">
+            {formError}
+          </div>
+        )}
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <Label>Kode *</Label>
-            <Input type="text" placeholder="Contoh: MAT" value={formData.kode} onChange={(e) => setFormData({ ...formData, kode: e.target.value.toUpperCase() })} />
+            <Input
+              type="text"
+              placeholder="Contoh: MAT"
+              value={formData.kode}
+              onChange={(e) =>
+                setFormData({ ...formData, kode: e.target.value.toUpperCase() })
+              }
+            />
           </div>
           <div>
             <Label>Nama *</Label>
-            <Input type="text" placeholder="Contoh: Matematika" value={formData.nama} onChange={(e) => setFormData({ ...formData, nama: e.target.value })} />
+            <Input
+              type="text"
+              placeholder="Contoh: Matematika"
+              value={formData.nama}
+              onChange={(e) =>
+                setFormData({ ...formData, nama: e.target.value })
+              }
+            />
           </div>
           <div>
             <Label>Deskripsi</Label>
@@ -208,14 +309,21 @@ export default function MataPelajaranPage() {
               className="w-full h-20 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               placeholder="Deskripsi singkat..."
               value={formData.deskripsi}
-              onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, deskripsi: e.target.value })
+              }
             />
           </div>
           <div>
             <Label>Status</Label>
             <select
               value={formData.isActive ? "true" : "false"}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.value === "true" })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  isActive: e.target.value === "true",
+                })
+              }
               className="mt-1 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
               <option value="true">Aktif</option>
@@ -223,8 +331,16 @@ export default function MataPelajaranPage() {
             </select>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-action-sm">Batal</button>
-            <Button size="sm" disabled={isSaving}>{isSaving ? "Menyimpan..." : "Simpan"}</Button>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="btn-action-sm"
+            >
+              Batal
+            </button>
+            <Button size="sm" disabled={isSaving}>
+              {isSaving ? "Menyimpan..." : "Simpan"}
+            </Button>
           </div>
         </form>
       </Modal>

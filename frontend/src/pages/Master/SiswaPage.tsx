@@ -178,7 +178,11 @@ export default function SiswaPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-              <Icon name="users" size={18} className="text-brand-600 dark:text-brand-400" />
+              <Icon
+                name="users"
+                size={18}
+                className="text-brand-600 dark:text-brand-400"
+              />
               Daftar Siswa (Total: {totalCount})
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -322,9 +326,13 @@ export default function SiswaPage() {
         {/* Mobile Cards View */}
         <div className="block md:hidden space-y-3 mt-4">
           {loading ? (
-            <div className="py-8 text-center text-gray-400">Memuat data siswa...</div>
+            <div className="py-8 text-center text-gray-400">
+              Memuat data siswa...
+            </div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Tidak ada data siswa ditemukan.</div>
+            <div className="py-8 text-center text-gray-400">
+              Tidak ada data siswa ditemukan.
+            </div>
           ) : (
             data.map((item) => (
               <div
@@ -333,7 +341,9 @@ export default function SiswaPage() {
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{item.namaLengkap}</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {item.namaLengkap}
+                    </h4>
                     <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                       NISN: {item.nisn} {item.nis ? `• NIS: ${item.nis}` : ""}
                     </span>
@@ -368,7 +378,10 @@ export default function SiswaPage() {
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <Badge color={item.statusAktif ? "success" : "light"} size="sm">
+                  <Badge
+                    color={item.statusAktif ? "success" : "light"}
+                    size="sm"
+                  >
                     {item.statusAktif ? "Aktif" : "Nonaktif"}
                   </Badge>
                   <div className="flex gap-2">
@@ -438,7 +451,10 @@ export default function SiswaPage() {
           </div>
         )}
 
-        <form onSubmit={handleSave} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
+        <form
+          onSubmit={handleSave}
+          className="space-y-4 max-h-[70vh] overflow-y-auto px-1"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>

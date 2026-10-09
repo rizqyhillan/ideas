@@ -3,13 +3,14 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 import { CardIcon, Icon } from "../../components/icons/ideas-icon";
 import Badge from "../../components/ui/badge/Badge";
-import {
-  ClassItem,
-  TahunAjaranItem,
-} from "../../services/academic.service";
+import { ClassItem, TahunAjaranItem } from "../../services/academic.service";
 import { classesService } from "../../services/academic.service";
 import { tahunAjaranService } from "../../services/academic.service";
-import { siswaService, guruService, pegawaiService } from "../../services/master.service";
+import {
+  siswaService,
+  guruService,
+  pegawaiService,
+} from "../../services/master.service";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -60,13 +61,23 @@ export default function AdminDashboard() {
             Dashboard Admin
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data civitas dan kegiatan akademik
+            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data
+            civitas dan kegiatan akademik
           </p>
         </div>
         {stats.tahunAjaran && (
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 w-fit">
-            <Icon name="calendar" size={14} className="text-emerald-600 dark:text-emerald-400" />
-            <span>Tahun Ajaran Aktif: <strong className="text-gray-900 dark:text-white">{stats.tahunAjaran.nama}</strong></span>
+            <Icon
+              name="calendar"
+              size={14}
+              className="text-emerald-600 dark:text-emerald-400"
+            />
+            <span>
+              Tahun Ajaran Aktif:{" "}
+              <strong className="text-gray-900 dark:text-white">
+                {stats.tahunAjaran.nama}
+              </strong>
+            </span>
           </div>
         )}
       </div>
@@ -145,20 +156,29 @@ export default function AdminDashboard() {
                   </tr>
                 ) : (
                   recentClasses.map((cls) => (
-                    <tr key={cls.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/20">
+                    <tr
+                      key={cls.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/20"
+                    >
                       <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white">
                         {cls.nama}
                       </td>
                       <td className="px-3 py-2.5">Kelas {cls.tingkat}</td>
-                      <td className="px-3 py-2.5">{cls.tahunAjaran?.nama || "-"}</td>
+                      <td className="px-3 py-2.5">
+                        {cls.tahunAjaran?.nama || "-"}
+                      </td>
                       <td className="px-3 py-2.5">
                         {cls.waliKelas?.pegawai?.namaLengkap || "-"}
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         {cls.statusAktif ? (
-                          <Badge color="success" size="sm">Aktif</Badge>
+                          <Badge color="success" size="sm">
+                            Aktif
+                          </Badge>
                         ) : (
-                          <Badge color="light" size="sm">Nonaktif</Badge>
+                          <Badge color="light" size="sm">
+                            Nonaktif
+                          </Badge>
                         )}
                       </td>
                     </tr>
@@ -175,12 +195,36 @@ export default function AdminDashboard() {
             Aksi Cepat
           </h3>
           <div className="space-y-1">
-            <QuickAction icon="calendar" label="Atur Tahun Ajaran" link="/academic/tahun-ajaran" />
-            <QuickAction icon="school" label="Kelola Rombel" link="/academic/classes" />
-            <QuickAction icon="users" label="Buku Induk Siswa" link="/master/siswa" />
-            <QuickAction icon="award" label="Data Guru & Pegawai" link="/master/guru" />
-            <QuickAction icon="clipboard" label="Presensi Siswa" link="/academic/absensi" />
-            <QuickAction icon="settings" label="Manajemen Akun" link="/master/users" />
+            <QuickAction
+              icon="calendar"
+              label="Atur Tahun Ajaran"
+              link="/academic/tahun-ajaran"
+            />
+            <QuickAction
+              icon="school"
+              label="Kelola Rombel"
+              link="/academic/classes"
+            />
+            <QuickAction
+              icon="users"
+              label="Buku Induk Siswa"
+              link="/master/siswa"
+            />
+            <QuickAction
+              icon="award"
+              label="Data Guru & Pegawai"
+              link="/master/guru"
+            />
+            <QuickAction
+              icon="clipboard"
+              label="Presensi Siswa"
+              link="/academic/absensi"
+            />
+            <QuickAction
+              icon="settings"
+              label="Manajemen Akun"
+              link="/master/users"
+            />
           </div>
 
           {/* Hak Akses */}

@@ -124,7 +124,7 @@ export const Icon: React.FC<IconProps> = ({
   if (!Component) {
     const lowerName = name.toLowerCase().replace(/[-_]/g, "");
     const matchingKey = Object.keys(LucideIcons).find(
-      (key) => key.toLowerCase() === lowerName
+      (key) => key.toLowerCase() === lowerName,
     );
     if (matchingKey) {
       Component = (LucideIcons as Record<string, any>)[matchingKey];
@@ -132,8 +132,12 @@ export const Icon: React.FC<IconProps> = ({
   }
 
   // 5. Fallback if still not found
-  if (!Component || (typeof Component !== "function" && typeof Component !== "object")) {
-    const Fallback = (LucideIcons as any).HelpCircle || (LucideIcons as any).Circle;
+  if (
+    !Component ||
+    (typeof Component !== "function" && typeof Component !== "object")
+  ) {
+    const Fallback =
+      (LucideIcons as any).HelpCircle || (LucideIcons as any).Circle;
     if (Fallback) {
       return <Fallback size={size} className={className} {...props} />;
     }

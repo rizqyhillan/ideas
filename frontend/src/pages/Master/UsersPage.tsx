@@ -124,7 +124,8 @@ export default function UsersPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Apakah Anda yakin ingin menonaktifkan/menghapus akun ini?")) return;
+    if (!confirm("Apakah Anda yakin ingin menonaktifkan/menghapus akun ini?"))
+      return;
     try {
       await usersService.delete(id);
       setSuccessMsg("Akun pengguna berhasil dihapus!");
@@ -283,9 +284,13 @@ export default function UsersPage() {
         {/* Mobile Cards View */}
         <div className="block md:hidden space-y-3 mt-4">
           {loading ? (
-            <div className="py-8 text-center text-gray-400">Memuat data pengguna...</div>
+            <div className="py-8 text-center text-gray-400">
+              Memuat data pengguna...
+            </div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Belum ada data pengguna.</div>
+            <div className="py-8 text-center text-gray-400">
+              Belum ada data pengguna.
+            </div>
           ) : (
             data.map((item) => (
               <div
@@ -294,8 +299,12 @@ export default function UsersPage() {
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{item.username}</h4>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.email}</span>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {item.username}
+                    </h4>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.email}
+                    </span>
                   </div>
                 </div>
                 <div className="text-xs mb-3">
@@ -319,17 +328,17 @@ export default function UsersPage() {
                     color={
                       item.status === "aktif"
                         ? "success"
-                      : item.status === "ditangguhkan"
-                        ? "warning"
-                        : "light"
+                        : item.status === "ditangguhkan"
+                          ? "warning"
+                          : "light"
                     }
                     size="sm"
                   >
                     {item.status === "aktif"
                       ? "Aktif"
                       : item.status === "ditangguhkan"
-                      ? "Ditangguhkan"
-                      : "Nonaktif"}
+                        ? "Ditangguhkan"
+                        : "Nonaktif"}
                   </Badge>
                   <div className="flex gap-2">
                     <button
@@ -406,7 +415,12 @@ export default function UsersPage() {
 
           <div>
             <Label>
-              Password {editingId ? "(Kosongkan jika tidak diubah)" : <span className="text-error-500">*</span>}
+              Password{" "}
+              {editingId ? (
+                "(Kosongkan jika tidak diubah)"
+              ) : (
+                <span className="text-error-500">*</span>
+              )}
             </Label>
             <Input
               type="password"

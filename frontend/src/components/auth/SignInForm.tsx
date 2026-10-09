@@ -40,8 +40,6 @@ export default function SignInForm() {
     }
   }
 
-
-
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -124,11 +122,7 @@ export default function SignInForm() {
                 )}
 
                 <div>
-                  <Button
-                    className="w-full"
-                    size="sm"
-                    disabled={isSubmitting}
-                  >
+                  <Button className="w-full" size="sm" disabled={isSubmitting}>
                     {isSubmitting ? "Memproses Masuk..." : "Masuk"}
                   </Button>
                 </div>

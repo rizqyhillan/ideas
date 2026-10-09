@@ -58,14 +58,21 @@ export default function PermissionsPage() {
 
   return (
     <>
-      <PageMeta title="Permissions | IdEaS" description="Daftar hak akses sistem" />
+      <PageMeta
+        title="Permissions | IdEaS"
+        description="Daftar hak akses sistem"
+      />
       <PageBreadcrumb pageTitle="Permissions (Hak Akses)" />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Permissions</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Hak akses yang tersedia dalam sistem</p>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Daftar Permissions
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Hak akses yang tersedia dalam sistem
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <select
@@ -75,7 +82,9 @@ export default function PermissionsPage() {
             >
               <option value="">Semua Module</option>
               {uniqueModules.map((m) => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m}>
+                  {m}
+                </option>
               ))}
             </select>
             <Input
@@ -100,18 +109,37 @@ export default function PermissionsPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {loading ? (
-                <tr><td colSpan={4} className="py-8 text-center text-gray-400">Memuat data...</td></tr>
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-gray-400">
+                    Memuat data...
+                  </td>
+                </tr>
               ) : data.length === 0 ? (
-                <tr><td colSpan={4} className="py-8 text-center text-gray-400">Tidak ada data ditemukan.</td></tr>
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-gray-400">
+                    Tidak ada data ditemukan.
+                  </td>
+                </tr>
               ) : (
                 data.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]">
-                    <td className="px-4 py-3.5 font-mono text-xs text-gray-900 dark:text-white">{item.code}</td>
-                    <td className="px-4 py-3.5">
-                      <Badge color="info" size="sm">{item.module}</Badge>
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
+                  >
+                    <td className="px-4 py-3.5 font-mono text-xs text-gray-900 dark:text-white">
+                      {item.code}
                     </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-800 dark:text-white">{item.action}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500 truncate max-w-xs">{item.description || "-"}</td>
+                    <td className="px-4 py-3.5">
+                      <Badge color="info" size="sm">
+                        {item.module}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-800 dark:text-white">
+                      {item.action}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500 truncate max-w-xs">
+                      {item.description || "-"}
+                    </td>
                   </tr>
                 ))
               )}
@@ -123,20 +151,33 @@ export default function PermissionsPage() {
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat data...</div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Tidak ada data ditemukan.</div>
+            <div className="py-8 text-center text-gray-400">
+              Tidak ada data ditemukan.
+            </div>
           ) : (
             data.map((item) => (
-              <div key={item.id} className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40">
+              <div
+                key={item.id}
+                className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40"
+              >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
-                    <h4 className="font-mono text-xs text-gray-900 dark:text-white">{item.code}</h4>
+                    <h4 className="font-mono text-xs text-gray-900 dark:text-white">
+                      {item.code}
+                    </h4>
                     <div className="flex gap-2 mt-1">
-                      <Badge color="info" size="sm">{item.module}</Badge>
-                      <span className="text-xs text-gray-600 dark:text-gray-300">{item.action}</span>
+                      <Badge color="info" size="sm">
+                        {item.module}
+                      </Badge>
+                      <span className="text-xs text-gray-600 dark:text-gray-300">
+                        {item.action}
+                      </span>
                     </div>
                   </div>
                 </div>
-                {item.description && <p className="text-xs text-gray-500">{item.description}</p>}
+                {item.description && (
+                  <p className="text-xs text-gray-500">{item.description}</p>
+                )}
               </div>
             ))
           )}

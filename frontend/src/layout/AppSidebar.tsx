@@ -42,36 +42,51 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-  { icon: <Icon name="user" size={20} />, name: "Profil Saya", path: "/profile" },
+  {
+    icon: <Icon name="user" size={20} />,
+    name: "Profil Saya",
+    path: "/profile",
+  },
 ];
 
 const AppSidebar: React.FC = () => {
   const { user } = useAuth();
-  
+
   const filteredNavItems = useMemo(() => {
     // Cloning
-    return navItems.map(item => {
-      // Guru/Siswa seharusnya tidak punya askes Master Civitas dan sejenisnya
-      if (item.name === "Master Civitas") {
-        const isAdmin = user?.roles?.includes("admin") || user?.userRoles2?.[0]?.role?.name === "admin";
-        if (!isAdmin) return null;
-      }
-      if (item.name === "Akademik") {
-        if (!user) return null;
-        
-        let allowedSubItems = item.subItems;
-        const roleStr = user?.roles?.[0] || user?.userRoles2?.[0]?.role?.name || "";
-        
-        if (roleStr === "guru") {
-          allowedSubItems = item.subItems?.filter(sub => ["Jadwal Pelajaran", "Absensi Siswa", "Konseling (BK)"].includes(sub.name));
-        } else if (roleStr === "siswa") {
-          allowedSubItems = item.subItems?.filter(sub => ["Jadwal Pelajaran", "Absensi Siswa"].includes(sub.name));
+    return navItems
+      .map((item) => {
+        // Guru/Siswa seharusnya tidak punya askes Master Civitas dan sejenisnya
+        if (item.name === "Master Civitas") {
+          const isAdmin =
+            user?.roles?.includes("admin") ||
+            user?.userRoles2?.[0]?.role?.name === "admin";
+          if (!isAdmin) return null;
         }
+        if (item.name === "Akademik") {
+          if (!user) return null;
 
-        return { ...item, subItems: allowedSubItems };
-      }
-      return item;
-    }).filter(Boolean) as NavItem[];
+          let allowedSubItems = item.subItems;
+          const roleStr =
+            user?.roles?.[0] || user?.userRoles2?.[0]?.role?.name || "";
+
+          if (roleStr === "guru") {
+            allowedSubItems = item.subItems?.filter((sub) =>
+              ["Jadwal Pelajaran", "Absensi Siswa", "Konseling (BK)"].includes(
+                sub.name,
+              ),
+            );
+          } else if (roleStr === "siswa") {
+            allowedSubItems = item.subItems?.filter((sub) =>
+              ["Jadwal Pelajaran", "Absensi Siswa"].includes(sub.name),
+            );
+          }
+
+          return { ...item, subItems: allowedSubItems };
+        }
+        return item;
+      })
+      .filter(Boolean) as NavItem[];
   }, [user]);
 
   const {
@@ -83,13 +98,18 @@ const AppSidebar: React.FC = () => {
   } = useSidebar();
   const location = useLocation();
 
-  const [openSubmenu, setOpenSubmenu] = useState<{ type: "main" | "others"; index: number } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
+  const [openSubmenu, setOpenSubmenu] = useState<{
+    type: "main" | "others";
+    index: number;
+  } | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
+    {},
+  );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isActive = useCallback(
     (path: string) => location.pathname === path,
-    [location.pathname]
+    [location.pathname],
   );
 
   useEffect(() => {
@@ -109,7 +129,8 @@ const AppSidebar: React.FC = () => {
       });
     });
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [location.pathname, isActive, closeMobileSidebar]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -130,10 +151,7 @@ const AppSidebar: React.FC = () => {
     });
   };
 
-  const renderMenuItems = (
-    items: NavItem[],
-    menuType: "main" | "others"
-  ) => (
+  const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
       {items.map((nav, index) => (
         <li key={nav.name}>
@@ -145,7 +163,9 @@ const AppSidebar: React.FC = () => {
                   ? "menu-item-active"
                   : "menu-item-inactive"
               } cursor-pointer ${
-                !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
+                !isExpanded && !isHovered
+                  ? "lg:justify-center"
+                  : "lg:justify-start"
               }`}
             >
               <span
@@ -200,8 +220,7 @@ const AppSidebar: React.FC = () => {
               className="overflow-hidden transition-all duration-300"
               style={{
                 height:
-                  openSubmenu?.type === menuType &&
-                  openSubmenu?.index === index
+                  openSubmenu?.type === menuType && openSubmenu?.index === index
                     ? `${subMenuHeight[`${menuType}-${index}`]}px`
                     : "0px",
               }}
@@ -261,8 +280,8 @@ const AppSidebar: React.FC = () => {
           isExpanded || isMobileOpen
             ? "w-[290px]"
             : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+              ? "w-[290px]"
+              : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -296,7 +315,9 @@ const AppSidebar: React.FC = () => {
             <div>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
@@ -310,7 +331,9 @@ const AppSidebar: React.FC = () => {
             <div>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
@@ -323,9 +346,7 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? (
-          <SidebarWidget />
-        ) : null}
+        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );

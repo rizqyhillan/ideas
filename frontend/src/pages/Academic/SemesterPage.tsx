@@ -34,7 +34,9 @@ export default function SemesterPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const [tahunAjaranList, setTahunAjaranList] = useState<{ id: number; nama: string }[]>([]);
+  const [tahunAjaranList, setTahunAjaranList] = useState<
+    { id: number; nama: string }[]
+  >([]);
 
   async function loadData() {
     try {
@@ -84,7 +86,11 @@ export default function SemesterPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.tahunAjaranId || !formData.tanggalMulai || !formData.tanggalSelesai) {
+    if (
+      !formData.tahunAjaranId ||
+      !formData.tanggalMulai ||
+      !formData.tanggalSelesai
+    ) {
       setFormError("Semua bidang wajib diisi.");
       return;
     }
@@ -130,22 +136,18 @@ export default function SemesterPage() {
       <PageMeta title="Semester | IdEaS" description="Kelola semester ajaran" />
       <PageBreadcrumb pageTitle="Semester" />
 
-      {successMsg && (
-        <div className="alert-success-flat">
-          {successMsg}
-        </div>
-      )}
-      {error && (
-        <div className="alert-error-flat">
-          {error}
-        </div>
-      )}
+      {successMsg && <div className="alert-success-flat">{successMsg}</div>}
+      {error && <div className="alert-error-flat">{error}</div>}
 
       <div className="card-flat lg:p-6 p-4">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Semester</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Kelola semester akademik (Ganjil / Genap)</p>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              Daftar Semester
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Kelola semester akademik (Ganjil / Genap)
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <Input
@@ -155,7 +157,9 @@ export default function SemesterPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-48 sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal}>+ Tambah Semester</Button>
+            <Button size="sm" onClick={openCreateModal}>
+              + Tambah Semester
+            </Button>
           </div>
         </div>
 
@@ -174,37 +178,66 @@ export default function SemesterPage() {
             </thead>
             <tbody className="table-body-row">
               {loading ? (
-                <tr><td colSpan={7} className="py-8 text-center text-gray-400">Memuat...</td></tr>
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-400">
+                    Memuat...
+                  </td>
+                </tr>
               ) : data.length === 0 ? (
-                <tr><td colSpan={7} className="py-8 text-center text-gray-400">Belum ada semester</td></tr>
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-400">
+                    Belum ada semester
+                  </td>
+                </tr>
               ) : (
                 data.map((item, idx) => (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                  >
                     <td className="px-4 py-3.5 font-medium">{idx + 1}</td>
                     <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">
-                      {tahunAjaranList.find((t) => t.id === item.tahunAjaranId)?.nama || "-"}
+                      {tahunAjaranList.find((t) => t.id === item.tahunAjaranId)
+                        ?.nama || "-"}
                     </td>
                     <td className="px-4 py-3.5">
-                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm">
+                      <Badge
+                        color={item.jenis === "ganjil" ? "info" : "warning"}
+                        size="sm"
+                      >
                         {item.jenis === "ganjil" ? "Ganjil" : "Genap"}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3.5">{item.tanggalMulai?.split("T")[0] || "-"}</td>
-                    <td className="px-4 py-3.5">{item.tanggalSelesai?.split("T")[0] || "-"}</td>
+                    <td className="px-4 py-3.5">
+                      {item.tanggalMulai?.split("T")[0] || "-"}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {item.tanggalSelesai?.split("T")[0] || "-"}
+                    </td>
                     <td className="px-4 py-3.5 text-center">
                       {item.isActive ? (
-                        <Badge color="success" size="sm">Aktif</Badge>
+                        <Badge color="success" size="sm">
+                          Aktif
+                        </Badge>
                       ) : (
-                        <Badge color="light" size="sm">Nonaktif</Badge>
+                        <Badge color="light" size="sm">
+                          Nonaktif
+                        </Badge>
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => openEditModal(item)} className="btn-action-sm">
+                        <button
+                          onClick={() => openEditModal(item)}
+                          className="btn-action-sm"
+                        >
                           <Icon name="edit" size={14} />
                           <span className="ml-1">Edit</span>
                         </button>
-                        <button onClick={() => handleDelete(item.id)} className="btn-action-sm">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="btn-action-sm"
+                        >
                           <Icon name="trash" size={14} />
                           <span className="ml-1">Hapus</span>
                         </button>
@@ -221,7 +254,9 @@ export default function SemesterPage() {
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat...</div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Belum ada semester</div>
+            <div className="py-8 text-center text-gray-400">
+              Belum ada semester
+            </div>
           ) : (
             data.map((item) => (
               <div key={item.id} className="card-flat">
@@ -229,24 +264,41 @@ export default function SemesterPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-bold text-gray-900 dark:text-white">
-                        {tahunAjaranList.find((t) => t.id === item.tahunAjaranId)?.nama || "-"}
+                        {tahunAjaranList.find(
+                          (t) => t.id === item.tahunAjaranId,
+                        )?.nama || "-"}
                       </span>
-                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm">
+                      <Badge
+                        color={item.jenis === "ganjil" ? "info" : "warning"}
+                        size="sm"
+                      >
                         {item.jenis === "ganjil" ? "Ganjil" : "Genap"}
                       </Badge>
-                      {item.isActive && <Badge color="success" size="sm">Aktif</Badge>}
+                      {item.isActive && (
+                        <Badge color="success" size="sm">
+                          Aktif
+                        </Badge>
+                      )}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
                       <p>Mulai: {item.tanggalMulai?.split("T")[0] || "-"}</p>
-                      <p>Selesai: {item.tanggalSelesai?.split("T")[0] || "-"}</p>
+                      <p>
+                        Selesai: {item.tanggalSelesai?.split("T")[0] || "-"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button onClick={() => openEditModal(item)} className="btn-action-sm">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="btn-action-sm"
+                    >
                       <Icon name="edit" size={14} />
                       <span className="ml-1">Edit</span>
                     </button>
-                    <button onClick={() => handleDelete(item.id)} className="btn-action-sm">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="btn-action-sm"
+                    >
                       <Icon name="trash" size={14} />
                       <span className="ml-1">Hapus</span>
                     </button>
@@ -258,28 +310,35 @@ export default function SemesterPage() {
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-lg p-6">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        className="max-w-lg p-6"
+      >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
             {editingId ? "Edit Semester" : "Tambah Semester"}
           </h3>
         </div>
-        {formError && (
-          <div className="alert-error-flat">
-            {formError}
-          </div>
-        )}
+        {formError && <div className="alert-error-flat">{formError}</div>}
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <Label>Tahun Ajaran *</Label>
             <select
               value={String(formData.tahunAjaranId)}
-              onChange={(e) => setFormData({ ...formData, tahunAjaranId: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  tahunAjaranId: Number(e.target.value),
+                })
+              }
               className="mt-1 w-full h-10 rounded-md border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
               <option value="">Pilih Tahun Ajaran</option>
               {tahunAjaranList.map((ta) => (
-                <option key={ta.id} value={String(ta.id)}>{ta.nama}</option>
+                <option key={ta.id} value={String(ta.id)}>
+                  {ta.nama}
+                </option>
               ))}
             </select>
           </div>
@@ -288,7 +347,12 @@ export default function SemesterPage() {
               <Label>Jenis Semester *</Label>
               <select
                 value={formData.jenis}
-                onChange={(e) => setFormData({ ...formData, jenis: e.target.value as JenisSemester })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    jenis: e.target.value as JenisSemester,
+                  })
+                }
                 className="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 <option value="ganjil">Ganjil</option>
@@ -299,23 +363,51 @@ export default function SemesterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Tanggal Mulai *</Label>
-              <Input type="date" value={formData.tanggalMulai} onChange={(e) => setFormData({ ...formData, tanggalMulai: e.target.value })} />
+              <Input
+                type="date"
+                value={formData.tanggalMulai}
+                onChange={(e) =>
+                  setFormData({ ...formData, tanggalMulai: e.target.value })
+                }
+              />
             </div>
             <div>
               <Label>Tanggal Selesai *</Label>
-              <Input type="date" value={formData.tanggalSelesai} onChange={(e) => setFormData({ ...formData, tanggalSelesai: e.target.value })} />
+              <Input
+                type="date"
+                value={formData.tanggalSelesai}
+                onChange={(e) =>
+                  setFormData({ ...formData, tanggalSelesai: e.target.value })
+                }
+              />
             </div>
           </div>
           <div className="flex items-center gap-3 pt-2">
-            <input type="checkbox" id="isActive" checked={formData.isActive || false} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
-            <Label htmlFor="isActive" className="mb-0 text-sm">Jadikan Semester Aktif</Label>
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive || false}
+              onChange={(e) =>
+                setFormData({ ...formData, isActive: e.target.checked })
+              }
+              className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+            />
+            <Label htmlFor="isActive" className="mb-0 text-sm">
+              Jadikan Semester Aktif
+            </Label>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="btn-action-sm">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="btn-action-sm"
+            >
               <Icon name="x" size={14} />
               <span className="ml-1">Batal</span>
             </button>
-            <Button size="sm" disabled={isSaving}>{isSaving ? "Menyimpan..." : "Simpan"}</Button>
+            <Button size="sm" disabled={isSaving}>
+              {isSaving ? "Menyimpan..." : "Simpan"}
+            </Button>
           </div>
         </form>
       </Modal>

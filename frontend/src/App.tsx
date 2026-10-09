@@ -67,11 +67,17 @@ export default function App() {
             />
 
             {/* Halaman akademik */}
-            <Route path="/academic/tahun-ajaran" element={<TahunAjaranPage />} />
+            <Route
+              path="/academic/tahun-ajaran"
+              element={<TahunAjaranPage />}
+            />
             <Route path="/academic/semester" element={<SemesterPage />} />
             <Route path="/academic/classes" element={<ClassesPage />} />
             <Route path="/academic/absensi" element={<AbsensiPage />} />
-            <Route path="/academic/mata-pelajaran" element={<MataPelajaranPage />} />
+            <Route
+              path="/academic/mata-pelajaran"
+              element={<MataPelajaranPage />}
+            />
             <Route path="/academic/jadwal" element={<JadwalPage />} />
             <Route path="/academic/konseling" element={<KonselingPage />} />
             {/* Halaman master data */}

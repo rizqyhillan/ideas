@@ -9,7 +9,11 @@ import {
   TahunAjaranItem,
   ClassItem,
 } from "../../services/academic.service";
-import { siswaService, guruService, pegawaiService } from "../../services/master.service";
+import {
+  siswaService,
+  guruService,
+  pegawaiService,
+} from "../../services/master.service";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Home() {
@@ -63,20 +67,33 @@ export default function Home() {
             Dashboard Utama
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data civitas dan kegiatan akademik
+            {user?.namaLengkap || user?.username || "Admin"} — Ringkasan data
+            civitas dan kegiatan akademik
           </p>
         </div>
         {activeTa && (
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 w-fit">
-            <Icon name="calendar" size={14} className="text-emerald-600 dark:text-emerald-400" />
-            <span>Tahun Ajaran Aktif: <strong className="text-gray-900 dark:text-white">{activeTa.nama}</strong></span>
+            <Icon
+              name="calendar"
+              size={14}
+              className="text-emerald-600 dark:text-emerald-400"
+            />
+            <span>
+              Tahun Ajaran Aktif:{" "}
+              <strong className="text-gray-900 dark:text-white">
+                {activeTa.nama}
+              </strong>
+            </span>
           </div>
         )}
       </div>
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Link to="/master/siswa" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
+        <Link
+          to="/master/siswa"
+          className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
+        >
           <div className="flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -93,7 +110,10 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link to="/master/guru" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
+        <Link
+          to="/master/guru"
+          className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
+        >
           <div className="flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -110,7 +130,10 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link to="/master/pegawai" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
+        <Link
+          to="/master/pegawai"
+          className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
+        >
           <div className="flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -127,7 +150,10 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link to="/academic/classes" className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group">
+        <Link
+          to="/academic/classes"
+          className="card-flat p-4 block hover:border-gray-300 dark:hover:border-gray-700 transition-colors group"
+        >
           <div className="flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -153,7 +179,10 @@ export default function Home() {
             <h3 className="text-base font-semibold text-gray-800 dark:text-white">
               Rombongan Belajar Terbaru
             </h3>
-            <Link to="/academic/classes" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">
+            <Link
+              to="/academic/classes"
+              className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400"
+            >
               Lihat Semua →
             </Link>
           </div>
@@ -184,16 +213,29 @@ export default function Home() {
                   </tr>
                 ) : (
                   recentClasses.map((cls) => (
-                    <tr key={cls.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/20">
-                      <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white">{cls.nama}</td>
+                    <tr
+                      key={cls.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/20"
+                    >
+                      <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white">
+                        {cls.nama}
+                      </td>
                       <td className="px-3 py-2.5">Kelas {cls.tingkat}</td>
-                      <td className="px-3 py-2.5">{cls.tahunAjaran?.nama || "-"}</td>
-                      <td className="px-3 py-2.5">{cls.waliKelas?.pegawai?.namaLengkap || "-"}</td>
+                      <td className="px-3 py-2.5">
+                        {cls.tahunAjaran?.nama || "-"}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        {cls.waliKelas?.pegawai?.namaLengkap || "-"}
+                      </td>
                       <td className="px-3 py-2.5 text-center">
                         {cls.statusAktif ? (
-                          <Badge color="success" size="sm">Aktif</Badge>
+                          <Badge color="success" size="sm">
+                            Aktif
+                          </Badge>
                         ) : (
-                          <Badge color="light" size="sm">Nonaktif</Badge>
+                          <Badge color="light" size="sm">
+                            Nonaktif
+                          </Badge>
                         )}
                       </td>
                     </tr>
@@ -206,12 +248,30 @@ export default function Home() {
 
         {/* Quick Actions */}
         <div className="card-flat p-5">
-          <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Aksi Cepat</h3>
+          <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">
+            Aksi Cepat
+          </h3>
           <div className="space-y-1.5">
-            <QuickLink icon="calendar" label="Atur Tahun Ajaran" link="/academic/tahun-ajaran" />
-            <QuickLink icon="school" label="Kelola Rombel" link="/academic/classes" />
-            <QuickLink icon="users" label="Buku Induk Siswa" link="/master/siswa" />
-            <QuickLink icon="award" label="Data Guru & Pegawai" link="/master/guru" />
+            <QuickLink
+              icon="calendar"
+              label="Atur Tahun Ajaran"
+              link="/academic/tahun-ajaran"
+            />
+            <QuickLink
+              icon="school"
+              label="Kelola Rombel"
+              link="/academic/classes"
+            />
+            <QuickLink
+              icon="users"
+              label="Buku Induk Siswa"
+              link="/master/siswa"
+            />
+            <QuickLink
+              icon="award"
+              label="Data Guru & Pegawai"
+              link="/master/guru"
+            />
           </div>
         </div>
       </div>
@@ -219,7 +279,15 @@ export default function Home() {
   );
 }
 
-function QuickLink({ icon, label, link }: { icon: string; label: string; link: string }) {
+function QuickLink({
+  icon,
+  label,
+  link,
+}: {
+  icon: string;
+  label: string;
+  link: string;
+}) {
   return (
     <Link
       to={link}

@@ -36,7 +36,9 @@ export default function AbsensiPage() {
     const now = new Date();
     return now.toISOString().split("T")[0];
   });
-  const [jamPelajaran, setJamPelajaran] = useState<string>("Jam Ke 1 - 2 (07:30 - 09:00)");
+  const [jamPelajaran, setJamPelajaran] = useState<string>(
+    "Jam Ke 1 - 2 (07:30 - 09:00)",
+  );
   const [mataPelajaran, setMataPelajaran] = useState<string>("");
   const [catatanSesi, setCatatanSesi] = useState<string>("");
 
@@ -70,8 +72,10 @@ export default function AbsensiPage() {
           currentGuru = guruRes.data.find(
             (g) =>
               g.pegawai?.userId === user.id ||
-              (g.pegawai?.email && user.email && g.pegawai.email.toLowerCase() === user.email.toLowerCase()) ||
-              g.kodeGuru === user.username
+              (g.pegawai?.email &&
+                user.email &&
+                g.pegawai.email.toLowerCase() === user.email.toLowerCase()) ||
+              g.kodeGuru === user.username,
           );
         }
 
@@ -100,7 +104,9 @@ export default function AbsensiPage() {
   // Daftar kelas yang relevan dengan guru
   const guruClasses = useMemo(() => {
     if (!activeGuru) return classes;
-    const taughtClasses = classes.filter((c) => c.waliKelasId === activeGuru.id);
+    const taughtClasses = classes.filter(
+      (c) => c.waliKelasId === activeGuru.id,
+    );
     return taughtClasses.length > 0 ? taughtClasses : classes;
   }, [activeGuru, classes]);
 
@@ -132,33 +138,39 @@ export default function AbsensiPage() {
         // Cek apakah ada riwayat tersimpan sebelumnya
         const existingSession = await absensiService.getAttendance(
           Number(selectedClassId),
-          tanggal
+          tanggal,
         );
 
-        if (existingSession && existingSession.items && existingSession.items.length > 0) {
+        if (
+          existingSession &&
+          existingSession.items &&
+          existingSession.items.length > 0
+        ) {
           setStudents(existingSession.items);
           if (existingSession.jamKe) setJamPelajaran(existingSession.jamKe);
-          if (existingSession.mataPelajaran) setMataPelajaran(existingSession.mataPelajaran);
+          if (existingSession.mataPelajaran)
+            setMataPelajaran(existingSession.mataPelajaran);
           if (existingSession.catatan) setCatatanSesi(existingSession.catatan);
           setSuccessMsg(
-            `Memuat data absensi tersimpan untuk tanggal ${tanggal} (${existingSession.items.length} siswa).`
+            `Memuat data absensi tersimpan untuk tanggal ${tanggal} (${existingSession.items.length} siswa).`,
           );
         } else {
           // Ambil siswa aktif di kelas dari backend
-          const classStudents: ClassStudentItem[] = await classesService.getClassStudents(
-            Number(selectedClassId)
-          );
+          const classStudents: ClassStudentItem[] =
+            await classesService.getClassStudents(Number(selectedClassId));
 
           // Inisialisasi: DEFAULT SEMUA SISWA ADALAH "hadir"
-          const initialItems: StudentAttendanceItem[] = classStudents.map((cs) => ({
-            siswaId: cs.siswa.id,
-            nisn: cs.siswa.nisn,
-            nis: cs.siswa.nis,
-            namaLengkap: cs.siswa.namaLengkap,
-            jenisKelamin: cs.siswa.jenisKelamin,
-            status: "hadir" as StatusAbsensi,
-            keterangan: "",
-          }));
+          const initialItems: StudentAttendanceItem[] = classStudents.map(
+            (cs) => ({
+              siswaId: cs.siswa.id,
+              nisn: cs.siswa.nisn,
+              nis: cs.siswa.nis,
+              namaLengkap: cs.siswa.namaLengkap,
+              jenisKelamin: cs.siswa.jenisKelamin,
+              status: "hadir" as StatusAbsensi,
+              keterangan: "",
+            }),
+          );
 
           setStudents(initialItems);
         }
@@ -200,7 +212,7 @@ export default function AbsensiPage() {
           status: nextStatus,
           keterangan: nextStatus === "hadir" ? "" : student.keterangan || "",
         };
-      })
+      }),
     );
   };
 
@@ -213,7 +225,7 @@ export default function AbsensiPage() {
           status,
           keterangan: status === "hadir" ? "" : student.keterangan || "",
         };
-      })
+      }),
     );
   };
 
@@ -225,7 +237,7 @@ export default function AbsensiPage() {
           ...student,
           keterangan,
         };
-      })
+      }),
     );
   };
 
@@ -235,7 +247,7 @@ export default function AbsensiPage() {
         ...student,
         status: "hadir",
         keterangan: "",
-      }))
+      })),
     );
     setSuccessMsg("Semua siswa berhasil ditandai 'Hadir'.");
   };
@@ -260,7 +272,8 @@ export default function AbsensiPage() {
         kelasId: Number(selectedClassId),
         kelasNama: activeClass.nama,
         guruId: activeGuru ? activeGuru.id : 0,
-        guruNama: activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar",
+        guruNama:
+          activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar",
         tanggal,
         jamKe: jamPelajaran,
         mataPelajaran: mataPelajaran || "Pelajaran Terjadwal",
@@ -346,7 +359,9 @@ export default function AbsensiPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar"}
+                  {activeGuru?.pegawai?.namaLengkap ||
+                    user?.username ||
+                    "Guru Pengajar"}
                 </h2>
                 {activeGuru?.kodeGuru && (
                   <Badge color="primary" size="sm">
@@ -372,13 +387,16 @@ export default function AbsensiPage() {
               </Label>
               <select
                 value={selectedGuruId}
-                onChange={(e) => setSelectedGuruId(Number(e.target.value) || "")}
+                onChange={(e) =>
+                  setSelectedGuruId(Number(e.target.value) || "")
+                }
                 disabled={loadingInitial}
                 className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
               >
                 {gurus.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.pegawai?.namaLengkap || `Guru #${g.id}`} {g.kodeGuru ? ` (${g.kodeGuru})` : ""}
+                    {g.pegawai?.namaLengkap || `Guru #${g.id}`}{" "}
+                    {g.kodeGuru ? ` (${g.kodeGuru})` : ""}
                   </option>
                 ))}
               </select>
@@ -409,7 +427,8 @@ export default function AbsensiPage() {
             </select>
             {activeClass && (
               <span className="mt-1 block text-xs text-brand-600 dark:text-brand-400">
-                Ruang: {activeClass.ruang || "-"} | Kapasitas: {activeClass.kapasitas || 32} siswa
+                Ruang: {activeClass.ruang || "-"} | Kapasitas:{" "}
+                {activeClass.kapasitas || 32} siswa
               </span>
             )}
           </div>
@@ -457,7 +476,9 @@ export default function AbsensiPage() {
       {/* Ringkasan Kehadiran Realtime (Metric Cards) */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Siswa</p>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            Total Siswa
+          </p>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-bold text-gray-800 dark:text-white">
               {stats.total}
@@ -468,9 +489,13 @@ export default function AbsensiPage() {
 
         <div className="rounded-xl border border-success-200 bg-success-50/50 p-4 shadow-theme-xs dark:border-success-900/30 dark:bg-success-950/20">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-success-700 dark:text-success-400">Hadir</p>
+            <p className="text-xs font-medium text-success-700 dark:text-success-400">
+              Hadir
+            </p>
             <Badge color="success" size="sm">
-              {stats.total > 0 ? `${Math.round((stats.hadir / stats.total) * 100)}%` : "0%"}
+              {stats.total > 0
+                ? `${Math.round((stats.hadir / stats.total) * 100)}%`
+                : "0%"}
             </Badge>
           </div>
           <div className="mt-2">
@@ -482,7 +507,9 @@ export default function AbsensiPage() {
 
         <div className="rounded-xl border border-warning-200 bg-warning-50/50 p-4 shadow-theme-xs dark:border-warning-900/30 dark:bg-warning-950/20">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-warning-700 dark:text-warning-400">Sakit (S)</p>
+            <p className="text-xs font-medium text-warning-700 dark:text-warning-400">
+              Sakit (S)
+            </p>
             <span className="h-2 w-2 rounded-full bg-warning-500"></span>
           </div>
           <div className="mt-2">
@@ -494,7 +521,9 @@ export default function AbsensiPage() {
 
         <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-theme-xs dark:border-blue-900/30 dark:bg-blue-950/20">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-blue-700 dark:text-blue-400">Izin (I)</p>
+            <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
+              Izin (I)
+            </p>
             <span className="h-2 w-2 rounded-full bg-blue-500"></span>
           </div>
           <div className="mt-2">
@@ -506,7 +535,9 @@ export default function AbsensiPage() {
 
         <div className="rounded-xl border border-error-200 bg-error-50/50 p-4 shadow-theme-xs dark:border-error-900/30 dark:bg-error-950/20">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-error-700 dark:text-error-400">Alpa (A)</p>
+            <p className="text-xs font-medium text-error-700 dark:text-error-400">
+              Alpa (A)
+            </p>
             <span className="h-2 w-2 rounded-full bg-error-500"></span>
           </div>
           <div className="mt-2">
@@ -526,8 +557,11 @@ export default function AbsensiPage() {
               Daftar Siswa Kelas {activeClass?.nama || ""}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Menampilkan {filteredStudents.length} siswa di kelas yang sedang diajar.
-              Tekan tombol pada tulisan <strong className="text-success-600 font-semibold">"Hadir"</strong>{" "}
+              Menampilkan {filteredStudents.length} siswa di kelas yang sedang
+              diajar. Tekan tombol pada tulisan{" "}
+              <strong className="text-success-600 font-semibold">
+                "Hadir"
+              </strong>{" "}
               untuk menandai siswa tidak masuk.
             </p>
           </div>
@@ -538,7 +572,9 @@ export default function AbsensiPage() {
               size="sm"
               onClick={handleMarkAllHadir}
               disabled={loadingStudents || students.length === 0}
-              startIcon={<Icon name="check" className="h-4 w-4 text-success-500" />}
+              startIcon={
+                <Icon name="check" className="h-4 w-4 text-success-500" />
+              }
               className="w-full sm:w-auto justify-center"
             >
               Tandai Semua Hadir
@@ -621,14 +657,20 @@ export default function AbsensiPage() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loadingStudents ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan={6}
+                    className="py-12 text-center text-gray-500 dark:text-gray-400"
+                  >
                     <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>
                     <p className="mt-2 text-xs">Memuat daftar siswa kelas...</p>
                   </td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan={6}
+                    className="py-12 text-center text-gray-500 dark:text-gray-400"
+                  >
                     <p className="text-sm">Tidak ada data siswa ditemukan.</p>
                     <p className="text-xs text-gray-400">
                       Pastikan kelas memiliki siswa aktif yang terdaftar.
@@ -650,8 +692,8 @@ export default function AbsensiPage() {
                           ? isSakit
                             ? "bg-warning-50/20 dark:bg-warning-950/10"
                             : isIzin
-                            ? "bg-blue-50/20 dark:bg-blue-950/10"
-                            : "bg-error-50/20 dark:bg-error-950/10"
+                              ? "bg-blue-50/20 dark:bg-blue-950/10"
+                              : "bg-error-50/20 dark:bg-error-950/10"
                           : ""
                       }`}
                     >
@@ -662,7 +704,9 @@ export default function AbsensiPage() {
                       <td className="px-5 py-3.5 font-mono text-xs text-gray-500 dark:text-gray-400">
                         <div>{student.nisn}</div>
                         {student.nis && (
-                          <span className="text-[10px] text-gray-400">NIS: {student.nis}</span>
+                          <span className="text-[10px] text-gray-400">
+                            NIS: {student.nis}
+                          </span>
                         )}
                       </td>
 
@@ -692,16 +736,20 @@ export default function AbsensiPage() {
                               isHadir
                                 ? "border border-success-400 bg-success-500 text-white hover:bg-success-600 dark:border-success-500 dark:bg-success-600"
                                 : isSakit
-                                ? "border border-warning-400 bg-warning-500 text-white hover:bg-warning-600"
-                                : isIzin
-                                ? "border border-blue-400 bg-blue-500 text-white hover:bg-blue-600"
-                                : "border border-error-400 bg-error-500 text-white hover:bg-error-600"
+                                  ? "border border-warning-400 bg-warning-500 text-white hover:bg-warning-600"
+                                  : isIzin
+                                    ? "border border-blue-400 bg-blue-500 text-white hover:bg-blue-600"
+                                    : "border border-error-400 bg-error-500 text-white hover:bg-error-600"
                             }`}
                           >
-                            {isHadir && <Icon name="check" className="h-3.5 w-3.5" />}
+                            {isHadir && (
+                              <Icon name="check" className="h-3.5 w-3.5" />
+                            )}
                             {isSakit && <span className="font-bold">S</span>}
                             {isIzin && <span className="font-bold">I</span>}
-                            {isAlpa && <Icon name="x" className="h-3.5 w-3.5" />}
+                            {isAlpa && (
+                              <Icon name="x" className="h-3.5 w-3.5" />
+                            )}
                             <span className="capitalize">{student.status}</span>
                             <span className="text-[10px] opacity-75 group-hover:opacity-100">
                               (Tekan)
@@ -711,7 +759,12 @@ export default function AbsensiPage() {
                           <div className="flex items-center gap-1 text-[11px]">
                             <button
                               type="button"
-                              onClick={() => handleSetSpecificStatus(student.siswaId, "hadir")}
+                              onClick={() =>
+                                handleSetSpecificStatus(
+                                  student.siswaId,
+                                  "hadir",
+                                )
+                              }
                               className={`rounded px-1.5 py-0.5 font-medium transition ${
                                 isHadir
                                   ? "bg-success-100 font-bold text-success-800 dark:bg-success-900/40 dark:text-success-300"
@@ -721,10 +774,17 @@ export default function AbsensiPage() {
                             >
                               H
                             </button>
-                            <span className="text-gray-300 dark:text-gray-700">|</span>
+                            <span className="text-gray-300 dark:text-gray-700">
+                              |
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleSetSpecificStatus(student.siswaId, "sakit")}
+                              onClick={() =>
+                                handleSetSpecificStatus(
+                                  student.siswaId,
+                                  "sakit",
+                                )
+                              }
                               className={`rounded px-1.5 py-0.5 font-medium transition ${
                                 isSakit
                                   ? "bg-warning-100 font-bold text-warning-800 dark:bg-warning-900/40 dark:text-warning-300"
@@ -734,10 +794,14 @@ export default function AbsensiPage() {
                             >
                               S
                             </button>
-                            <span className="text-gray-300 dark:text-gray-700">|</span>
+                            <span className="text-gray-300 dark:text-gray-700">
+                              |
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleSetSpecificStatus(student.siswaId, "izin")}
+                              onClick={() =>
+                                handleSetSpecificStatus(student.siswaId, "izin")
+                              }
                               className={`rounded px-1.5 py-0.5 font-medium transition ${
                                 isIzin
                                   ? "bg-blue-100 font-bold text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
@@ -747,10 +811,14 @@ export default function AbsensiPage() {
                             >
                               I
                             </button>
-                            <span className="text-gray-300 dark:text-gray-700">|</span>
+                            <span className="text-gray-300 dark:text-gray-700">
+                              |
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleSetSpecificStatus(student.siswaId, "alpa")}
+                              onClick={() =>
+                                handleSetSpecificStatus(student.siswaId, "alpa")
+                              }
                               className={`rounded px-1.5 py-0.5 font-medium transition ${
                                 isAlpa
                                   ? "bg-error-100 font-bold text-error-800 dark:bg-error-900/40 dark:text-error-300"
@@ -771,14 +839,17 @@ export default function AbsensiPage() {
                               type="text"
                               value={student.keterangan || ""}
                               onChange={(e) =>
-                                handleUpdateKeterangan(student.siswaId, e.target.value)
+                                handleUpdateKeterangan(
+                                  student.siswaId,
+                                  e.target.value,
+                                )
                               }
                               placeholder={
                                 isSakit
                                   ? "Alasan sakit (cth: Demam, Surat dokter)..."
                                   : isIzin
-                                  ? "Alasan izin (cth: Keperluan keluarga)..."
-                                  : "Alasan alpa (tanpa kabar)..."
+                                    ? "Alasan izin (cth: Keperluan keluarga)..."
+                                    : "Alasan alpa (tanpa kabar)..."
                               }
                               className="h-8 w-full rounded-md border border-gray-300 bg-white px-2.5 text-xs text-gray-800 focus:border-brand-500 focus:outline-hidden dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                             />
@@ -807,7 +878,9 @@ export default function AbsensiPage() {
           ) : filteredStudents.length === 0 ? (
             <div className="py-8 text-center text-gray-500 dark:text-gray-400">
               <p className="text-sm">Tidak ada data siswa ditemukan.</p>
-              <p className="text-xs text-gray-400 mt-1">Pastikan kelas memiliki siswa aktif.</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Pastikan kelas memiliki siswa aktif.
+              </p>
             </div>
           ) : (
             filteredStudents.map((student, idx) => {
@@ -823,10 +896,10 @@ export default function AbsensiPage() {
                     isHadir
                       ? "bg-white border-gray-200 dark:bg-gray-800/40 dark:border-gray-700"
                       : isSakit
-                      ? "bg-warning-50/40 border-warning-200 dark:bg-warning-950/20 dark:border-warning-900/40"
-                      : isIzin
-                      ? "bg-blue-50/40 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/40"
-                      : "bg-error-50/40 border-error-200 dark:bg-error-950/20 dark:border-error-900/40"
+                        ? "bg-warning-50/40 border-warning-200 dark:bg-warning-950/20 dark:border-warning-900/40"
+                        : isIzin
+                          ? "bg-blue-50/40 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/40"
+                          : "bg-error-50/40 border-error-200 dark:bg-error-950/20 dark:border-error-900/40"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2.5">
@@ -839,7 +912,8 @@ export default function AbsensiPage() {
                           {student.namaLengkap}
                         </h4>
                         <span className="text-[11px] text-gray-400 font-mono">
-                          NISN: {student.nisn} {student.nis ? `• NIS: ${student.nis}` : ""}
+                          NISN: {student.nisn}{" "}
+                          {student.nis ? `• NIS: ${student.nis}` : ""}
                         </span>
                       </div>
                     </div>
@@ -858,7 +932,9 @@ export default function AbsensiPage() {
                   <div className="grid grid-cols-4 gap-1.5 mb-2">
                     <button
                       type="button"
-                      onClick={() => handleSetSpecificStatus(student.siswaId, "hadir")}
+                      onClick={() =>
+                        handleSetSpecificStatus(student.siswaId, "hadir")
+                      }
                       className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isHadir
                           ? "bg-success-600 text-white border-success-600 shadow-xs"
@@ -870,7 +946,9 @@ export default function AbsensiPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSetSpecificStatus(student.siswaId, "sakit")}
+                      onClick={() =>
+                        handleSetSpecificStatus(student.siswaId, "sakit")
+                      }
                       className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isSakit
                           ? "bg-warning-500 text-white border-warning-500 shadow-xs"
@@ -882,7 +960,9 @@ export default function AbsensiPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSetSpecificStatus(student.siswaId, "izin")}
+                      onClick={() =>
+                        handleSetSpecificStatus(student.siswaId, "izin")
+                      }
                       className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isIzin
                           ? "bg-blue-600 text-white border-blue-600 shadow-xs"
@@ -894,7 +974,9 @@ export default function AbsensiPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSetSpecificStatus(student.siswaId, "alpa")}
+                      onClick={() =>
+                        handleSetSpecificStatus(student.siswaId, "alpa")
+                      }
                       className={`py-2 px-1 rounded-lg border transition active:scale-95 flex items-center justify-center ${
                         isAlpa
                           ? "bg-error-600 text-white border-error-600 shadow-xs"
@@ -918,8 +1000,8 @@ export default function AbsensiPage() {
                         isSakit
                           ? "Alasan sakit (cth: Demam, surat dokter)..."
                           : isIzin
-                          ? "Alasan izin (cth: Acara keluarga)..."
-                          : "Alasan tanpa keterangan (alpa)..."
+                            ? "Alasan izin (cth: Acara keluarga)..."
+                            : "Alasan tanpa keterangan (alpa)..."
                       }
                       className="h-8 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-xs text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                     />
@@ -946,7 +1028,9 @@ export default function AbsensiPage() {
               variant="outline"
               onClick={handleMarkAllHadir}
               disabled={students.length === 0}
-              startIcon={<Icon name="check" className="h-4 w-4 text-success-500" />}
+              startIcon={
+                <Icon name="check" className="h-4 w-4 text-success-500" />
+              }
             >
               Hadir Semua
             </Button>

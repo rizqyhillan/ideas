@@ -31,7 +31,7 @@ export const userService = {
 
     const qs = searchParams.toString();
     const res = await apiFetch<ApiResponse<UserProfile[]>>(
-      `/users${qs ? `?${qs}` : ""}`
+      `/users${qs ? `?${qs}` : ""}`,
     );
     return { data: res.data || [], meta: res.meta };
   },
@@ -49,7 +49,10 @@ export const userService = {
     return res.data!;
   },
 
-  async update(id: number, payload: Partial<UserProfile>): Promise<UserProfile> {
+  async update(
+    id: number,
+    payload: Partial<UserProfile>,
+  ): Promise<UserProfile> {
     const res = await apiFetch<ApiResponse<UserProfile>>(`/users/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),

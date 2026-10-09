@@ -25,7 +25,8 @@ export function clearStoredAuth() {
 }
 
 export function getStoredUser<T>(): T | null {
-  const userJson = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
+  const userJson =
+    localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
   if (!userJson) return null;
   try {
     return JSON.parse(userJson) as T;
@@ -103,7 +104,9 @@ export async function apiFetch<T = any>(
     return data as T;
   } catch (error: any) {
     if (error.name === "TypeError" && error.message.includes("fetch")) {
-      throw new Error("Gagal terhubung ke server backend. Pastikan server backend sedang berjalan.");
+      throw new Error(
+        "Gagal terhubung ke server backend. Pastikan server backend sedang berjalan.",
+      );
     }
     throw error;
   }

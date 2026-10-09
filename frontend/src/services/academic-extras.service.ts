@@ -46,13 +46,17 @@ export const semesterService = {
     if (params?.page) sp.append("page", String(params.page));
     if (params?.limit) sp.append("limit", String(params.limit));
     if (params?.search) sp.append("search", params.search);
-    if (params?.tahunAjaranId) sp.append("tahunAjaranId", String(params.tahunAjaranId));
+    if (params?.tahunAjaranId)
+      sp.append("tahunAjaranId", String(params.tahunAjaranId));
     if (params?.jenis) sp.append("jenis", params.jenis);
-    if (params?.isActive !== undefined) sp.append("isActive", String(params.isActive));
+    if (params?.isActive !== undefined)
+      sp.append("isActive", String(params.isActive));
     if (params?.sort) sp.append("sort", params.sort);
     if (params?.order) sp.append("order", params.order);
     const qs = sp.toString();
-    const res = await apiFetch<ApiResponse<SemesterItem[]>>(`/semester${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch<ApiResponse<SemesterItem[]>>(
+      `/semester${qs ? `?${qs}` : ""}`,
+    );
     return { data: res.data || [], meta: res.meta };
   },
 
@@ -69,7 +73,10 @@ export const semesterService = {
     return res.data!;
   },
 
-  async update(id: number, payload: UpdateSemesterPayload): Promise<SemesterItem> {
+  async update(
+    id: number,
+    payload: UpdateSemesterPayload,
+  ): Promise<SemesterItem> {
     const res = await apiFetch<ApiResponse<SemesterItem>>(`/semester/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
@@ -122,32 +129,48 @@ export const mataPelajaranService = {
     if (params?.page) sp.append("page", String(params.page));
     if (params?.limit) sp.append("limit", String(params.limit));
     if (params?.search) sp.append("search", params.search);
-    if (params?.isActive !== undefined) sp.append("isActive", String(params.isActive));
+    if (params?.isActive !== undefined)
+      sp.append("isActive", String(params.isActive));
     if (params?.sort) sp.append("sort", params.sort);
     if (params?.order) sp.append("order", params.order);
     const qs = sp.toString();
-    const res = await apiFetch<ApiResponse<MataPelajaranItem[]>>(`/mata-pelajaran${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch<ApiResponse<MataPelajaranItem[]>>(
+      `/mata-pelajaran${qs ? `?${qs}` : ""}`,
+    );
     return { data: res.data || [], meta: res.meta };
   },
 
   async getById(id: number): Promise<MataPelajaranItem> {
-    const res = await apiFetch<ApiResponse<MataPelajaranItem>>(`/mata-pelajaran/${id}`);
+    const res = await apiFetch<ApiResponse<MataPelajaranItem>>(
+      `/mata-pelajaran/${id}`,
+    );
     return res.data!;
   },
 
-  async create(payload: CreateMataPelajaranPayload): Promise<MataPelajaranItem> {
-    const res = await apiFetch<ApiResponse<MataPelajaranItem>>("/mata-pelajaran", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+  async create(
+    payload: CreateMataPelajaranPayload,
+  ): Promise<MataPelajaranItem> {
+    const res = await apiFetch<ApiResponse<MataPelajaranItem>>(
+      "/mata-pelajaran",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
     return res.data!;
   },
 
-  async update(id: number, payload: UpdateMataPelajaranPayload): Promise<MataPelajaranItem> {
-    const res = await apiFetch<ApiResponse<MataPelajaranItem>>(`/mata-pelajaran/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
+  async update(
+    id: number,
+    payload: UpdateMataPelajaranPayload,
+  ): Promise<MataPelajaranItem> {
+    const res = await apiFetch<ApiResponse<MataPelajaranItem>>(
+      `/mata-pelajaran/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    );
     return res.data!;
   },
 
@@ -159,7 +182,8 @@ export const mataPelajaranService = {
 // ===========================================================================
 // JADWAL PELAJARAN
 // ===========================================================================
-export type NamaHari = "senin" | "selasa" | "rabu" | "kamis" | "jumat" | "sabtu";
+export type NamaHari =
+  "senin" | "selasa" | "rabu" | "kamis" | "jumat" | "sabtu";
 
 export interface JadwalItem {
   id: number;
@@ -220,11 +244,14 @@ export const jadwalService = {
     if (params?.guruId) sp.append("guruId", String(params.guruId));
     if (params?.semesterId) sp.append("semesterId", String(params.semesterId));
     if (params?.hari) sp.append("hari", params.hari);
-    if (params?.isActive !== undefined) sp.append("isActive", String(params.isActive));
+    if (params?.isActive !== undefined)
+      sp.append("isActive", String(params.isActive));
     if (params?.sort) sp.append("sort", params.sort);
     if (params?.order) sp.append("order", params.order);
     const qs = sp.toString();
-    const res = await apiFetch<ApiResponse<JadwalItem[]>>(`/jadwal${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch<ApiResponse<JadwalItem[]>>(
+      `/jadwal${qs ? `?${qs}` : ""}`,
+    );
     return { data: res.data || [], meta: res.meta };
   },
 
@@ -272,7 +299,13 @@ export interface CatatanKonselingItem {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
-  siswa?: { id: number; nisn: string; namaLengkap: string; foto?: string; jenisKelamin: "L" | "P" };
+  siswa?: {
+    id: number;
+    nisn: string;
+    namaLengkap: string;
+    foto?: string;
+    jenisKelamin: "L" | "P";
+  };
   guruBk?: { id: number; pegawai: { namaLengkap: string } };
 }
 
@@ -318,28 +351,43 @@ export const konselingService = {
     if (params?.sort) sp.append("sort", params.sort);
     if (params?.order) sp.append("order", params.order);
     const qs = sp.toString();
-    const res = await apiFetch<ApiResponse<CatatanKonselingItem[]>>(`/konseling${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch<ApiResponse<CatatanKonselingItem[]>>(
+      `/konseling${qs ? `?${qs}` : ""}`,
+    );
     return { data: res.data || [], meta: res.meta };
   },
 
   async getById(id: number): Promise<CatatanKonselingItem> {
-    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>(`/konseling/${id}`);
+    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>(
+      `/konseling/${id}`,
+    );
     return res.data!;
   },
 
-  async create(payload: CreateCatatanKonselingPayload): Promise<CatatanKonselingItem> {
-    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>("/konseling", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
+  async create(
+    payload: CreateCatatanKonselingPayload,
+  ): Promise<CatatanKonselingItem> {
+    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>(
+      "/konseling",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
     return res.data!;
   },
 
-  async update(id: number, payload: UpdateCatatanKonselingPayload): Promise<CatatanKonselingItem> {
-    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>(`/konseling/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
+  async update(
+    id: number,
+    payload: UpdateCatatanKonselingPayload,
+  ): Promise<CatatanKonselingItem> {
+    const res = await apiFetch<ApiResponse<CatatanKonselingItem>>(
+      `/konseling/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    );
     return res.data!;
   },
 
@@ -348,20 +396,36 @@ export const konselingService = {
   },
 
   async getBySiswa(siswaId: number): Promise<CatatanKonselingItem[]> {
-    const res = await apiFetch<ApiResponse<CatatanKonselingItem[]>>(`/konseling?siswaId=${siswaId}`);
+    const res = await apiFetch<ApiResponse<CatatanKonselingItem[]>>(
+      `/konseling?siswaId=${siswaId}`,
+    );
     return res.data || [];
   },
 
-  async getSiswaList(search?: string): Promise<{ id: number; nisn: string; namaLengkap: string; foto?: string; jenisKelamin: "L" | "P" }[]> {
+  async getSiswaList(
+    search?: string,
+  ): Promise<
+    {
+      id: number;
+      nisn: string;
+      namaLengkap: string;
+      foto?: string;
+      jenisKelamin: "L" | "P";
+    }[]
+  > {
     const sp = new URLSearchParams();
     if (search) sp.append("search", search);
     const qs = sp.toString();
-    const res = await apiFetch<ApiResponse<any[]>>(`/siswa${qs ? `?${qs}` : ""}`);
+    const res = await apiFetch<ApiResponse<any[]>>(
+      `/siswa${qs ? `?${qs}` : ""}`,
+    );
     const filtered = (res.data || []).filter((s: any) => !s.deletedAt);
     return filtered;
   },
 
-  async getGuruBKLIST(): Promise<{ id: number; pegawai: { namaLengkap: string } }[]> {
+  async getGuruBKLIST(): Promise<
+    { id: number; pegawai: { namaLengkap: string } }[]
+  > {
     const res = await apiFetch<ApiResponse<any[]>>(`/guru?role=bk`);
     return res.data || [];
   },

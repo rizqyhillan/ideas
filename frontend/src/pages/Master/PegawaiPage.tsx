@@ -294,9 +294,13 @@ export default function PegawaiPage() {
         {/* Mobile Cards View */}
         <div className="block md:hidden space-y-3 mt-4">
           {loading ? (
-            <div className="py-8 text-center text-gray-400">Memuat data pegawai...</div>
+            <div className="py-8 text-center text-gray-400">
+              Memuat data pegawai...
+            </div>
           ) : data.length === 0 ? (
-            <div className="py-8 text-center text-gray-400">Belum ada data pegawai.</div>
+            <div className="py-8 text-center text-gray-400">
+              Belum ada data pegawai.
+            </div>
           ) : (
             data.map((item) => (
               <div
@@ -305,7 +309,9 @@ export default function PegawaiPage() {
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{item.namaLengkap}</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {item.namaLengkap}
+                    </h4>
                     <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                       NIP: {item.nip || "-"}
                     </span>
@@ -322,18 +328,29 @@ export default function PegawaiPage() {
                 </div>
                 <div className="text-xs mb-3">
                   <span className="text-gray-400">Jabatan:</span>
-                  <span className="text-gray-700 dark:text-gray-300">{item.jabatan || "-"}</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item.jabatan || "-"}
+                  </span>
                   {item.nuptk && (
-                    <span className="text-gray-400 block">NUPTK: {item.nuptk}</span>
+                    <span className="text-gray-400 block">
+                      NUPTK: {item.nuptk}
+                    </span>
                   )}
                 </div>
                 <div className="text-xs mb-3">
                   <span className="text-gray-400">Kontak:</span>
-                  <span className="text-gray-700 dark:text-gray-300">{item.noTelepon || "-"}</span>
-                  <span className="text-gray-400 block">{item.email || ""}</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item.noTelepon || "-"}
+                  </span>
+                  <span className="text-gray-400 block">
+                    {item.email || ""}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <Badge color={item.statusAktif ? "success" : "light"} size="sm">
+                  <Badge
+                    color={item.statusAktif ? "success" : "light"}
+                    size="sm"
+                  >
                     {item.statusAktif ? "Aktif" : "Nonaktif"}
                   </Badge>
                   <div className="flex gap-2">
@@ -378,7 +395,10 @@ export default function PegawaiPage() {
           </div>
         )}
 
-        <form onSubmit={handleSave} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
+        <form
+          onSubmit={handleSave}
+          className="space-y-4 max-h-[70vh] overflow-y-auto px-1"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>NIP (Nomor Induk Pegawai)</Label>

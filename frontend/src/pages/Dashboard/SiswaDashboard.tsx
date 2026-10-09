@@ -11,7 +11,9 @@ export default function SiswaDashboard() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard Siswa</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Dashboard Siswa
+        </h1>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           Cek kehadiran, lihat data kelas, dan kelola profil
         </p>
@@ -31,7 +33,9 @@ export default function SiswaDashboard() {
               <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
                 {email}
               </span>
-              <Badge color="success" size="sm">Siswa</Badge>
+              <Badge color="success" size="sm">
+                Siswa
+              </Badge>
             </div>
           </div>
         </div>
@@ -70,14 +74,17 @@ export default function SiswaDashboard() {
               <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
                 Data Kelas
               </h3>
-              <p className="text-xs text-gray-400">Informasi rombongan belajar</p>
+              <p className="text-xs text-gray-400">
+                Informasi rombongan belajar
+              </p>
             </div>
           </div>
           <div className="p-4 rounded-md bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800">
             <div className="text-center py-2">
               <p className="text-2xl font-bold text-gray-400">-</p>
               <p className="text-xs text-gray-400 mt-1">
-                Informasi kelas akan ditampilkan setelah dikonfigurasi oleh admin.
+                Informasi kelas akan ditampilkan setelah dikonfigurasi oleh
+                admin.
               </p>
             </div>
           </div>
@@ -88,25 +95,53 @@ export default function SiswaDashboard() {
       <div className="mb-6 card-flat p-5 border-l-4 border-l-success-500 bg-success-50/30 dark:bg-success-950/10">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">Cek Absensi Hari Ini</h3>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              Cek Absensi Hari Ini
+            </h3>
             <p className="text-sm text-gray-500 mt-0.5">
               Apakah kamu sudah menandatangani kehadiran hari ini?
             </p>
           </div>
           <div className="icon-box bg-white/80 dark:bg-gray-800/80 shadow-sm">
-            <Icon name="clipboard" size={20} className="text-success-600 dark:text-success-400" />
+            <Icon
+              name="clipboard"
+              size={20}
+              className="text-success-600 dark:text-success-400"
+            />
           </div>
         </div>
       </div>
 
       {/* Menu Cepat */}
       <div className="card-flat p-5">
-        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">Menu Cepat</h3>
+        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-4">
+          Menu Cepat
+        </h3>
         <div className="grid grid-cols-2 gap-2.5">
-          <QuickLink icon="clipboard" label="Cek Absensi" sub="Lihat status kehadiran" link="/academic/absensi" />
-          <QuickLink icon="school" label="Data Kelas" sub="Lihat rombongan belajar" link="/academic/classes" />
-          <QuickLink icon="calendar" label="Tahun Ajaran" sub="Periode akademik" link="/academic/tahun-ajaran" />
-          <QuickLink icon="user" label="Profil Saya" sub="Edit data pribadi" link="/profile" />
+          <QuickLink
+            icon="clipboard"
+            label="Cek Absensi"
+            sub="Lihat status kehadiran"
+            link="/academic/absensi"
+          />
+          <QuickLink
+            icon="school"
+            label="Data Kelas"
+            sub="Lihat rombongan belajar"
+            link="/academic/classes"
+          />
+          <QuickLink
+            icon="calendar"
+            label="Tahun Ajaran"
+            sub="Periode akademik"
+            link="/academic/tahun-ajaran"
+          />
+          <QuickLink
+            icon="user"
+            label="Profil Saya"
+            sub="Edit data pribadi"
+            link="/profile"
+          />
         </div>
       </div>
     </>
@@ -133,7 +168,9 @@ function QuickLink({
         <CardIcon name={icon} size={18} />
       </div>
       <div>
-        <div className="font-semibold text-gray-900 dark:text-white text-xs">{label}</div>
+        <div className="font-semibold text-gray-900 dark:text-white text-xs">
+          {label}
+        </div>
         <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>
       </div>
     </Link>

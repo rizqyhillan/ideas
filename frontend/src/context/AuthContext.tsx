@@ -5,10 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import {
-  authService,
-  UserProfile,
-} from "../services/auth.service";
+import { authService, UserProfile } from "../services/auth.service";
 import {
   getStoredToken,
   getStoredUser,
@@ -22,7 +19,11 @@ type AuthContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string, remember?: boolean) => Promise<void>;
+  signIn: (
+    email: string,
+    password: string,
+    remember?: boolean,
+  ) => Promise<void>;
   signOut: () => void;
   refreshUser: () => Promise<void>;
 };
@@ -31,7 +32,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => getStoredToken());
-  const [user, setUser] = useState<UserProfile | null>(() => getStoredUser<UserProfile>());
+  const [user, setUser] = useState<UserProfile | null>(() =>
+    getStoredUser<UserProfile>(),
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const isAuthenticated = Boolean(token);
@@ -48,7 +51,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const currentUser = await authService.me();
         setUser(currentUser);
         // Persist updated user details
-        const isLocalStorage = Boolean(localStorage.getItem("ideas_access_token"));
+        const isLocalStorage = Boolean(
+          localStorage.getItem("ideas_access_token"),
+        );
         setStoredUser(currentUser, isLocalStorage);
       } catch (error) {
         console.error("Auth session expired or invalid:", error);
@@ -82,7 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const currentUser = await authService.me();
       setUser(currentUser);
-      const isLocalStorage = Boolean(localStorage.getItem("ideas_access_token"));
+      const isLocalStorage = Boolean(
+        localStorage.getItem("ideas_access_token"),
+      );
       setStoredUser(currentUser, isLocalStorage);
     } catch (error) {
       console.error("Failed to refresh user:", error);
@@ -111,11 +118,13 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");
   const rolesFromRelations =
-    context.user?.userRoles2?.map((r: any) => r.role?.code).filter(Boolean) || [];
+    context.user?.userRoles2?.map((r: any) => r.role?.code).filter(Boolean) ||
+    [];
   const permissionsFromRelations =
     context.user?.userRoles2
-      ?.flatMap((r: any) =>
-        r.role?.rolePermissions?.map((rp: any) => rp.permission?.code) || [],
+      ?.flatMap(
+        (r: any) =>
+          r.role?.rolePermissions?.map((rp: any) => rp.permission?.code) || [],
       )
       .filter(Boolean) || [];
   const userWithRoles = {
