@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
+// @ts-ignore
 import { Icon } from "../../components/icons/ideas-icon";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+// @ts-ignore
 import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
+// @ts-ignore
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
+// @ts-ignore
 import Label from "../../components/form/Label";
 import {
   permissionService,
@@ -27,7 +31,11 @@ export default function PermissionsPage() {
       } else {
         res = await permissionService.getAll();
       }
-      setData(res.data);
+      if (res && "data" in res) {
+        setData(res.data as PermissionItem[]);
+      } else if (Array.isArray(res)) {
+        setData(res);
+      }
     } catch (err: any) {
       // handle error silently
     } finally {

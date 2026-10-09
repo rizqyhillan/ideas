@@ -944,7 +944,7 @@ export default function AbsensiPage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={handleMarkAllPresent}
+              onClick={handleMarkAllHadir}
               disabled={students.length === 0}
               startIcon={<Icon name="check" className="h-4 w-4 text-success-500" />}
             >

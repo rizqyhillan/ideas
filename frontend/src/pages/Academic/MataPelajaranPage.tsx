@@ -117,7 +117,7 @@ export default function MataPelajaranPage() {
           {errorMsg}
         </div>
       )}
-      <div className="card-flat">
+      <div className="card-flat lg:p-6 p-4">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Mata Pelajaran</h3>

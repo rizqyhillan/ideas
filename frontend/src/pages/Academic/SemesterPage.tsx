@@ -141,7 +141,7 @@ export default function SemesterPage() {
         </div>
       )}
 
-      <div className="card-flat">
+      <div className="card-flat lg:p-6 p-4">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Daftar Semester</h3>
@@ -185,7 +185,7 @@ export default function SemesterPage() {
                       {tahunAjaranList.find((t) => t.id === item.tahunAjaranId)?.nama || "-"}
                     </td>
                     <td className="px-4 py-3.5">
-                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm" rounded="md">
+                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm">
                         {item.jenis === "ganjil" ? "Ganjil" : "Genap"}
                       </Badge>
                     </td>
@@ -193,9 +193,9 @@ export default function SemesterPage() {
                     <td className="px-4 py-3.5">{item.tanggalSelesai?.split("T")[0] || "-"}</td>
                     <td className="px-4 py-3.5 text-center">
                       {item.isActive ? (
-                        <Badge color="success" size="sm" rounded="md">Aktif</Badge>
+                        <Badge color="success" size="sm">Aktif</Badge>
                       ) : (
-                        <Badge color="light" size="sm" rounded="md">Nonaktif</Badge>
+                        <Badge color="light" size="sm">Nonaktif</Badge>
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-center">
@@ -231,10 +231,10 @@ export default function SemesterPage() {
                       <span className="font-bold text-gray-900 dark:text-white">
                         {tahunAjaranList.find((t) => t.id === item.tahunAjaranId)?.nama || "-"}
                       </span>
-                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm" rounded="md">
+                      <Badge color={item.jenis === "ganjil" ? "info" : "warning"} size="sm">
                         {item.jenis === "ganjil" ? "Ganjil" : "Genap"}
                       </Badge>
-                      {item.isActive && <Badge color="success" size="sm" rounded="md">Aktif</Badge>}
+                      {item.isActive && <Badge color="success" size="sm">Aktif</Badge>}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
                       <p>Mulai: {item.tanggalMulai?.split("T")[0] || "-"}</p>

@@ -105,7 +105,7 @@ export default function GuruDashboard() {
         />
         <StatCard
           label="Status"
-          value={myGuru?.aktif ? "Aktif" : "Nonaktif"}
+          value={myGuru?.pegawai?.statusAktif ? "Aktif" : "Nonaktif"}
           icon="activity"
           sub="Status akun guru"
         />

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation } from "react-router";
 import { Icon } from "../components/icons/ideas-icon";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import { useAuth } from "../context/AuthContext";
 
 type NavItem = {
   name: string;
@@ -45,6 +46,34 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
+  const { user } = useAuth();
+  
+  const filteredNavItems = useMemo(() => {
+    // Cloning
+    return navItems.map(item => {
+      // Guru/Siswa seharusnya tidak punya askes Master Civitas dan sejenisnya
+      if (item.name === "Master Civitas") {
+        const isAdmin = user?.roles?.includes("admin") || user?.userRoles2?.[0]?.role?.name === "admin";
+        if (!isAdmin) return null;
+      }
+      if (item.name === "Akademik") {
+        if (!user) return null;
+        
+        let allowedSubItems = item.subItems;
+        const roleStr = user?.roles?.[0] || user?.userRoles2?.[0]?.role?.name || "";
+        
+        if (roleStr === "guru") {
+          allowedSubItems = item.subItems?.filter(sub => ["Jadwal Pelajaran", "Absensi Siswa", "Konseling (BK)"].includes(sub.name));
+        } else if (roleStr === "siswa") {
+          allowedSubItems = item.subItems?.filter(sub => ["Jadwal Pelajaran", "Absensi Siswa"].includes(sub.name));
+        }
+
+        return { ...item, subItems: allowedSubItems };
+      }
+      return item;
+    }).filter(Boolean) as NavItem[];
+  }, [user]);
+
   const {
     isExpanded,
     isMobileOpen,
@@ -276,7 +305,7 @@ const AppSidebar: React.FC = () => {
                   <Icon name="dotsHorizontal" size={14} />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+              {renderMenuItems(filteredNavItems, "main")}
             </div>
             <div>
               <h2

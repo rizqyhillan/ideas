@@ -169,7 +169,7 @@ export default function TahunAjaranPage() {
       )}
 
       {/* Main Card */}
-      <div className="card-flat lg:p-6">
+      <div className="card-flat lg:p-6 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">

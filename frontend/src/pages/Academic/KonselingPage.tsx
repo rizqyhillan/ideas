@@ -8,7 +8,6 @@ import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Textarea from "../../components/form/input/TextArea";
-import Select from "../../components/form/Select";
 import {
   konselingService,
   CatatanKonselingItem,
@@ -29,7 +28,6 @@ export default function KonselingPage() {
   const [visibilitasFilter, setVisibilitasFilter] = useState<VisibilitasKonseling | "">("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -61,7 +59,7 @@ export default function KonselingPage() {
       setData(res.data);
       if (res.meta) {
         setTotalPages(res.meta.lastPage || 1);
-        setTotalCount(res.meta.total || 0);
+        // setTotalCount(res.meta.total || 0);
       }
     } catch (err: any) {
       setErrorMsg(err?.message || "Gagal memuat data");
@@ -215,7 +213,7 @@ export default function KonselingPage() {
                       <div className="truncate max-w-xs">{item.topik}</div>
                     </td>
                     <td className="px-4 py-3.5">
-                      <Badge color={visibilitasOptions.find((v) => v.value === item.visibilitas)?.color || "light"} size="sm">
+                      <Badge color={(visibilitasOptions.find((v) => v.value === item.visibilitas)?.color as any) || "light"} size="sm">
                         {visibilitasOptions.find((v) => v.value === item.visibilitas)?.label}
                       </Badge>
                     </td>
@@ -252,7 +250,7 @@ export default function KonselingPage() {
                       <div>{item.tanggal?.split("T")[0]}</div>
                     </div>
                   </div>
-                  <Badge color={visibilitasOptions.find((v) => v.value === item.visibilitas)?.color || "light"} size="sm">
+                      <Badge color={(visibilitasOptions.find((v) => v.value === item.visibilitas)?.color as any) || "light"} size="sm">
                     {visibilitasOptions.find((v) => v.value === item.visibilitas)?.label}
                   </Badge>
                 </div>

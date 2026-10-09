@@ -40,11 +40,7 @@ export default function SignInForm() {
     }
   }
 
-  function handleQuickFillAdmin() {
-    setEmail("admin@ideas.id");
-    setPassword("admin123");
-    setError("");
-  }
+
 
   return (
     <div className="flex flex-col flex-1">

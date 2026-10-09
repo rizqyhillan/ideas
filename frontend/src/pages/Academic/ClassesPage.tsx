@@ -262,7 +262,7 @@ export default function ClassesPage() {
       )}
 
       {/* Main Card */}
-      <div className="card-flat lg:p-6">
+      <div className="card-flat lg:p-6 p-4">
         {/* Header & Filter Controls */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
