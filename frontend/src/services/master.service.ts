@@ -493,6 +493,20 @@ export const roleService = {
     return res.data || [];
   },
 
+  async updateRolePermissions(
+    roleId: number,
+    permissionIds: number[],
+  ): Promise<PermissionItem[]> {
+    const res = await apiFetch<ApiResponse<PermissionItem[]>>(
+      `/roles/${roleId}/permissions`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ permissionIds }),
+      },
+    );
+    return res.data || [];
+  },
+
   async assignPermission(roleId: number, permissionId: number): Promise<void> {
     await apiFetch(`/roles/${roleId}/permissions/${permissionId}`, {
       method: "POST",

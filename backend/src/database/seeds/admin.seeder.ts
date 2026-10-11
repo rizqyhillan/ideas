@@ -12,9 +12,7 @@ export async function adminSeeder() {
   const userRoleRepository = AppDataSource.getRepository(UserRoles);
 
   const username = 'admin';
-
   const email = 'admin@ideas.id';
-
   const password = 'admin123';
 
   //----------------------------------------------------

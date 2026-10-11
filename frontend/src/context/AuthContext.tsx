@@ -138,8 +138,47 @@ export function useAuth() {
       ...permissionsFromRelations,
     ],
   };
+
+  const hasPermission = (perm: string): boolean => {
+    if (!context.isAuthenticated) return false;
+    if (
+      userWithRoles.roles?.includes("admin") ||
+      userWithRoles.permissions?.includes("*")
+    ) {
+      return true;
+    }
+    return Boolean(userWithRoles.permissions?.includes(perm));
+  };
+
+  const hasAnyPermission = (...perms: string[]): boolean => {
+    if (!context.isAuthenticated) return false;
+    if (
+      userWithRoles.roles?.includes("admin") ||
+      userWithRoles.permissions?.includes("*")
+    ) {
+      return true;
+    }
+    return perms.some((p) => userWithRoles.permissions?.includes(p));
+  };
+
+  const hasModuleAccess = (module: string): boolean => {
+    if (!context.isAuthenticated) return false;
+    if (
+      userWithRoles.roles?.includes("admin") ||
+      userWithRoles.permissions?.includes("*")
+    ) {
+      return true;
+    }
+    return Boolean(
+      userWithRoles.permissions?.some((p: string) => p.startsWith(`${module}.`)),
+    );
+  };
+
   return {
     ...context,
     user: userWithRoles,
+    hasPermission,
+    hasAnyPermission,
+    hasModuleAccess,
   };
 }

@@ -19,10 +19,10 @@ export class Permissions {
   @Column('character varying', { name: 'code', unique: true, length: 100 })
   code: string;
 
-  @Column('character varying', { name: 'module', unique: true, length: 50 })
+  @Column('character varying', { name: 'module', length: 50 })
   module: string;
 
-  @Column('character varying', { name: 'action', unique: true, length: 50 })
+  @Column('character varying', { name: 'action', length: 50 })
   action: string;
 
   @Column('text', { name: 'description', nullable: true })

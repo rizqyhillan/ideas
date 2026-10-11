@@ -13,8 +13,14 @@ import {
   SiswaItem,
   CreateSiswaPayload,
 } from "../../services/master.service";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SiswaPage() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission("students.create");
+  const canUpdate = hasPermission("students.update");
+  const canDelete = hasPermission("students.delete");
+
   const [data, setData] = useState<SiswaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -215,14 +221,16 @@ export default function SiswaPage() {
               }}
               className="w-full sm:w-56"
             />
-            <Button
-              size="sm"
-              onClick={openCreateModal}
-              className="w-full sm:w-auto justify-center"
-              startIcon={<Icon name="plus" size={15} />}
-            >
-              Tambah Siswa
-            </Button>
+            {canCreate && (
+              <Button
+                size="sm"
+                onClick={openCreateModal}
+                className="w-full sm:w-auto justify-center"
+                startIcon={<Icon name="plus" size={15} />}
+              >
+                Tambah Siswa
+              </Button>
+            )}
           </div>
         </div>
 
@@ -302,18 +310,27 @@ export default function SiswaPage() {
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
-                        >
-                          Hapus
-                        </button>
+                        {canUpdate && (
+                          <button
+                            onClick={() => openEditModal(item)}
+                            className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                          >
+                            Hapus
+                          </button>
+                        )}
+                        {!canUpdate && !canDelete && (
+                          <span className="text-xs text-gray-400 italic">
+                            Hanya Lihat
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -385,18 +402,22 @@ export default function SiswaPage() {
                     {item.statusAktif ? "Aktif" : "Nonaktif"}
                   </Badge>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
-                    >
-                      Hapus
-                    </button>
+                    {canUpdate && (
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                      >
+                        Hapus
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

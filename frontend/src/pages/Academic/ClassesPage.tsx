@@ -22,8 +22,14 @@ import {
   siswaService,
   SiswaItem,
 } from "../../services/master.service";
+import { useAuth } from "../../context/AuthContext";
 
 export default function ClassesPage() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission("classes.create");
+  const canUpdate = hasPermission("classes.update");
+  const canDelete = hasPermission("classes.delete");
+
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [tahunAjarans, setTahunAjarans] = useState<TahunAjaranItem[]>([]);
   const [gurus, setGurus] = useState<GuruItem[]>([]);
@@ -327,13 +333,15 @@ export default function ClassesPage() {
               className="w-36 sm:w-48"
             />
 
-            <Button
-              size="sm"
-              startIcon={<Icon name="plus" size={16} />}
-              onClick={openCreateClassModal}
-            >
-              Tambah Kelas
-            </Button>
+            {canCreate && (
+              <Button
+                size="sm"
+                startIcon={<Icon name="plus" size={16} />}
+                onClick={openCreateClassModal}
+              >
+                Tambah Kelas
+              </Button>
+            )}
           </div>
         </div>
 
@@ -420,27 +428,38 @@ export default function ClassesPage() {
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openStudentsModal(cls)}
-                          className="btn-action-sm text-brand-600"
-                        >
-                          <Icon name="users" size={14} />
-                          Kelola Siswa
-                        </button>
-                        <button
-                          onClick={() => openEditClassModal(cls)}
-                          className="btn-action-sm"
-                        >
-                          <Icon name="edit" size={14} />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClass(cls.id)}
-                          className="btn-action-sm text-error-600"
-                        >
-                          <Icon name="trash" size={14} />
-                          Hapus
-                        </button>
+                        {canUpdate && (
+                          <button
+                            onClick={() => openStudentsModal(cls)}
+                            className="btn-action-sm text-brand-600"
+                          >
+                            <Icon name="users" size={14} />
+                            Kelola Siswa
+                          </button>
+                        )}
+                        {canUpdate && (
+                          <button
+                            onClick={() => openEditClassModal(cls)}
+                            className="btn-action-sm"
+                          >
+                            <Icon name="edit" size={14} />
+                            Edit
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDeleteClass(cls.id)}
+                            className="btn-action-sm text-error-600"
+                          >
+                            <Icon name="trash" size={14} />
+                            Hapus
+                          </button>
+                        )}
+                        {!canUpdate && !canDelete && (
+                          <span className="text-xs text-gray-400 italic">
+                            Hanya Lihat
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>

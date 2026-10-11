@@ -49,45 +49,54 @@ const othersItems: NavItem[] = [
   },
 ];
 
+const ITEM_PERMISSIONS: Record<string, string[]> = {
+  "Dashboard": ["dashboard.view"],
+  "Tahun Ajaran": ["classes.view", "classes.create"],
+  "Semester": ["classes.view"],
+  "Kelas & Rombel": ["classes.view"],
+  "Mata Pelajaran": ["subjects.view"],
+  "Jadwal Pelajaran": ["schedules.view"],
+  "Absensi Siswa": [
+    "student_attendance.view",
+    "student_attendance.view_own",
+    "duty_attendance.view",
+    "duty_attendance.view_own",
+  ],
+  "Konseling (BK)": ["counseling.view", "counseling.view_own"],
+  "Data Siswa": ["students.view", "students.view_own"],
+  "Data Guru": ["teachers.view"],
+  "Data Pegawai": ["teachers.view"],
+  "Data Pengguna": ["users.view"],
+  "Role & Hak Akses": ["roles.manage"],
+  "Permissions": ["roles.manage"],
+};
+
 const AppSidebar: React.FC = () => {
-  const { user } = useAuth();
+  const { user, hasAnyPermission } = useAuth();
 
   const filteredNavItems = useMemo(() => {
-    // Cloning
+    if (!user) return [];
+
     return navItems
       .map((item) => {
-        // Guru/Siswa seharusnya tidak punya askes Master Civitas dan sejenisnya
-        if (item.name === "Master Civitas") {
-          const isAdmin =
-            user?.roles?.includes("admin") ||
-            user?.userRoles2?.[0]?.role?.name === "admin";
-          if (!isAdmin) return null;
-        }
-        if (item.name === "Akademik") {
-          if (!user) return null;
-
-          let allowedSubItems = item.subItems;
-          const roleStr =
-            user?.roles?.[0] || user?.userRoles2?.[0]?.role?.name || "";
-
-          if (roleStr === "guru") {
-            allowedSubItems = item.subItems?.filter((sub) =>
-              ["Jadwal Pelajaran", "Absensi Siswa", "Konseling (BK)"].includes(
-                sub.name,
-              ),
-            );
-          } else if (roleStr === "siswa") {
-            allowedSubItems = item.subItems?.filter((sub) =>
-              ["Jadwal Pelajaran", "Absensi Siswa"].includes(sub.name),
-            );
+        if (item.subItems) {
+          const allowedSub = item.subItems.filter((sub) => {
+            const required = ITEM_PERMISSIONS[sub.name];
+            if (!required) return true;
+            return hasAnyPermission(...required);
+          });
+          if (allowedSub.length === 0) return null;
+          return { ...item, subItems: allowedSub };
+        } else {
+          const required = ITEM_PERMISSIONS[item.name];
+          if (required && !hasAnyPermission(...required)) {
+            return null;
           }
-
-          return { ...item, subItems: allowedSubItems };
+          return item;
         }
-        return item;
       })
       .filter(Boolean) as NavItem[];
-  }, [user]);
+  }, [user, hasAnyPermission]);
 
   const {
     isExpanded,

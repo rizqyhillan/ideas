@@ -71,7 +71,7 @@ export default function UsersPage() {
 
   function openEditModal(item: UserAccountItem) {
     setEditingId(item.id);
-    const roleCode = item.userRoles2?.[0]?.role?.code || "guru";
+    const roleCode = item.userRoles2?.[0]?.role?.code || "admin";
     setFormData({
       username: item.username,
       email: item.email,

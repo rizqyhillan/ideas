@@ -9,7 +9,7 @@ export async function siswaSeeder() {
       nisn: '0135344834',
       nis: '13681',
       namaLengkap: 'Adji Shobri Wa Shola',
-      jenisKelamin: 'L' as const,
+      jenisKelamin: 'L' as const, 
       tempatLahir: 'Magetan',
       tanggalLahir: '2013-04-02',
       alamat: 'Lingk. Sale RT 33 RW 6, Kel Plaosan, Plaosan, Magetan',

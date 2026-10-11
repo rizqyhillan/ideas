@@ -150,15 +150,12 @@ export class UsersService {
           throw new BadRequestException('Role tidak ditemukan');
         }
 
-        await queryRunner.manager.update(
-          UserRoles,
-          {
-            userId: id,
-          },
-          {
-            roleId: role.id,
-          },
-        );
+        await queryRunner.manager.delete(UserRoles, { userId: id });
+        const userRole = queryRunner.manager.create(UserRoles, {
+          userId: id,
+          roleId: role.id,
+        });
+        await queryRunner.manager.save(userRole);
       }
 
       await queryRunner.commitTransaction();
@@ -202,6 +199,9 @@ export class UsersService {
     const { page, limit, search, status, sort, order } = query;
 
     const qb = this.usersRepository.createQueryBuilder('user');
+
+    qb.leftJoinAndSelect('user.userRoles2', 'userRoles2')
+      .leftJoinAndSelect('userRoles2.role', 'role');
 
     qb.andWhere('user.deletedAt IS NULL');
 

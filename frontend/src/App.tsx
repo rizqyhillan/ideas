@@ -67,26 +67,46 @@ export default function App() {
             />
 
             {/* Halaman akademik */}
-            <Route
-              path="/academic/tahun-ajaran"
-              element={<TahunAjaranPage />}
-            />
-            <Route path="/academic/semester" element={<SemesterPage />} />
-            <Route path="/academic/classes" element={<ClassesPage />} />
-            <Route path="/academic/absensi" element={<AbsensiPage />} />
-            <Route
-              path="/academic/mata-pelajaran"
-              element={<MataPelajaranPage />}
-            />
-            <Route path="/academic/jadwal" element={<JadwalPage />} />
-            <Route path="/academic/konseling" element={<KonselingPage />} />
+            <Route element={<ProtectedRoute requiredPermission={["classes.view", "classes.create"]} />}>
+              <Route path="/academic/tahun-ajaran" element={<TahunAjaranPage />} />
+              <Route path="/academic/semester" element={<SemesterPage />} />
+              <Route path="/academic/classes" element={<ClassesPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="subjects.view" />}>
+              <Route path="/academic/mata-pelajaran" element={<MataPelajaranPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="schedules.view" />}>
+              <Route path="/academic/jadwal" element={<JadwalPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission={["student_attendance.view", "student_attendance.view_own", "duty_attendance.view", "duty_attendance.view_own"]} />}>
+              <Route path="/academic/absensi" element={<AbsensiPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission={["counseling.view", "counseling.view_own"]} />}>
+              <Route path="/academic/konseling" element={<KonselingPage />} />
+            </Route>
+
             {/* Halaman master data */}
-            <Route path="/master/siswa" element={<SiswaPage />} />
-            <Route path="/master/guru" element={<GuruPage />} />
-            <Route path="/master/pegawai" element={<PegawaiPage />} />
-            <Route path="/master/users" element={<UsersPage />} />
-            <Route path="/master/roles" element={<RolesPage />} />
-            <Route path="/master/permissions" element={<PermissionsPage />} />
+            <Route element={<ProtectedRoute requiredPermission={["students.view", "students.view_own"]} />}>
+              <Route path="/master/siswa" element={<SiswaPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="teachers.view" />}>
+              <Route path="/master/guru" element={<GuruPage />} />
+              <Route path="/master/pegawai" element={<PegawaiPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="users.view" />}>
+              <Route path="/master/users" element={<UsersPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="roles.manage" />}>
+              <Route path="/master/roles" element={<RolesPage />} />
+              <Route path="/master/permissions" element={<PermissionsPage />} />
+            </Route>
 
             {/* Halaman profil */}
             <Route path="/profile" element={<ProfilePage />} />

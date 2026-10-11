@@ -43,11 +43,11 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    const { passwordHash, deletedAt, ...userData } = user;
+    const fullUser = await this.me(user.id);
 
     return {
       accessToken,
-      user: userData,
+      user: fullUser,
     };
   }
 
@@ -60,6 +60,39 @@ export class AuthService {
 
     const { passwordHash, deletedAt, ...userData } = user;
 
-    return userData;
+    const roles: string[] = [];
+    const permissionsSet = new Set<string>();
+
+    if (user.userRoles2) {
+      for (const ur of user.userRoles2) {
+        if (ur.role) {
+          roles.push(ur.role.code);
+          if (ur.role.code === 'admin') {
+            permissionsSet.add('*');
+          }
+          if (ur.role.rolePermissions) {
+            for (const rp of ur.role.rolePermissions) {
+              if (rp.permission?.code) {
+                permissionsSet.add(rp.permission.code);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (user.userPermissions2) {
+      for (const up of user.userPermissions2) {
+        if (up.permission?.code) {
+          permissionsSet.add(up.permission.code);
+        }
+      }
+    }
+
+    return {
+      ...userData,
+      roles,
+      permissions: Array.from(permissionsSet),
+    };
   }
 }
