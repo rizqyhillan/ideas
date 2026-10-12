@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MasterExportImport } from "../../components/MasterExportImport";
 // @ts-ignore
 import { Icon } from "../../components/icons/ideas-icon";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
@@ -164,8 +165,11 @@ export default function GuruPage() {
             </Button>
           </div>
         </div>
-
         {/* Table (Desktop & Tablet) */}
+        <MasterExportImport
+        masterName="guru"
+        title="Master Guru"
+        >
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
@@ -257,6 +261,7 @@ export default function GuruPage() {
             </tbody>
           </table>
         </div>
+      </MasterExportImport>
 
         {/* Mobile Cards View */}
         <div className="block md:hidden space-y-3 mt-4">

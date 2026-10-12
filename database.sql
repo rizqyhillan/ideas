@@ -958,6 +958,40 @@ INSERT INTO permissions (code, module, action, description) VALUES
     ('counseling.delete', 'counseling', 'delete', 'Menghapus atau mengarsipkan catatan konseling.');
 
 -- --------------------------------------------------------------------------
+-- ABSENSI / ATTENDANCE (typeorm entities: AbsensiSesi, AbsensiSesiItem)
+-- --------------------------------------------------------------------------
+-- Catatan: tabel ini dibuat agar entitas TypeORM (AbsensiSesi/AbsensiSesiItem)
+-- sesuai dengan kode backend. Tabel ini terpisah dari absensi_siswa/sesi_absensi_siswa.
+CREATE TABLE IF NOT EXISTS absensi_sesi (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    kelas_id INTEGER NOT NULL,
+    guru_id INTEGER,
+    tanggal DATE NOT NULL,
+    jam_ke TEXT,
+    mata_pelajaran TEXT,
+    catatan TEXT,
+    saved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT idx_absensi_sesi_tanggal_kelas UNIQUE (tanggal, kelas_id)
+);
+CREATE INDEX IF NOT EXISTS idx_absensi_sesi_kelas_id ON absensi_sesi (kelas_id);
+
+CREATE TABLE IF NOT EXISTS absensi_sesi_item (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    absensi_sesi_id INTEGER NOT NULL,
+    siswa_id INTEGER NOT NULL,
+    status status_absensi NOT NULL,
+    keterangan TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT idx_absensi_sesi_item_siswa UNIQUE (absensi_sesi_id, siswa_id)
+);
+CREATE INDEX IF NOT EXISTS idx_absensi_sesi_item_absensi_sesi_id ON absensi_sesi_item (absensi_sesi_id);
+ALTER TABLE absensi_sesi_item ADD CONSTRAINT IF NOT EXISTS fk_absensi_sesi_item_sesi FOREIGN KEY (absensi_sesi_id) REFERENCES absensi_sesi(id) ON DELETE CASCADE;
+ALTER TABLE absensi_sesi_item ADD CONSTRAINT IF NOT EXISTS fk_absensi_sesi_item_siswa FOREIGN KEY (siswa_id) REFERENCES siswa(id) ON DELETE RESTRICT;
+
+-- --------------------------------------------------------------------------
 -- PEMETAAN PERMISSION PER ROLE
 -- --------------------------------------------------------------------------
 

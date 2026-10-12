@@ -9,6 +9,10 @@ import { Siswa } from '../database/entities/entities/Siswa';
 
 import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
+import { ClassesExportImportService } from './export-import.service';
+import { ExportImportController } from '../common/export/export-imports.controller';
+import { EXPORT_IMPORT_SERVICE } from '../common/export/export.service';
+import { PdfService } from '../common/export/pdf.service';
 
 @Module({
   imports: [
@@ -20,8 +24,8 @@ import { ClassesService } from './classes.service';
       Siswa,
     ]),
   ],
-  controllers: [ClassesController],
-  providers: [ClassesService],
-  exports: [ClassesService],
+  controllers: [ClassesController, ExportImportController],
+
+  providers: [ClassesService, ClassesExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: ClassesExportImportService }, PdfService],
 })
 export class ClassesModule {}
