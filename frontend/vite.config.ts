@@ -15,4 +15,24 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router"],
+          "vendor-charts": ["apexcharts", "react-apexcharts"],
+          "vendor-calendar": [
+            "@fullcalendar/core",
+            "@fullcalendar/daygrid",
+            "@fullcalendar/interaction",
+            "@fullcalendar/list",
+            "@fullcalendar/react",
+            "@fullcalendar/timegrid",
+          ],
+          "vendor-icons": ["lucide-react"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 800,
+  },
 });

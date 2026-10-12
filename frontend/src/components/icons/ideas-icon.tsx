@@ -90,6 +90,17 @@ const ALIAS_MAP: Record<string, string> = {
   unlock: "Unlock",
   refresh: "RefreshCw",
   refreshcw: "RefreshCw",
+  shieldalert: "ShieldAlert",
+  "shield-alert": "ShieldAlert",
+  folder: "Folder",
+  messagesquare: "MessageSquare",
+  "message-square": "MessageSquare",
+  usercheck: "UserCheck",
+  "user-check": "UserCheck",
+  filequestion: "FileQuestion",
+  "file-question": "FileQuestion",
+  searchx: "SearchX",
+  "search-x": "SearchX",
 };
 
 export interface IconProps extends Omit<LucideProps, "ref"> {

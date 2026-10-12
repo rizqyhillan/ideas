@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { Icon } from "../icons/ideas-icon";
 
 interface SchoolNotification {
   id: string;
@@ -26,7 +27,7 @@ export default function NotificationDropdown() {
       desc: "Tahun ajaran aktif sedang berjalan. Pastikan jadwal kelas dan wali kelas terisi.",
       time: "Hari ini",
       category: "Akademik",
-      icon: "📅",
+      icon: "calendar",
       unread: true,
       link: "/academic/tahun-ajaran",
     },
@@ -36,7 +37,7 @@ export default function NotificationDropdown() {
       desc: "Pencatatan absensi siswa kelas hari ini sudah dapat dilakukan.",
       time: "Hari ini",
       category: "Absensi",
-      icon: "📋",
+      icon: "clipboard-list",
       unread: true,
       link: "/academic/absensi",
     },
@@ -46,7 +47,7 @@ export default function NotificationDropdown() {
       desc: `Anda masuk sebagai ${user?.username || "Pengguna"}. Kelola profil dan keamanan akun Anda.`,
       time: "Sesi ini",
       category: "Sistem",
-      icon: "🔐",
+      icon: "lock",
       unread: false,
       link: "/profile",
     },
@@ -80,20 +81,7 @@ export default function NotificationDropdown() {
             <span className="absolute inline-flex w-full h-full bg-brand-400 rounded-full opacity-75 animate-ping"></span>
           </span>
         )}
-        <svg
-          className="fill-current"
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M10.75 2.29248C10.75 1.87827 10.4143 1.54248 10 1.54248C9.58583 1.54248 9.25004 1.87827 9.25004 2.29248V2.83613C6.08266 3.20733 3.62504 5.9004 3.62504 9.16748V14.4591H3.33337C2.91916 14.4591 2.58337 14.7949 2.58337 15.2091C2.58337 15.6234 2.91916 15.9591 3.33337 15.9591H4.37504H15.625H16.6667C17.0809 15.9591 17.4167 15.6234 17.4167 15.2091C17.4167 14.7949 17.0809 14.4591 16.6667 14.4591H16.375V9.16748C16.375 5.9004 13.9174 3.20733 10.75 2.83613V2.29248ZM14.875 14.4591V9.16748C14.875 6.47509 12.6924 4.29248 10 4.29248C7.30765 4.29248 5.12504 6.47509 5.12504 9.16748V14.4591H14.875ZM8.00004 17.7085C8.00004 18.1228 8.33583 18.4585 8.75004 18.4585H11.25C11.6643 18.4585 12 18.1228 12 17.7085C12 17.2943 11.6643 16.9585 11.25 16.9585H8.75004C8.33583 16.9585 8.00004 17.2943 8.00004 17.7085Z"
-            fill="currentColor"
-          />
-        </svg>
+        <Icon name="bell" size={20} className="text-gray-500 dark:text-gray-400" />
       </button>
 
       <Dropdown
@@ -130,8 +118,8 @@ export default function NotificationDropdown() {
                     : "hover:bg-gray-50 dark:hover:bg-white/[0.03]"
                 }`}
               >
-                <div className="w-9 h-9 rounded-xl bg-white border border-gray-100 shadow-xs flex items-center justify-center text-base shrink-0 dark:bg-gray-800 dark:border-gray-700">
-                  {item.icon}
+                <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 shadow-xs flex items-center justify-center shrink-0 dark:bg-gray-800 dark:border-gray-700">
+                  <Icon name={item.icon} size={18} className="text-brand-500 dark:text-brand-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 mb-0.5">

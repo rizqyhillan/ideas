@@ -1,34 +1,37 @@
+import { lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import AppLayout from "./layout/AppLayout";
+
+// Halaman auth & error
 import SignIn from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/AuthPages/NotFound";
 
-// Dashboard per role
-import AdminDashboard from "./pages/Dashboard/AdminDashboard";
-import GuruDashboard from "./pages/Dashboard/GuruDashboard";
-import SiswaDashboard from "./pages/Dashboard/SiswaDashboard";
+// Dashboard per role (Lazy loaded)
+const AdminDashboard = lazy(() => import("./pages/Dashboard/AdminDashboard"));
+const GuruDashboard = lazy(() => import("./pages/Dashboard/GuruDashboard"));
+const SiswaDashboard = lazy(() => import("./pages/Dashboard/SiswaDashboard"));
 
-// Halaman akademik
-import TahunAjaranPage from "./pages/Academic/TahunAjaranPage";
-import SemesterPage from "./pages/Academic/SemesterPage";
-import ClassesPage from "./pages/Academic/ClassesPage";
-import AbsensiPage from "./pages/Academic/AbsensiPage";
-import MataPelajaranPage from "./pages/Academic/MataPelajaranPage";
-import JadwalPage from "./pages/Academic/JadwalPage";
-import KonselingPage from "./pages/Academic/KonselingPage";
+// Halaman akademik (Lazy loaded)
+const TahunAjaranPage = lazy(() => import("./pages/Academic/TahunAjaranPage"));
+const SemesterPage = lazy(() => import("./pages/Academic/SemesterPage"));
+const ClassesPage = lazy(() => import("./pages/Academic/ClassesPage"));
+const AbsensiPage = lazy(() => import("./pages/Academic/AbsensiPage"));
+const MataPelajaranPage = lazy(() => import("./pages/Academic/MataPelajaranPage"));
+const JadwalPage = lazy(() => import("./pages/Academic/JadwalPage"));
+const KonselingPage = lazy(() => import("./pages/Academic/KonselingPage"));
 
-// Halaman master data
-import SiswaPage from "./pages/Master/SiswaPage";
-import GuruPage from "./pages/Master/GuruPage";
-import PegawaiPage from "./pages/Master/PegawaiPage";
-import UsersPage from "./pages/Master/UsersPage";
-import RolesPage from "./pages/Master/RolesPage";
-import PermissionsPage from "./pages/Master/PermissionsPage";
+// Halaman master data (Lazy loaded)
+const SiswaPage = lazy(() => import("./pages/Master/SiswaPage"));
+const GuruPage = lazy(() => import("./pages/Master/GuruPage"));
+const PegawaiPage = lazy(() => import("./pages/Master/PegawaiPage"));
+const UsersPage = lazy(() => import("./pages/Master/UsersPage"));
+const RolesPage = lazy(() => import("./pages/Master/RolesPage"));
+const PermissionsPage = lazy(() => import("./pages/Master/PermissionsPage"));
 
-// Halaman profil
-import ProfilePage from "./pages/ProfilePage";
+// Halaman profil (Lazy loaded)
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 
 export default function App() {
   return (

@@ -344,7 +344,7 @@ export default function TahunAjaranPage() {
         onClose={() => setIsModalOpen(false)}
         className="max-w-lg p-6"
       >
-        <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
+        <div className="mb-4 border-b border-gray-100 pb-3 pr-12 dark:border-gray-800">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
             {editingId ? "Edit Tahun Ajaran" : "Tambah Tahun Ajaran"}
           </h3>

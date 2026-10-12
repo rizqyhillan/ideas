@@ -1,5 +1,6 @@
 import { Link, Navigate, Outlet, useLocation } from "react-router";
 import { useAuth } from "../../context/AuthContext";
+import { Icon } from "../icons/ideas-icon";
 
 interface ProtectedRouteProps {
   requiredPermission?: string | string[];
@@ -35,8 +36,8 @@ export default function ProtectedRoute({ requiredPermission }: ProtectedRoutePro
     if (!isAllowed) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
-          <div className="w-16 h-16 mb-4 rounded-2xl bg-error-50 text-error-500 dark:bg-error-500/10 flex items-center justify-center text-3xl font-bold">
-            🚫
+          <div className="w-16 h-16 mb-4 rounded-lg bg-error-50 text-error-500 dark:bg-error-500/10 flex items-center justify-center">
+            <Icon name="shield-alert" size={32} />
           </div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
             Akses Ditolak (403 Forbidden)
@@ -46,7 +47,7 @@ export default function ProtectedRoute({ requiredPermission }: ProtectedRoutePro
           </p>
           <Link
             to="/"
-            className="px-4 py-2 text-sm font-semibold text-white bg-brand-500 rounded-xl hover:bg-brand-600 transition-colors shadow-sm"
+            className="px-4 py-2 text-sm font-semibold text-white bg-brand-500 rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
           >
             Kembali ke Dashboard Utama
           </Link>

@@ -6,6 +6,7 @@ import Badge from "../../components/ui/badge/Badge";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import { Icon } from "../../components/icons/ideas-icon";
 import {
   roleService,
   permissionService,
@@ -22,62 +23,62 @@ const MODULE_CONFIG: Record<
 > = {
   students: {
     label: "Data Siswa",
-    icon: "🎓",
+    icon: "graduation-cap",
     description: "Buku induk pelajar dan profil siswa",
   },
   teachers: {
     label: "Data Guru & Pegawai",
-    icon: "👨‍🏫",
+    icon: "users",
     description: "Tenaga pendidik dan staf kependidikan",
   },
   classes: {
     label: "Kelas & Rombel",
-    icon: "🏫",
+    icon: "school",
     description: "Rombongan belajar, tingkat, dan wali kelas",
   },
   subjects: {
     label: "Mata Pelajaran",
-    icon: "📚",
+    icon: "book-open",
     description: "Daftar kurikulum dan mata pelajaran",
   },
   schedules: {
     label: "Jadwal Pelajaran",
-    icon: "🗓️",
+    icon: "calendar",
     description: "Jadwal jam mengajar dan alokasi kelas",
   },
   student_attendance: {
     label: "Presensi Siswa",
-    icon: "📋",
+    icon: "clipboard-list",
     description: "Pencatatan kehadiran harian siswa",
   },
   duty_attendance: {
     label: "Presensi Guru Piket",
-    icon: "⏱️",
+    icon: "clock",
     description: "Kehadiran piket dan verifikasi jam guru",
   },
   counseling: {
     label: "Bimbingan Konseling (BK)",
-    icon: "💬",
+    icon: "message-square",
     description: "Catatan konseling dan pembinaan siswa",
   },
   users: {
     label: "Pengguna Sistem",
-    icon: "👤",
+    icon: "user",
     description: "Akun login dan status akses sistem",
   },
   roles: {
     label: "Role & Hak Akses",
-    icon: "🛡️",
+    icon: "shield",
     description: "Manajemen peran dan konfigurasi hak akses",
   },
   audit: {
     label: "Audit Log",
-    icon: "🔍",
+    icon: "search",
     description: "Catatan riwayat aktivitas pengguna",
   },
   dashboard: {
     label: "Dashboard",
-    icon: "📊",
+    icon: "bar-chart-3",
     description: "Akses ke halaman ringkasan dan statistik",
   },
 };
@@ -421,7 +422,7 @@ export default function RolesPage() {
                             onClick={() => openPermissionsModal(item)}
                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-600 hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400 transition-colors"
                           >
-                            <span>🛡️</span>
+                            <Icon name="shield" size={13} />
                             <span>{permCount} Hak Akses</span>
                           </button>
                         </td>
@@ -510,9 +511,10 @@ export default function RolesPage() {
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
                     <button
                       onClick={() => openPermissionsModal(item)}
-                      className="px-3 py-1.5 text-xs font-semibold text-white bg-brand-500 rounded-lg hover:bg-brand-600"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-brand-500 rounded-lg hover:bg-brand-600"
                     >
-                      🛡️ Atur Hak Akses
+                      <Icon name="shield" size={13} />
+                      Atur Hak Akses
                     </button>
                     <button
                       onClick={() => openEditModal(item)}
@@ -547,7 +549,9 @@ export default function RolesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl">🛡️</span>
+                <span className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 flex items-center justify-center">
+                  <Icon name="shield" size={18} />
+                </span>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   Atur Hak Akses: {selectedRole?.name}
                 </h3>
@@ -579,16 +583,18 @@ export default function RolesPage() {
               <button
                 type="button"
                 onClick={selectAll}
-                className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
               >
-                ✓ Pilih Semua
+                <Icon name="check" size={13} />
+                Pilih Semua
               </button>
               <button
                 type="button"
                 onClick={deselectAll}
-                className="px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
               >
-                ✕ Batal Semua
+                <Icon name="x" size={13} />
+                Batal Semua
               </button>
             </div>
           </div>
@@ -621,7 +627,7 @@ export default function RolesPage() {
             .map(([moduleName, perms]) => {
               const modConfig = MODULE_CONFIG[moduleName] || {
                 label: moduleName,
-                icon: "📁",
+                icon: "folder",
                 description: `Modul ${moduleName}`,
               };
 
@@ -637,7 +643,7 @@ export default function RolesPage() {
               return (
                 <div
                   key={moduleName}
-                  className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/60 overflow-hidden transition-all shadow-xs"
+                  className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/60 overflow-hidden transition-all shadow-xs"
                 >
                   {/* Folder Header */}
                   <div className="flex items-center justify-between p-3.5 bg-gray-50/70 hover:bg-gray-100/60 dark:bg-gray-800/40 dark:hover:bg-gray-800/70 cursor-pointer">
@@ -649,16 +655,18 @@ export default function RolesPage() {
                         type="button"
                         className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-transform"
                       >
-                        <span
-                          className={`inline-block text-xs transform transition-transform ${
+                        <Icon
+                          name="chevron-right"
+                          size={16}
+                          className={`transform transition-transform ${
                             isFolderOpen ? "rotate-90" : "rotate-0"
                           }`}
-                        >
-                          ▶
-                        </span>
+                        />
                       </button>
 
-                      <span className="text-xl">{modConfig.icon}</span>
+                      <span className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 flex items-center justify-center shrink-0">
+                        <Icon name={modConfig.icon} size={16} />
+                      </span>
 
                       <div>
                         <div className="flex items-center gap-2">

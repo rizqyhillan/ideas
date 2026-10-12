@@ -6,6 +6,7 @@ import Badge from "../../components/ui/badge/Badge";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
 import { Icon } from "../../components/icons/ideas-icon";
 import {
   semesterService,
@@ -323,41 +324,40 @@ export default function SemesterPage() {
         {formError && <div className="alert-error-flat">{formError}</div>}
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <Label>Tahun Ajaran *</Label>
-            <select
-              value={String(formData.tahunAjaranId)}
-              onChange={(e) =>
+            <Label htmlFor="tahun-ajaran">Tahun Ajaran *</Label>
+            <Select
+              id="tahun-ajaran"
+              value={formData.tahunAjaranId ? String(formData.tahunAjaranId) : ""}
+              placeholder="Pilih Tahun Ajaran"
+              options={tahunAjaranList.map((ta) => ({
+                value: String(ta.id),
+                label: ta.nama,
+              }))}
+              onChange={(selectedValue) =>
                 setFormData({
                   ...formData,
-                  tahunAjaranId: Number(e.target.value),
+                  tahunAjaranId: Number(selectedValue),
                 })
               }
-              className="mt-1 w-full h-10 rounded-md border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            >
-              <option value="">Pilih Tahun Ajaran</option>
-              {tahunAjaranList.map((ta) => (
-                <option key={ta.id} value={String(ta.id)}>
-                  {ta.nama}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>Jenis Semester *</Label>
-              <select
+              <Label htmlFor="jenis-semester">Jenis Semester *</Label>
+              <Select
+                id="jenis-semester"
                 value={formData.jenis}
-                onChange={(e) =>
+                options={[
+                  { value: "ganjil", label: "Ganjil" },
+                  { value: "genap", label: "Genap" },
+                ]}
+                onChange={(selectedValue) =>
                   setFormData({
                     ...formData,
-                    jenis: e.target.value as JenisSemester,
+                    jenis: selectedValue as JenisSemester,
                   })
                 }
-                className="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-              >
-                <option value="ganjil">Ganjil</option>
-                <option value="genap">Genap</option>
-              </select>
+              />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

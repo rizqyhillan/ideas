@@ -5,6 +5,7 @@ import Badge from "../../components/ui/badge/Badge";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import { Modal } from "../../components/ui/modal";
+import { Icon } from "../../components/icons/ideas-icon";
 import {
   jadwalService,
   JadwalItem,
@@ -383,11 +384,16 @@ export default function JadwalPage() {
                         ?.namaLengkap || "-"}
                     </p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                      <span>
-                        ⏰ {formatJam(item.jamMulai)} -{" "}
-                        {formatJam(item.jamSelesai)}
+                      <span className="flex items-center">
+                        <Icon name="clock" size={13} className="inline mr-1 text-gray-400" />
+                        {formatJam(item.jamMulai)} - {formatJam(item.jamSelesai)}
                       </span>
-                      {item.ruang && <span>📍 {item.ruang}</span>}
+                      {item.ruang && (
+                        <span className="flex items-center">
+                          <Icon name="mappin" size={13} className="inline mr-1 text-gray-400" />
+                          {item.ruang}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">

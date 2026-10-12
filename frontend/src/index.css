@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap")
 layer(base);
 
 @import "tailwindcss";
@@ -7,7 +7,8 @@ layer(base);
 
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -186,7 +187,8 @@ layer(base);
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    @apply relative font-normal font-sans antialiased z-1 bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100;
   }
 }
 
@@ -312,6 +314,18 @@ layer(base);
 @utility card-flat {
   @apply bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800
      rounded-lg shadow-sm;
+}
+
+@utility card-flat-body {
+  @apply p-4 sm:p-5 lg:p-6;
+}
+
+@utility page-container {
+  @apply mx-auto max-w-7xl p-4 sm:p-5 lg:p-6 space-y-6;
+}
+
+@utility table-cell {
+  @apply px-4 py-3.5 text-sm text-gray-700 dark:text-gray-300;
 }
 
 @utility alert-success-flat {

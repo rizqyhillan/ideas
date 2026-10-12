@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import { Icon } from "../icons/ideas-icon";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
@@ -53,9 +54,9 @@ export default function SignUpForm() {
           </div>
 
           {submitted ? (
-            <div className="p-6 rounded-2xl bg-brand-50/60 border border-brand-200 text-center dark:bg-brand-950/20 dark:border-brand-900/40">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-brand-500 text-white flex items-center justify-center text-2xl font-bold">
-                ✓
+            <div className="p-6 rounded-lg bg-brand-50/60 border border-brand-200 text-center dark:bg-brand-950/20 dark:border-brand-900/40">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-brand-500 text-white flex items-center justify-center">
+                <Icon name="check" size={24} className="text-white" />
               </div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
                 Permohonan Akun Terkirim
