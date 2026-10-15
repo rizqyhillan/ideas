@@ -15,22 +15,6 @@ export async function adminSeeder() {
   const email = 'admin@ideas.id';
   const password = 'admin123';
 
-  //----------------------------------------------------
-
-  const existing = await userRepository.findOne({
-    where: {
-      username,
-    },
-  });
-
-  if (existing) {
-    console.log('✔ Admin sudah ada');
-
-    return;
-  }
-
-  //----------------------------------------------------
-
   const adminRole = await roleRepository.findOne({
     where: {
       code: 'admin',
@@ -42,6 +26,37 @@ export async function adminSeeder() {
       'Role ADMIN tidak ditemukan. Pastikan database SQL sudah diimport.',
     );
   }
+
+  //----------------------------------------------------
+
+  const existing = await userRepository.findOne({
+    where: {
+      username,
+    },
+  });
+
+  if (existing) {
+    // Pastikan akun admin tidak menyimpan role lain akibat perubahan manual.
+    const assignedRoles = await userRoleRepository.find({
+      where: { userId: existing.id },
+    });
+    const staleRoles = assignedRoles.filter(
+      (userRole) => userRole.roleId !== adminRole.id,
+    );
+    if (staleRoles.length > 0) {
+      await userRoleRepository.remove(staleRoles);
+    }
+    if (!assignedRoles.some((userRole) => userRole.roleId === adminRole.id)) {
+      await userRoleRepository.save(
+        userRoleRepository.create({ userId: existing.id, roleId: adminRole.id }),
+      );
+    }
+    console.log('↻ Admin sudah ada, role admin disinkronkan');
+
+    return;
+  }
+
+  //----------------------------------------------------
 
   //----------------------------------------------------
 

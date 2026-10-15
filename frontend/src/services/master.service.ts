@@ -252,6 +252,11 @@ export interface UpdateGuruPayload {
 }
 
 export const guruService = {
+  async getMe(): Promise<GuruItem | null> {
+    const res = await apiFetch<ApiResponse<GuruItem | null>>('/guru/me');
+    return res.data || null;
+  },
+
   async getAll(params?: {
     page?: number;
     limit?: number;

@@ -24,8 +24,9 @@ import { PdfService } from '../common/export/pdf.service';
       Siswa,
     ]),
   ],
-  controllers: [ClassesController, ExportImportController],
+  controllers: [ClassesController],
 
-  providers: [ClassesService, ClassesExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: ClassesExportImportService }, PdfService],
+  providers: [ClassesService, ClassesExportImportService],
+  exports: [ClassesService, ClassesExportImportService],
 })
 export class ClassesModule {}

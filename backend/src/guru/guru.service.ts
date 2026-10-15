@@ -32,6 +32,20 @@ export class GuruService {
     });
   }
 
+  async findByUser(user: any) {
+    const guru = await this.guruRepository
+      .createQueryBuilder('guru')
+      .leftJoinAndSelect('guru.pegawai', 'pegawai')
+      .where('pegawai.userId = :userId', { userId: user?.id })
+      .getOne();
+
+    return {
+      success: true,
+      message: guru ? 'Guru retrieved successfully' : 'Data guru belum terhubung',
+      data: guru ?? null,
+    };
+  }
+
   async create(dto: CreateGuruDto) {
     const pegawai = await this.pegawaiRepository.findOne({
       where: {
@@ -79,12 +93,17 @@ export class GuruService {
     };
   }
 
-  async findAll(query: QueryGuruDto) {
+  async findAll(query: QueryGuruDto, user?: any) {
     const { page, limit, search, sort, order } = query;
 
     const qb = this.guruRepository.createQueryBuilder('guru');
 
     qb.leftJoinAndSelect('guru.pegawai', 'pegawai');
+
+    const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
+    if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin')) {
+      qb.andWhere('pegawai.userId = :currentUserId', { currentUserId: user.id });
+    }
 
     if (search) {
       qb.andWhere(

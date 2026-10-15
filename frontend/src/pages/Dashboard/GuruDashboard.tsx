@@ -5,6 +5,7 @@ import { CardIcon, Icon } from "../../components/icons/ideas-icon";
 import Badge from "../../components/ui/badge/Badge";
 import { guruService, GuruItem } from "../../services/master.service";
 import { classesService, ClassItem } from "../../services/academic.service";
+import { jadwalService, JadwalItem } from "../../services/academic-extras.service";
 
 export default function GuruDashboard() {
   const { user } = useAuth();
@@ -12,31 +13,23 @@ export default function GuruDashboard() {
   const [myGuru, setMyGuru] = useState<GuruItem | null>(null);
   const [myClasses, setMyClasses] = useState<ClassItem[]>([]);
   const [stats, setStats] = useState({ totalKelas: 0, totalStudents: 0 });
+  const [activeScheduleNow, setActiveScheduleNow] = useState<JadwalItem | null>(null);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const guruRes = await guruService.getAll({ limit: 100 });
-        const guruList = guruRes.data;
-        let foundGuru: GuruItem | undefined;
+        const foundGuru = await guruService.getMe();
         let guruClasses: ClassItem[] = [];
-
-        if (user) {
-          foundGuru = guruList.find(
-            (g) =>
-              g.pegawai?.userId === user.id ||
-              (g.pegawai?.email &&
-                g.pegawai.email.toLowerCase() === user.email?.toLowerCase()) ||
-              g.kodeGuru === user.username,
-          );
-        }
 
         if (foundGuru) {
           setMyGuru(foundGuru);
-          const classesRes = await classesService.getAll({
-            waliKelasId: foundGuru.id,
-            limit: 50,
-          });
+          const [classesRes, jadwalRes] = await Promise.all([
+            classesService.getAll({
+              waliKelasId: foundGuru.id,
+              limit: 50,
+            }),
+            jadwalService.getAll({ isActive: true, limit: 200 }),
+          ]);
           guruClasses = classesRes.data;
           setMyClasses(guruClasses);
           setStats({
@@ -47,6 +40,23 @@ export default function GuruDashboard() {
               return acc + count;
             }, 0),
           });
+
+          // Deteksi apakah sedang dalam jam mengajar hari ini
+          const dayNames = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"] as const;
+          const now = new Date();
+          const todayName = dayNames[now.getDay()];
+          const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+          const activeJadwal = (jadwalRes.data || []).find((j) => {
+            if (j.guruId !== foundGuru?.id) return false;
+            if (j.hari !== todayName) return false;
+            if (!j.jamMulai || !j.jamSelesai) return false;
+            const [startH, startM] = j.jamMulai.split(":").map(Number);
+            const [endH, endM] = j.jamSelesai.split(":").map(Number);
+            return nowMinutes >= (startH * 60 + startM) && nowMinutes <= (endH * 60 + endM);
+          });
+
+          setActiveScheduleNow(activeJadwal || null);
         }
       } catch (err) {
         console.error("Gagal memuat data guru:", err);
@@ -70,6 +80,40 @@ export default function GuruDashboard() {
           Kelola kelas yang diampu dan input absensi siswa
         </p>
       </div>
+
+      {/* Pemberitahuan Jam Mengajar Aktif */}
+      {activeScheduleNow && (
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-emerald-300 bg-emerald-50/80 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+              <Icon name="bell" className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
+                  Pemberitahuan Jam Mengajar
+                </span>
+                <Badge color="success" size="sm">
+                  Sedang Berlangsung
+                </Badge>
+              </div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
+                Kelas {activeScheduleNow.kelas?.nama} — {activeScheduleNow.mataPelajaran?.nama || "Mata Pelajaran"}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Pukul {activeScheduleNow.jamMulai?.slice(0, 5)} - {activeScheduleNow.jamSelesai?.slice(0, 5)} • Sesi absensi siswa sudah bisa diakses sekarang.
+              </p>
+            </div>
+          </div>
+          <Link
+            to={`/academic/absensi?kelasId=${activeScheduleNow.kelasId}&mapel=${encodeURIComponent(activeScheduleNow.mataPelajaran?.nama || "")}&jam=${encodeURIComponent(activeScheduleNow.jamMulai?.slice(0, 5) + " - " + activeScheduleNow.jamSelesai?.slice(0, 5))}`}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors shrink-0"
+          >
+            <Icon name="clipboard" className="h-4 w-4" />
+            <span>Buka & Isi Absensi Kelas →</span>
+          </Link>
+        </div>
+      )}
 
       {/* Identity Card */}
       <div className="mb-6 card-flat p-5">
@@ -230,9 +274,9 @@ export default function GuruDashboard() {
           />
           <QuickLink
             icon="calendar"
-            label="Tahun Ajaran"
-            sub="Informasi periode"
-            link="/academic/tahun-ajaran"
+            label="Jadwal Mengajar"
+            sub="Lihat jadwal pelajaran"
+            link="/academic/jadwal"
           />
           <QuickLink
             icon="user"

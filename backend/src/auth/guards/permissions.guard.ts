@@ -28,7 +28,7 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     const userRoles = user.userRoles2?.map((ur: any) => ur.role?.code) || [];
-    if (userRoles.includes('admin')) {
+    if (userRoles.includes('admin') || userRoles.includes('super_admin')) {
       return true;
     }
 
@@ -52,8 +52,16 @@ export class PermissionsGuard implements CanActivate {
       }
     });
 
+    const aliases: Record<string, string[]> = {
+      'users.view': ['users.list'],
+      'classes.view': ['kelas.list'],
+      'students.view': ['siswa.list'],
+      'teachers.view': ['guru.list'],
+      'schedules.view': ['jadwal.list'],
+    };
     const hasPermission = requiredPermissions.every((permission) =>
-      permissions.has(permission),
+      permissions.has(permission) ||
+      (aliases[permission] || []).some((alias) => permissions.has(alias)),
     );
 
     if (!hasPermission) {

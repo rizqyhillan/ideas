@@ -16,10 +16,10 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Guru, Pegawai])],
 
-  controllers: [GuruController, ExportImportController],
+  controllers: [GuruController],
 
-  providers: [GuruService, GuruExportImportService, PegawaiExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: GuruExportImportService }, PdfService],
+  providers: [GuruService, GuruExportImportService, PegawaiExportImportService],
 
-  exports: [GuruService],
+  exports: [GuruService, GuruExportImportService],
 })
 export class GuruModule {}

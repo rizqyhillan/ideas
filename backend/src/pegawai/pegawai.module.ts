@@ -13,10 +13,10 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Pegawai])],
 
-  controllers: [PegawaiController, ExportImportController],
+  controllers: [PegawaiController],
 
-  providers: [PegawaiService, PegawaiExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: PegawaiExportImportService }, PdfService],
+  providers: [PegawaiService, PegawaiExportImportService],
 
-  exports: [PegawaiService],
+  exports: [PegawaiService, PegawaiExportImportService],
 })
 export class PegawaiModule {}

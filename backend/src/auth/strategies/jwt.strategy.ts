@@ -31,6 +31,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Akun tidak aktif');
     }
 
-    return user;
+    // Passport places this return value in `request.user`. The rest of the
+    // application uses the JWT shape (`sub`) while permission guards also
+    // need the loaded role/permission relations. Keep both available.
+    return Object.assign(user, {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+      status: user.status,
+    });
   }
 }

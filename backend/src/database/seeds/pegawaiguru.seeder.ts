@@ -1,10 +1,12 @@
 import { AppDataSource } from '../datasource';
 import { Pegawai } from '../entities/entities/Pegawai';
 import { Guru } from '../entities/entities/Guru';
+import { Users } from '../entities/entities/Users';
 
 export async function guruPegawaiSeeder() {
   const pegawaiRepository = AppDataSource.getRepository(Pegawai);
   const guruRepository = AppDataSource.getRepository(Guru);
+  const userRepository = AppDataSource.getRepository(Users);
 
   // Sampel Data Pegawai & Guru (Ganti / Tambahkan sesuai data sekolah)
   const dataGuruPegawai = [
@@ -15,7 +17,7 @@ export async function guruPegawaiSeeder() {
       jenisKelamin: 'L' as const,
       tempatLahir: 'Magetan',
       tanggalLahir: '1985-01-15',
-      email: 'budi.santoso@sekolah.sch.id',
+      email: 'guruutama@sekolah.sch.id',
       noTelepon: '081234567890',
       alamat: 'Jl. Raya Plaosan No. 12, Magetan',
       jabatan: 'Guru Mata Pelajaran',
@@ -43,7 +45,7 @@ export async function guruPegawaiSeeder() {
       jenisKelamin: 'L' as const,
       tempatLahir: 'Surakarta',
       tanggalLahir: '1982-08-10',
-      email: 'ahmad.fauzi@sekolah.sch.id',
+      email: 'gurubk@sekolah.sch.id',
       noTelepon: '083456789012',
       alamat: 'Dsn. Bogoarum, Plaosan, Magetan',
       jabatan: 'Guru Bimbingan Konseling (BK)',
@@ -85,6 +87,17 @@ export async function guruPegawaiSeeder() {
       });
       await guruRepository.save(guru);
       totalGuruDibuat++;
+    }
+
+    // Kaitkan pegawai dengan akun login berdasarkan email canonical.
+    // Ini penting karena pembatasan data guru memakai pegawai.userId.
+    const user = await userRepository.findOne({ where: { email: item.email } });
+    if (user && pegawai.userId !== user.id) {
+      const linkedPegawai = await pegawaiRepository.findOne({ where: { userId: user.id } });
+      if (!linkedPegawai || linkedPegawai.id === pegawai.id) {
+        pegawai.userId = user.id;
+        await pegawaiRepository.save(pegawai);
+      }
     }
   }
 

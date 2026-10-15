@@ -15,6 +15,7 @@ const PERMISSIONS: Array<{
   action: string;
   description: string;
 }> = [
+  { code: 'dashboard.view', module: 'dashboard', action: 'view', description: 'Lihat dashboard sesuai role' },
   { code: 'users.list', module: 'users', action: 'list', description: 'Lihat daftar user' },
   { code: 'users.create', module: 'users', action: 'create', description: 'Tambah user' },
   { code: 'users.update', module: 'users', action: 'update', description: 'Perbarui user' },
@@ -51,6 +52,8 @@ const PERMISSIONS: Array<{
   { code: 'jadwal.update', module: 'jadwal', action: 'update', description: 'Perbarui jadwal pelajaran' },
   { code: 'konseling.list', module: 'konseling', action: 'list', description: 'Lihat daftar konseling' },
   { code: 'konseling.create', module: 'konseling', action: 'create', description: 'Tambah catatan konseling' },
+  { code: 'konseling.update', module: 'konseling', action: 'update', description: 'Perbarui catatan konseling' },
+  { code: 'konseling.delete', module: 'konseling', action: 'delete', description: 'Hapus catatan konseling' },
   { code: 'laporan.absensi', module: 'laporan', action: 'absensi', description: 'Lihat laporan kehadiran' },
   { code: 'laporan.transaksi', module: 'laporan', action: 'transaksi', description: 'Lihat laporan keuangan/transaksi' },
 ];

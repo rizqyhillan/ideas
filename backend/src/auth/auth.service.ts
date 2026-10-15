@@ -14,12 +14,12 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const { email, password } = dto;
+    const { email: identifier, password } = dto;
 
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByLoginIdentifier(identifier);
 
     if (!user) {
-      throw new UnauthorizedException('Email atau password salah');
+      throw new UnauthorizedException('Username/email atau password salah');
     }
 
     if (user.status !== 'aktif') {
@@ -29,7 +29,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isMatch) {
-      throw new UnauthorizedException('Email atau password salah');
+      throw new UnauthorizedException('Username/email atau password salah');
     }
 
     await this.usersService.updateLastLogin(user.id);
@@ -67,7 +67,7 @@ export class AuthService {
       for (const ur of user.userRoles2) {
         if (ur.role) {
           roles.push(ur.role.code);
-          if (ur.role.code === 'admin') {
+          if (ur.role.code === 'admin' || ur.role.code === 'super_admin') {
             permissionsSet.add('*');
           }
           if (ur.role.rolePermissions) {

@@ -12,8 +12,9 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Semester])],
 
-  controllers: [SemesterController, ExportImportController],
+  controllers: [SemesterController],
 
-  providers: [SemesterService, SemesterExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: SemesterExportImportService }, PdfService],
+  providers: [SemesterService, SemesterExportImportService],
+  exports: [SemesterService, SemesterExportImportService],
 })
 export class SemesterModule {}

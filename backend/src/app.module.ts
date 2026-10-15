@@ -18,6 +18,7 @@ import { MataPelajaranModule } from './mata-pelajaran/mata-pelajaran.module';
 import { JadwalModule } from './jadwal/jadwal.module';
 import { KonselingModule } from './konseling/konseling.module';
 import { RolesModule } from './roles/roles.module';
+import { ExportModule } from './common/export/export.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { RolesModule } from './roles/roles.module';
     JadwalModule,
     KonselingModule,
     RolesModule,
+    ExportModule,
   ],
 })
 export class AppModule {}

@@ -12,8 +12,9 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([MataPelajaran])],
 
-  controllers: [MataPelajaranController, ExportImportController],
+  controllers: [MataPelajaranController],
 
-  providers: [MataPelajaranService, MataPelajaranExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: MataPelajaranExportImportService }, PdfService],
+  providers: [MataPelajaranService, MataPelajaranExportImportService],
+  exports: [MataPelajaranService, MataPelajaranExportImportService],
 })
 export class MataPelajaranModule {}

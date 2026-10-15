@@ -17,8 +17,8 @@ import { PdfService } from '../common/export/pdf.service';
 
   controllers: [UsersController],
 
-  providers: [UsersService, { provide: EXPORT_IMPORT_SERVICE, useClass: UsersExportImportService }, PdfService],
+  providers: [UsersService, UsersExportImportService],
 
-  exports: [UsersService],
+  exports: [UsersService, UsersExportImportService],
 })
 export class UsersModule {}

@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
@@ -21,9 +28,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   me(
     @CurrentUser()
-    user: JwtPayload,
+    user: JwtPayload & { id?: number },
   ) {
-    return this.authService.me(user.sub);
+    // `request.user` is enriched by JwtStrategy and supports both the JWT
+    // identifier (`sub`) and the database entity identifier (`id`). The
+    // fallback keeps this endpoint safe during upgrades from the old guard.
+    const userId = user?.sub ?? user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Sesi login tidak valid');
+    }
+
+    return this.authService.me(Number(userId));
   }
 
   @Get('test-permission')

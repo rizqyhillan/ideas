@@ -43,6 +43,7 @@ async function runSeed(): Promise<void> {
     await mataPelajaranSeeder();
 
     console.log('\n── STEP 2: Users & Auth ──');
+    await adminSeeder();
     await usersSeeder();
 
     console.log('\n── STEP 3: Objects (Pegawai & Guru) ──');

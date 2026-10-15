@@ -12,7 +12,9 @@ import { Guru } from './Guru';
 import { Kelas } from './Kelas';
 import { AbsensiSesiItem } from './AbsensiSesiItem';
 
-@Index('idx_absensi_sesi_tanggal_kelas', ['tanggal', 'kelasId'])
+@Index('uq_absensi_sesi_tanggal_kelas_jam', ['tanggal', 'kelasId', 'jamKe'], {
+  unique: true,
+})
 @Entity('absensi_sesi', { schema: 'public' })
 export class AbsensiSesi {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })

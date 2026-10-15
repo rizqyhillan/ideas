@@ -132,9 +132,9 @@ export default function SiswaDashboard() {
           />
           <QuickLink
             icon="calendar"
-            label="Tahun Ajaran"
-            sub="Periode akademik"
-            link="/academic/tahun-ajaran"
+            label="Profil Saya"
+            sub="Kelola data akun"
+            link="/profile"
           />
           <QuickLink
             icon="user"

@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 import { GuruService } from './guru.service';
 
@@ -24,11 +25,11 @@ import { QueryGuruDto } from './dto/query-guru.dto';
 
 @Controller('guru')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class GuruController {
   constructor(private readonly guruService: GuruService) {}
 
   @Post()
+  @Roles('admin')
   create(
     @Body()
     dto: CreateGuruDto,
@@ -37,14 +38,23 @@ export class GuruController {
   }
 
   @Get()
+  @Roles('admin', 'guru', 'bk', 'guru_bk')
   findAll(
     @Query()
     query: QueryGuruDto,
+    @CurrentUser() user?: any,
   ) {
-    return this.guruService.findAll(query);
+    return user ? this.guruService.findAll(query, user) : this.guruService.findAll(query);
+  }
+
+  @Get('me')
+  @Roles('guru', 'bk', 'guru_bk')
+  findMe(@CurrentUser() user: any) {
+    return this.guruService.findByUser(user);
   }
 
   @Get(':id')
+  @Roles('admin', 'guru', 'bk', 'guru_bk')
   findOne(
     @Param('id', ParseIntPipe)
     id: number,
@@ -53,6 +63,7 @@ export class GuruController {
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(
     @Param('id', ParseIntPipe)
     id: number,
@@ -64,6 +75,7 @@ export class GuruController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(
     @Param('id', ParseIntPipe)
     id: number,

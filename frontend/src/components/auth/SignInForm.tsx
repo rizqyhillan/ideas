@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,15 +20,15 @@ export default function SignInForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!email || !password) {
-      setError("Silakan isi email dan password.");
+    if (!identifier.trim() || !password) {
+      setError("Silakan isi username/email dan password.");
       return;
     }
 
     try {
       setIsSubmitting(true);
       setError("");
-      await signIn(email, password, isChecked);
+      await signIn(identifier, password, isChecked);
       const from =
         (location.state as { from?: { pathname?: string } } | null)?.from
           ?.pathname ?? "/";
@@ -66,14 +66,14 @@ export default function SignInForm() {
               <div className="space-y-6">
                 <div>
                   <Label>
-                    Email <span className="text-error-500">*</span>{" "}
+                    Username atau email <span className="text-error-500">*</span>{" "}
                   </Label>
                   <Input
-                    type="email"
-                    value={email}
+                    type="text"
+                    value={identifier}
                     disabled={isSubmitting}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="nama@ideas.id"
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    placeholder="guruutama atau nama@ideas.id"
                   />
                 </div>
                 <div>

@@ -25,11 +25,11 @@ import { AssignStudentsDto, RemoveStudentDto } from './dto/assign-student.dto';
 
 @Controller('classes')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) {}
 
   @Post()
+  @Roles('admin')
   create(
     @Body() createClassDto: CreateClassDto,
     @CurrentUser() user: JwtPayload,
@@ -38,16 +38,19 @@ export class ClassesController {
   }
 
   @Get()
-  findAll(@Query() query: QueryClassDto) {
-    return this.classesService.findAll(query);
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  findAll(@Query() query: QueryClassDto, @CurrentUser() user?: JwtPayload) {
+    return user ? this.classesService.findAll(query, user) : this.classesService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.classesService.findOne(id);
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user?: JwtPayload) {
+    return user ? this.classesService.findOne(id, user) : this.classesService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateClassDto: UpdateClassDto,
@@ -57,6 +60,7 @@ export class ClassesController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: JwtPayload,
@@ -69,6 +73,7 @@ export class ClassesController {
   // =========================================================
 
   @Post(':id/students')
+  @Roles('admin')
   assignStudents(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AssignStudentsDto,
@@ -78,11 +83,13 @@ export class ClassesController {
   }
 
   @Get(':id/students')
-  getClassStudents(@Param('id', ParseIntPipe) id: number) {
-    return this.classesService.getClassStudents(id);
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  getClassStudents(@Param('id', ParseIntPipe) id: number, @CurrentUser() user?: JwtPayload) {
+    return user ? this.classesService.getClassStudents(id, user) : this.classesService.getClassStudents(id);
   }
 
   @Delete(':id/students/:siswaId')
+  @Roles('admin')
   removeStudentFromClass(
     @Param('id', ParseIntPipe) id: number,
     @Param('siswaId', ParseIntPipe) siswaId: number,

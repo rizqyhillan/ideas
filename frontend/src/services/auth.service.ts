@@ -32,12 +32,12 @@ export interface LoginResult {
 }
 
 export const authService = {
-  async login(email: string, password: string): Promise<LoginResult> {
+  async login(identifier: string, password: string): Promise<LoginResult> {
     const res = await apiFetch<ApiResponse<LoginResult> | LoginResult>(
       "/auth/login",
       {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: identifier, password }),
       },
     );
 

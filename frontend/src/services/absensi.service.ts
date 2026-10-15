@@ -30,6 +30,7 @@ export interface AttendanceSessionRecord {
   guruId: number;
   guruNama: string;
   tanggal: string; // YYYY-MM-DD
+  mode?: "mengajar" | "piket";
   jamKe?: string;
   mataPelajaran?: string;
   catatan?: string;
@@ -48,7 +49,7 @@ export const absensiService = {
   ): Promise<{ success: boolean; message: string }> {
     try {
       // 1. Simpan di local storage berdasarkan kelas dan tanggal
-      const key = `${STORAGE_KEY_PREFIX}${record.kelasId}_${record.tanggal}`;
+    const key = `${STORAGE_KEY_PREFIX}${record.kelasId}_${record.tanggal}_${record.jamKe || "default"}`;
       const serialized = JSON.stringify(record);
       localStorage.setItem(key, serialized);
 
@@ -85,13 +86,14 @@ export const absensiService = {
   async getAttendance(
     kelasId: number,
     tanggal: string,
+    jamKe?: string,
   ): Promise<AttendanceSessionRecord | null> {
-    const key = `${STORAGE_KEY_PREFIX}${kelasId}_${tanggal}`;
+    const key = `${STORAGE_KEY_PREFIX}${kelasId}_${tanggal}_${jamKe || "default"}`;
     const dataJson = localStorage.getItem(key);
     if (!dataJson) {
       // Coba fetch dari backend
       const res = await apiFetch<ApiResponse<AttendanceSessionRecord>>(
-        `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}`,
+        `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}${jamKe ? `&jamKe=${encodeURIComponent(jamKe)}` : ""}`,
       );
       if (res.data) return res.data;
       return null;
@@ -124,6 +126,35 @@ export const absensiService = {
     });
 
     return summary;
+  },
+
+  /**
+   * Mengambil daftar kelas yang belum diabsen pada tanggal tertentu (untuk guru piket/admin)
+   */
+  async getUnattendedClasses(
+    tanggal: string,
+  ): Promise<Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>> {
+    try {
+      const res = await apiFetch<Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>>(
+        `/absensi/unattended?tanggal=${tanggal}`,
+      );
+      return res || [];
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Mengambil URL download export absensi
+   */
+  getExportUrl(format: "excel" | "pdf", params: { kelasId?: number; guruId?: number; startDate?: string; endDate?: string }): string {
+    const sp = new URLSearchParams();
+    if (params.kelasId) sp.append("kelasId", String(params.kelasId));
+    if (params.guruId) sp.append("guruId", String(params.guruId));
+    if (params.startDate) sp.append("startDate", params.startDate);
+    if (params.endDate) sp.append("endDate", params.endDate);
+    const qs = sp.toString();
+    return `/absensi/export/${format}${qs ? `?${qs}` : ""}`;
   },
 
   /**

@@ -1,12 +1,15 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, ChangeEvent } from "react";
 import Button from "./ui/button/Button";
-import Icon from "./icons/ideas-icon";
-import * as XLSX from "xlsx";
+import { Icon } from "./icons/ideas-icon";
+import { getStoredToken } from "../services/api";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface MasterExportImportProps {
   masterName: string;
-  title: string;
-  children: ReactNode;
+  title?: string;
+  children?: ReactNode;
+  onImportSuccess?: () => void;
 }
 
 /**
@@ -20,11 +23,21 @@ export function MasterExportImport({
   masterName,
   title,
   children,
+  onImportSuccess,
 }: MasterExportImportProps) {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  const getHeaders = (): Record<string, string> => {
+    const token = getStoredToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
 
   // ------------------------------------------------------------------
   // Export XLSX
@@ -33,17 +46,23 @@ export function MasterExportImport({
     try {
       setExporting(true);
       setMessage("");
-      const res = await fetch(`/api/export/${masterName}`);
-      if (!res.ok) throw new Error("Gagal mengunduh file");
+      setIsError(false);
+      const res = await fetch(`${API_BASE_URL}/api/export/${masterName}`, {
+        headers: getHeaders(),
+      });
+      if (!res.ok) throw new Error("Gagal mengunduh file Excel");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${masterName}-export-${Date.now()}.xlsx`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       setMessage(`Berhasil mengunduh ${masterName}.xlsx`);
     } catch (err: any) {
+      setIsError(true);
       setMessage(err.message || "Gagal mengunduh file");
     } finally {
       setExporting(false);
@@ -57,17 +76,23 @@ export function MasterExportImport({
     try {
       setExporting(true);
       setMessage("");
-      const res = await fetch(`/api/export/${masterName}/pdf`);
+      setIsError(false);
+      const res = await fetch(`${API_BASE_URL}/api/export/${masterName}/pdf`, {
+        headers: getHeaders(),
+      });
       if (!res.ok) throw new Error("Gagal mengunduh PDF");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${masterName}-laporan.pdf`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       setMessage(`Berhasil mengunduh ${masterName}-laporan.pdf`);
     } catch (err: any) {
+      setIsError(true);
       setMessage(err.message || "Gagal mengunduh PDF");
     } finally {
       setExporting(false);
@@ -77,88 +102,113 @@ export function MasterExportImport({
   // ------------------------------------------------------------------
   // Import
   // ------------------------------------------------------------------
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected) setImportFile(selected);
-  };
-
-  const handleImport = async () => {
-    if (!importFile) return;
+    if (!selected) return;
     try {
       setImporting(true);
-      setMessage("");
+      setMessage(`Mengunggah & mengimpor ${selected.name}...`);
+      setIsError(false);
 
-      // Read the file as array buffer
-      const data = await importFile.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet);
-
-      // Build FormData with the file
       const formData = new FormData();
-      formData.append("file", importFile, importFile.name);
+      formData.append("file", selected, selected.name);
 
-      const res = await fetch(`/api/export/${masterName}/import`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/export/${masterName}/import`,
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: formData,
+        },
+      );
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Import gagal");
-      setMessage(result.message || "Berhasil import data");
+      const result = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(result?.message || "Import gagal");
+      }
+
+      setMessage(result?.message || `Berhasil mengimpor data ${masterName}`);
+      if (onImportSuccess) {
+        onImportSuccess();
+      }
     } catch (err: any) {
+      setIsError(true);
       setMessage(err.message || "Gagal import data");
     } finally {
       setImporting(false);
+      e.target.value = "";
     }
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-6">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          onClick={handleExportXlsx}
-          disabled={exporting}
-          size="sm"
-          startIcon={<Icon name="download" size={15} />}
-        >
-          Export XLSX
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleExportPdf}
-          disabled={exporting}
-          size="sm"
-          startIcon={<Icon name="file" size={15} />}
-        >
-          Export PDF
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => document.getElementById("import-file")?.click()}
-          disabled={importing}
-          size="sm"
-          startIcon={<Icon name="upload" size={15} />}
-        >
-          Import
-        </Button>
-        {importFile && (
-          <span className="text-xs text-gray-500 truncate max-w-[180px]">
-            {importFile.name}
-          </span>
+    <div className="w-full">
+      {/* Action Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        {title ? (
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {title}
+          </h4>
+        ) : (
+          <div />
         )}
-        <input
-          type="file"
-          id="import-file"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-          accept=".xlsx,.xls"
-        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExportXlsx}
+            disabled={exporting}
+            size="sm"
+            startIcon={<Icon name="download" size={15} />}
+          >
+            {exporting ? "Mengunduh..." : "Export Excel"}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleExportPdf}
+            disabled={exporting}
+            size="sm"
+            startIcon={<Icon name="file" size={15} />}
+          >
+            Export PDF
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() =>
+              document.getElementById(`import-file-${masterName}`)?.click()
+            }
+            disabled={importing}
+            size="sm"
+            startIcon={<Icon name="upload" size={15} />}
+          >
+            {importing ? "Mengimpor..." : "Import Excel"}
+          </Button>
+
+          <input
+            type="file"
+            id={`import-file-${masterName}`}
+            className="hidden"
+            onChange={handleFileChange}
+            accept=".xlsx,.xls"
+          />
+        </div>
       </div>
+
       {message && (
-        <span className="text-xs text-gray-600">{message}</span>
+        <div
+          className={`mb-4 px-3 py-2 text-xs rounded-lg ${
+            isError
+              ? "bg-error-50 text-error-700 border border-error-200 dark:bg-error-500/10 dark:text-error-400 dark:border-error-500/30"
+              : "bg-success-50 text-success-700 border border-success-200 dark:bg-success-500/10 dark:text-success-400 dark:border-success-500/30"
+          }`}
+        >
+          {message}
+        </div>
       )}
+
+      {/* Render children table/content */}
+      {children}
     </div>
   );
 }

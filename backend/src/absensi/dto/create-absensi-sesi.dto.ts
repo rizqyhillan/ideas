@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class StudentAttendanceDto {
@@ -20,6 +20,10 @@ export class CreateAbsensiSesiDto {
   @IsOptional()
   @IsInt()
   guruId?: number;
+
+  @IsOptional()
+  @IsIn(['mengajar', 'piket'])
+  mode?: 'mengajar' | 'piket';
 
   @IsDateString()
   tanggal: string;

@@ -22,8 +22,11 @@ export class RolesGuard implements CanActivate {
 
     const user = request.user;
 
-    const roles = user.userRoles2.map((item: any) => item.role.code);
+    const roles = (user.userRoles2 || []).map((item: any) => item.role?.code).filter(Boolean);
+    // Database lama memakai super_admin, sedangkan kode baru memakai admin.
+    // Keduanya harus memiliki perilaku otorisasi yang sama.
+    const normalizedRoles = roles.includes('super_admin') ? [...roles, 'admin'] : roles;
 
-    return requiredRoles.some((role) => roles.includes(role));
+    return requiredRoles.some((role) => normalizedRoles.includes(role));
   }
 }

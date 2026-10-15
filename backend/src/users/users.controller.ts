@@ -41,14 +41,17 @@ export class UsersController {
   }
 
   @Post()
+  @Permissions('users.create')
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
   @Patch(':id')
+  @Permissions('users.update')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
   @Delete(':id')
+  @Permissions('users.delete')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }

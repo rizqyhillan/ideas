@@ -898,7 +898,26 @@ INSERT INTO roles (code, name, description) VALUES
     ('admin', 'Admin', 'Memiliki seluruh hak akses sistem.'),
     ('guru', 'Guru', 'Guru mata pelajaran dan wali kelas.'),
     ('guru_bk', 'Guru BK', 'Guru bimbingan dan konseling.'),
-    ('siswa', 'Siswa', 'Akses baca data milik sendiri.');
+    ('siswa', 'Siswa', 'Akses baca data milik sendiri.')
+ON CONFLICT (code) DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description;
+
+-- Normalisasi role dari instalasi lama. Data user tetap dipertahankan.
+INSERT INTO user_roles (user_id, role_id)
+SELECT ur.user_id, target.id
+FROM user_roles ur
+JOIN roles legacy ON legacy.id = ur.role_id
+JOIN roles target ON target.code = CASE legacy.code
+    WHEN 'super_admin' THEN 'admin'
+    WHEN 'bk' THEN 'guru_bk'
+END
+WHERE legacy.code IN ('super_admin', 'bk')
+ON CONFLICT (user_id, role_id) DO NOTHING;
+DELETE FROM user_roles ur
+USING roles legacy
+WHERE ur.role_id = legacy.id AND legacy.code IN ('super_admin', 'bk');
+DELETE FROM roles WHERE code IN ('super_admin', 'bk');
 
 -- --------------------------------------------------------------------------
 -- SEED PERMISSION
@@ -946,6 +965,13 @@ INSERT INTO permissions (code, module, action, description) VALUES
     ('student_attendance.update', 'student_attendance', 'update', 'Mengubah absensi siswa.'),
     ('student_attendance.delete', 'student_attendance', 'delete', 'Menghapus absensi siswa.'),
 
+    -- Permission endpoint lama tetap disediakan sebagai alias kompatibilitas
+    -- karena controller absensi memakai namespace absensi.*.
+    ('absensi.list', 'absensi', 'list', 'Melihat daftar absensi siswa.'),
+    ('absensi.create', 'absensi', 'create', 'Mencatat absensi siswa.'),
+    ('absensi.report', 'absensi', 'report', 'Melihat laporan absensi.'),
+    ('laporan.absensi', 'laporan', 'absensi', 'Melihat laporan kehadiran.'),
+
     ('duty_attendance.view', 'duty_attendance', 'view', 'Melihat absensi guru piket.'),
     ('duty_attendance.view_own', 'duty_attendance', 'view_own', 'Melihat jadwal dan absensi piket sendiri.'),
     ('duty_attendance.check_in_self', 'duty_attendance', 'check_in_self', 'Melakukan absensi piket sendiri.'),
@@ -955,7 +981,11 @@ INSERT INTO permissions (code, module, action, description) VALUES
     ('counseling.view_own', 'counseling', 'view_own', 'Melihat catatan konseling yang diizinkan untuk siswa.'),
     ('counseling.create', 'counseling', 'create', 'Membuat catatan konseling.'),
     ('counseling.update', 'counseling', 'update', 'Mengubah catatan konseling.'),
-    ('counseling.delete', 'counseling', 'delete', 'Menghapus atau mengarsipkan catatan konseling.');
+    ('counseling.delete', 'counseling', 'delete', 'Menghapus atau mengarsipkan catatan konseling.')
+ON CONFLICT (code) DO UPDATE SET
+    module = EXCLUDED.module,
+    action = EXCLUDED.action,
+    description = EXCLUDED.description;
 
 -- --------------------------------------------------------------------------
 -- ABSENSI / ATTENDANCE (typeorm entities: AbsensiSesi, AbsensiSesiItem)
@@ -973,9 +1003,29 @@ CREATE TABLE IF NOT EXISTS absensi_sesi (
     saved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT idx_absensi_sesi_tanggal_kelas UNIQUE (tanggal, kelas_id)
+    CONSTRAINT uq_absensi_sesi_tanggal_kelas_jam UNIQUE (tanggal, kelas_id, jam_ke)
 );
 CREATE INDEX IF NOT EXISTS idx_absensi_sesi_kelas_id ON absensi_sesi (kelas_id);
+
+-- Jika database sudah pernah dibuat dengan constraint lama (tanggal, kelas),
+-- jalankan blok ini saat migrasi agar satu kelas dapat memiliki beberapa sesi.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'idx_absensi_sesi_tanggal_kelas'
+    ) THEN
+        ALTER TABLE absensi_sesi DROP CONSTRAINT idx_absensi_sesi_tanggal_kelas;
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'uq_absensi_sesi_tanggal_kelas_jam'
+    ) THEN
+        ALTER TABLE absensi_sesi
+            ADD CONSTRAINT uq_absensi_sesi_tanggal_kelas_jam
+            UNIQUE (tanggal, kelas_id, jam_ke);
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS absensi_sesi_item (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -988,8 +1038,23 @@ CREATE TABLE IF NOT EXISTS absensi_sesi_item (
     CONSTRAINT idx_absensi_sesi_item_siswa UNIQUE (absensi_sesi_id, siswa_id)
 );
 CREATE INDEX IF NOT EXISTS idx_absensi_sesi_item_absensi_sesi_id ON absensi_sesi_item (absensi_sesi_id);
-ALTER TABLE absensi_sesi_item ADD CONSTRAINT IF NOT EXISTS fk_absensi_sesi_item_sesi FOREIGN KEY (absensi_sesi_id) REFERENCES absensi_sesi(id) ON DELETE CASCADE;
-ALTER TABLE absensi_sesi_item ADD CONSTRAINT IF NOT EXISTS fk_absensi_sesi_item_siswa FOREIGN KEY (siswa_id) REFERENCES siswa(id) ON DELETE RESTRICT;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_absensi_sesi_item_sesi'
+    ) THEN
+        ALTER TABLE absensi_sesi_item
+            ADD CONSTRAINT fk_absensi_sesi_item_sesi
+            FOREIGN KEY (absensi_sesi_id) REFERENCES absensi_sesi(id) ON DELETE CASCADE;
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_absensi_sesi_item_siswa'
+    ) THEN
+        ALTER TABLE absensi_sesi_item
+            ADD CONSTRAINT fk_absensi_sesi_item_siswa
+            FOREIGN KEY (siswa_id) REFERENCES siswa(id) ON DELETE RESTRICT;
+    END IF;
+END $$;
 
 -- --------------------------------------------------------------------------
 -- PEMETAAN PERMISSION PER ROLE
@@ -1000,7 +1065,8 @@ INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r
 CROSS JOIN permissions p
-WHERE r.code = 'admin';
+WHERE r.code = 'admin'
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- Guru.
 INSERT INTO role_permissions (role_id, permission_id)
@@ -1022,8 +1088,13 @@ JOIN permissions p ON p.code IN (
     'student_attendance.create',
     'student_attendance.update',
     'student_attendance.delete'
+    ,'absensi.list',
+    'absensi.create',
+    'absensi.report',
+    'laporan.absensi'
 )
-WHERE r.code = 'guru';
+WHERE r.code = 'guru'
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- Guru BK.
 INSERT INTO role_permissions (role_id, permission_id)
@@ -1038,7 +1109,8 @@ JOIN permissions p ON p.code IN (
     'counseling.update',
     'counseling.delete'
 )
-WHERE r.code = 'guru_bk';
+WHERE r.code = 'guru_bk'
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- Siswa: hanya data milik sendiri ditambah jadwal kelasnya.
 INSERT INTO role_permissions (role_id, permission_id)
@@ -1052,6 +1124,7 @@ JOIN permissions p ON p.code IN (
     'counseling.view_own',
     'extracurricular_attendance.view_own'
 )
-WHERE r.code = 'siswa';
+WHERE r.code = 'siswa'
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 COMMIT;

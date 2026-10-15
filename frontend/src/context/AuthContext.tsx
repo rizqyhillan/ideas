@@ -20,7 +20,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (
-    email: string,
+    identifier: string,
     password: string,
     remember?: boolean,
   ) => Promise<void>;
@@ -68,13 +68,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  async function signIn(email: string, password: string, remember = false) {
-    const result = await authService.login(email.trim(), password);
+  async function signIn(
+    identifier: string,
+    password: string,
+    remember = false,
+  ) {
+    clearStoredAuth();
+    setToken(null);
+    setUser(null);
+    const result = await authService.login(identifier.trim(), password);
+
+    // Login already returns the canonical user resolved by the backend.
+    // Avoid a second `/auth/me` request here: it used to create a race with
+    // the old token/session and could restore the previous account in state.
     setStoredToken(result.accessToken, remember);
-    const currentUser = await authService.me();
-    setStoredUser(currentUser, remember);
+    setStoredUser(result.user, remember);
     setToken(result.accessToken);
-    setUser(currentUser);
+    setUser(result.user);
   }
 
   function signOut() {

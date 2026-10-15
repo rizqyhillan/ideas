@@ -10,19 +10,35 @@ export class JadwalService {
     private jadwalRepo: Repository<JadwalPelajaran>
   ) {}
 
-  async findAll() {
-    const data = await this.jadwalRepo.find({
-      relations: ['kelas', 'mataPelajaran', 'guru', 'semester', 'semester.tahunAjaran']
-    });
+  async findAll(user?: any) {
+    const qb = this.jadwalRepo.createQueryBuilder('jadwal')
+      .leftJoinAndSelect('jadwal.kelas', 'kelas')
+      .leftJoinAndSelect('jadwal.mataPelajaran', 'mataPelajaran')
+      .leftJoinAndSelect('jadwal.guru', 'guru')
+      .leftJoinAndSelect('guru.pegawai', 'pegawai')
+      .leftJoinAndSelect('jadwal.semester', 'semester')
+      .leftJoinAndSelect('semester.tahunAjaran', 'tahunAjaran');
+
+    const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
+      if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin')) {
+      qb.andWhere('pegawai.userId = :userId', { userId: user.id });
+    }
+
+    const data = await qb.getMany();
     return { success: true, data };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user?: any) {
     const data = await this.jadwalRepo.findOne({
       where: { id },
-      relations: ['kelas', 'mataPelajaran', 'guru', 'semester', 'semester.tahunAjaran']
+      relations: ['kelas', 'mataPelajaran', 'guru', 'guru.pegawai', 'semester', 'semester.tahunAjaran']
     });
     if (!data) throw new NotFoundException('Jadwal tidak ditemukan');
+
+    const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
+    if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin') && data.guru?.pegawai?.userId !== user.id) {
+      throw new NotFoundException('Jadwal tidak ditemukan');
+    }
     return { success: true, data };
   }
 

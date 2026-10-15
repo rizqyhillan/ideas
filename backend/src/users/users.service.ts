@@ -306,6 +306,26 @@ export class UsersService {
     });
   }
 
+  async findByLoginIdentifier(identifier: string) {
+    const value = identifier.trim();
+
+    return this.usersRepository.findOne({
+      where: [{ email: value }, { username: value }],
+      relations: {
+        userRoles2: {
+          role: {
+            rolePermissions: {
+              permission: true,
+            },
+          },
+        },
+        userPermissions2: {
+          permission: true,
+        },
+      },
+    });
+  }
+
   async updateLastLogin(id: number) {
     await this.usersRepository.update(id, {
       lastLoginAt: new Date(),

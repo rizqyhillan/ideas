@@ -44,14 +44,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             {/* Dashboard berdasarkan role */}
-            <Route
-              path="/"
-              element={
-                <RoleBasedDashboard>
-                  <AdminDashboard />
-                </RoleBasedDashboard>
-              }
-            />
+            <Route path="/" element={<RoleBasedDashboard />} />
             <Route
               path="/guru/dashboard"
               element={
@@ -70,30 +63,33 @@ export default function App() {
             />
 
             {/* Halaman akademik */}
-            <Route element={<ProtectedRoute requiredPermission={["classes.view", "classes.create"]} />}>
+            <Route element={<AdminOnlyRoute />}>
               <Route path="/academic/tahun-ajaran" element={<TahunAjaranPage />} />
               <Route path="/academic/semester" element={<SemesterPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission={["classes.view", "kelas.list"]} />}>
               <Route path="/academic/classes" element={<ClassesPage />} />
             </Route>
 
-            <Route element={<ProtectedRoute requiredPermission="subjects.view" />}>
+            <Route element={<ProtectedRoute requiredPermission={["subjects.view", "guru.list"]} />}>
               <Route path="/academic/mata-pelajaran" element={<MataPelajaranPage />} />
             </Route>
 
-            <Route element={<ProtectedRoute requiredPermission="schedules.view" />}>
+            <Route element={<ProtectedRoute requiredPermission={["schedules.view", "jadwal.list"]} />}>
               <Route path="/academic/jadwal" element={<JadwalPage />} />
             </Route>
 
-            <Route element={<ProtectedRoute requiredPermission={["student_attendance.view", "student_attendance.view_own", "duty_attendance.view", "duty_attendance.view_own"]} />}>
+            <Route element={<ProtectedRoute requiredPermission={["student_attendance.view", "absensi.list", "laporan.absensi"]} />}>
               <Route path="/academic/absensi" element={<AbsensiPage />} />
             </Route>
 
-            <Route element={<ProtectedRoute requiredPermission={["counseling.view", "counseling.view_own"]} />}>
+            <Route element={<ProtectedRoute requiredPermission={["counseling.view", "counseling.view_own", "konseling.list", "siswa.list"]} />}>
               <Route path="/academic/konseling" element={<KonselingPage />} />
             </Route>
 
             {/* Halaman master data */}
-            <Route element={<ProtectedRoute requiredPermission={["students.view", "students.view_own"]} />}>
+            <Route element={<ProtectedRoute requiredPermission="students.view" />}>
               <Route path="/master/siswa" element={<SiswaPage />} />
             </Route>
 
@@ -127,16 +123,46 @@ function RoleBasedDashboard({
   children,
   role,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   role?: string;
 }) {
   const { user } = useAuth();
-  const userRoles = user?.roles || [];
-  const targetRole = role || "admin";
+  const userRoles = (user?.roles || []).map((r: any) =>
+    typeof r === "string" ? r : r.code || r.name || "",
+  );
+  const isAdmin =
+    userRoles.includes("admin") || userRoles.includes("super_admin");
 
-  if (!userRoles.includes(targetRole)) {
+  if (!role) {
+    if (isAdmin) {
+      return <AdminDashboard />;
+    }
+    if (userRoles.includes("guru") || userRoles.includes("guru_bk") || userRoles.includes("bk")) {
+      return <GuruDashboard />;
+    }
+    if (userRoles.includes("siswa")) {
+      return <SiswaDashboard />;
+    }
+    return <Navigate to="/signin" replace />;
+  }
+
+  if (!userRoles.includes(role) && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
+}
+
+function AdminOnlyRoute() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const roles = (user?.roles || []).map((r: any) =>
+    typeof r === "string" ? r : r.code || r.name || "",
+  );
+
+  if (isLoading) return <ProtectedRoute requiredPermission={["classes.view", "kelas.list"]} />;
+  if (!isAuthenticated) return <Navigate to="/signin" replace />;
+  if (!roles.includes("admin") && !roles.includes("super_admin")) {
+    return <Navigate to="/" replace />;
+  }
+  return <ProtectedRoute requiredPermission={["classes.view", "kelas.list"]} />;
 }

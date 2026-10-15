@@ -16,7 +16,7 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Roles, Permissions, RolePermissions])],
   controllers: [RolesController, PermissionsController],
-  providers: [RolesService, { provide: EXPORT_IMPORT_SERVICE, useClass: RolesExportImportService }, PdfService],
-  exports: [RolesService],
+  providers: [RolesService, RolesExportImportService],
+  exports: [RolesService, RolesExportImportService],
 })
 export class RolesModule {}

@@ -60,6 +60,28 @@ export class ClassesService {
     });
   }
 
+  private async assertTeacherScope(kelas: Kelas, user?: any) {
+    const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
+    if (roles.includes('siswa')) {
+      const siswa = await this.siswaRepository.findOne({ where: { userId: user.id, deletedAt: IsNull() } });
+      if (!siswa) throw new BadRequestException('Akun siswa belum terhubung ke data siswa');
+      const membership = await this.siswaKelasRepository.findOne({ where: { siswaId: siswa.id, kelasId: kelas.id, isActive: true } });
+      if (!membership) throw new BadRequestException('Anda tidak terdaftar pada kelas ini');
+      return;
+    }
+    if (!roles.includes('guru') || roles.includes('admin') || roles.includes('super_admin')) return;
+
+    const guru = await this.guruRepository
+      .createQueryBuilder('guru')
+      .innerJoin('guru.pegawai', 'pegawai')
+      .where('pegawai.userId = :userId', { userId: user.id })
+      .getOne();
+
+    if (!guru || kelas.waliKelasId !== guru.id) {
+      throw new BadRequestException('Guru hanya dapat mengakses kelas yang menjadi tanggung jawabnya');
+    }
+  }
+
   // =========================================================
   // CREATE
   // =========================================================
@@ -140,7 +162,7 @@ export class ClassesService {
   // =========================================================
   // FIND ALL
   // =========================================================
-  async findAll(query: QueryClassDto) {
+  async findAll(query: QueryClassDto, user?: any) {
     const {
       page,
       limit,
@@ -159,6 +181,26 @@ export class ClassesService {
       .leftJoinAndSelect('kelas.waliKelas', 'waliKelas')
       .leftJoinAndSelect('waliKelas.pegawai', 'pegawai')
       .where('kelas.deletedAt IS NULL');
+
+    const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
+    if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin')) {
+      const guru = await this.guruRepository
+        .createQueryBuilder('guru')
+        .innerJoin('guru.pegawai', 'pegawai')
+        .where('pegawai.userId = :userId', { userId: user.id })
+        .getOne();
+      if (!guru) {
+        return { success: true, message: 'Classes retrieved successfully', data: [], meta: { page, limit, total: 0, lastPage: 0 } };
+      }
+      qb.andWhere('kelas.waliKelasId = :currentGuruId', { currentGuruId: guru.id });
+    }
+    if (roles.includes('siswa')) {
+      const siswa = await this.siswaRepository.findOne({ where: { userId: user.id, deletedAt: IsNull() } });
+      if (!siswa) {
+        return { success: true, message: 'Classes retrieved successfully', data: [], meta: { page, limit, total: 0, lastPage: 0 } };
+      }
+      qb.innerJoin('kelas.siswaKelas', 'currentSiswaKelas', 'currentSiswaKelas.siswaId = :currentSiswaId AND currentSiswaKelas.isActive = true', { currentSiswaId: siswa.id });
+    }
 
     if (search) {
       qb.andWhere('kelas.nama ILIKE :search', {
@@ -213,12 +255,14 @@ export class ClassesService {
   // =========================================================
   // FIND ONE
   // =========================================================
-  async findOne(id: number) {
+  async findOne(id: number, user?: any) {
     const kelas = await this.findById(id);
 
     if (!kelas) {
       throw new NotFoundException('Kelas tidak ditemukan');
     }
+
+    await this.assertTeacherScope(kelas, user);
 
     return {
       success: true,
@@ -493,11 +537,13 @@ export class ClassesService {
   // =========================================================
   // GET CLASS STUDENTS
   // =========================================================
-  async getClassStudents(classId: number) {
+  async getClassStudents(classId: number, user?: any) {
     const kelas = await this.findById(classId);
     if (!kelas) {
       throw new NotFoundException('Kelas tidak ditemukan');
     }
+
+    await this.assertTeacherScope(kelas, user);
 
     const list = await this.siswaKelasRepository.find({
       where: {

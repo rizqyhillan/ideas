@@ -51,36 +51,86 @@ const othersItems: NavItem[] = [
 
 const ITEM_PERMISSIONS: Record<string, string[]> = {
   "Dashboard": ["dashboard.view"],
-  "Tahun Ajaran": ["classes.view", "classes.create"],
-  "Semester": ["classes.view"],
-  "Kelas & Rombel": ["classes.view"],
-  "Mata Pelajaran": ["subjects.view"],
-  "Jadwal Pelajaran": ["schedules.view"],
+  "Tahun Ajaran": ["classes.view", "kelas.list"],
+  "Semester": ["classes.view", "kelas.list"],
+  "Kelas & Rombel": ["classes.view", "kelas.list"],
+  "Mata Pelajaran": ["subjects.view", "guru.list"],
+  "Jadwal Pelajaran": ["schedules.view", "jadwal.list"],
   "Absensi Siswa": [
     "student_attendance.view",
-    "student_attendance.view_own",
-    "duty_attendance.view",
-    "duty_attendance.view_own",
+    "absensi.list",
+    "absensi.create",
+    "laporan.absensi",
   ],
-  "Konseling (BK)": ["counseling.view", "counseling.view_own"],
-  "Data Siswa": ["students.view", "students.view_own"],
-  "Data Guru": ["teachers.view"],
-  "Data Pegawai": ["teachers.view"],
+  "Konseling (BK)": ["counseling.view", "counseling.view_own", "konseling.list", "siswa.list"],
+  "Data Siswa": ["students.view", "siswa.list"],
+  "Data Guru": ["teachers.view", "guru.list"],
+  "Data Pegawai": ["teachers.view", "guru.list"],
   "Data Pengguna": ["users.view"],
   "Role & Hak Akses": ["roles.manage"],
   "Permissions": ["roles.manage"],
 };
 
 const AppSidebar: React.FC = () => {
-  const { user, hasAnyPermission } = useAuth();
+  const { user, hasAnyPermission, hasPermission } = useAuth();
 
   const filteredNavItems = useMemo(() => {
     if (!user) return [];
 
+    const userRoles = (user?.roles || []).map((r: any) =>
+      typeof r === "string" ? r : r.code || r.name || "",
+    );
+    const isCivitasAdmin =
+      userRoles.includes("admin") ||
+      userRoles.includes("super_admin") ||
+      hasPermission("users.view") ||
+      hasPermission("roles.manage");
+
+    const isAdmin = userRoles.includes("admin") || userRoles.includes("super_admin");
+    const isGuru = userRoles.includes("guru");
+    const isBk = userRoles.includes("bk") || userRoles.includes("guru_bk");
+    const isSiswa = userRoles.includes("siswa");
+    const roleMenu: Record<string, string[]> = {
+      guru: ["Dashboard", "Jadwal Pelajaran", "Absensi Siswa"],
+      bk: ["Dashboard", "Konseling (BK)"],
+      guru_bk: ["Dashboard", "Konseling (BK)"],
+      siswa: ["Dashboard", "Konseling (BK)"],
+    };
+
     return navItems
       .map((item) => {
+        if (!isAdmin && !isCivitasAdmin) {
+          const allowed = isGuru
+            ? roleMenu.guru
+            : isBk
+              ? roleMenu.bk
+              : isSiswa
+                ? roleMenu.siswa
+                : undefined;
+          if (allowed && item.name !== "Akademik" && !allowed.includes(item.name)) {
+            return null;
+          }
+        }
+        // Master Civitas hanya untuk admin & staff sekolah
+        if (item.name === "Master Civitas" && !isCivitasAdmin) {
+          return null;
+        }
+
         if (item.subItems) {
           const allowedSub = item.subItems.filter((sub) => {
+            if ((sub.name === "Tahun Ajaran" || sub.name === "Semester") && !isAdmin) {
+              return false;
+            }
+            if (!isAdmin && !isCivitasAdmin) {
+              const allowed = isGuru
+                ? roleMenu.guru
+                : isBk
+                  ? roleMenu.bk
+                  : isSiswa
+                    ? roleMenu.siswa
+                    : undefined;
+              if (allowed && !allowed.includes(sub.name)) return false;
+            }
             const required = ITEM_PERMISSIONS[sub.name];
             if (!required) return true;
             return hasAnyPermission(...required);
@@ -96,7 +146,7 @@ const AppSidebar: React.FC = () => {
         }
       })
       .filter(Boolean) as NavItem[];
-  }, [user, hasAnyPermission]);
+  }, [user, hasAnyPermission, hasPermission]);
 
   const {
     isExpanded,

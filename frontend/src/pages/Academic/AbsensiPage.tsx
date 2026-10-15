@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import { Modal } from "../../components/ui/modal";
 import {
   classesService,
   ClassItem,
@@ -16,11 +18,13 @@ import {
   StatusAbsensi,
   StudentAttendanceItem,
 } from "../../services/absensi.service";
+import { jadwalService, JadwalItem } from "../../services/academic-extras.service";
 import { useAuth } from "../../context/AuthContext";
 import { Icon } from "../../components/icons/ideas-icon";
 
 export default function AbsensiPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
 
   // Master options
   const [gurus, setGurus] = useState<GuruItem[]>([]);
@@ -29,6 +33,27 @@ export default function AbsensiPage() {
 
   // Active Teacher state
   const [selectedGuruId, setSelectedGuruId] = useState<number | "">("");
+
+  // Mode Guru Piket
+  const [isPiketMode, setIsPiketMode] = useState<boolean>(false);
+  const [unattendedClasses, setUnattendedClasses] = useState<
+    Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>
+  >([]);
+  const [loadingUnattended, setLoadingUnattended] = useState<boolean>(false);
+
+  // Jadwal aktif & notifikasi jam pelajaran
+  const [activeSchedules, setActiveSchedules] = useState<JadwalItem[]>([]);
+  const [currentTeachingSchedule, setCurrentTeachingSchedule] = useState<JadwalItem | null>(null);
+  const [hasAppliedUrlOrSchedule, setHasAppliedUrlOrSchedule] = useState<boolean>(false);
+
+  // Modal Export Absensi
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [exportRangeType, setExportRangeType] = useState<"hari" | "minggu" | "bulan" | "semester">("hari");
+  const [exportGuruFilter, setExportGuruFilter] = useState<string>("selected");
+  const [exportClassFilter, setExportClassFilter] = useState<string>("selected");
+  const [exportStartDate, setExportStartDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [exportEndDate, setExportEndDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   // Session & Class state
   const [selectedClassId, setSelectedClassId] = useState<number | "">("");
@@ -58,13 +83,15 @@ export default function AbsensiPage() {
     async function loadInit() {
       try {
         setLoadingInitial(true);
-        const [guruRes, classesRes] = await Promise.all([
+        const [guruRes, classesRes, jadwalRes] = await Promise.all([
           guruService.getAll({ limit: 100 }),
           classesService.getAll({ statusAktif: true, limit: 100 }),
+          jadwalService.getAll({ limit: 200, isActive: true }),
         ]);
 
         setGurus(guruRes.data);
         setClasses(classesRes.data);
+        setActiveSchedules(jadwalRes.data);
 
         // Cari guru yang sesuai dengan akun login
         let currentGuru: GuruItem | undefined;
@@ -81,8 +108,6 @@ export default function AbsensiPage() {
 
         if (currentGuru) {
           setSelectedGuruId(currentGuru.id);
-        } else if (guruRes.data.length > 0) {
-          setSelectedGuruId(guruRes.data[0].id);
         }
       } catch (err: unknown) {
         const error = err as Error;
@@ -95,32 +120,122 @@ export default function AbsensiPage() {
     loadInit();
   }, [user]);
 
+  // Otomatis terapkan jadwal mengajar aktif jika tombol "Terapkan Jadwal" diklik
+  const applySchedule = (sched: JadwalItem) => {
+    setSelectedClassId(sched.kelasId);
+    if (sched.jamMulai && sched.jamSelesai) {
+      setJamPelajaran(`${sched.jamMulai.slice(0, 5)} - ${sched.jamSelesai.slice(0, 5)}`);
+    }
+    if (sched.mataPelajaran?.nama) {
+      setMataPelajaran(sched.mataPelajaran.nama);
+    }
+    setSuccessMsg(`Memilih Kelas ${sched.kelas?.nama} (${sched.mataPelajaran?.nama || "Pelajaran Terjadwal"}) sesuai jadwal mengajar.`);
+  };
+
+  // Cek parameter URL (misalnya diarahkan dari Dashboard Guru)
+  useEffect(() => {
+    const urlKelas = searchParams.get("kelas") || searchParams.get("kelasId");
+    const urlMapel = searchParams.get("mapel");
+    const urlJam = searchParams.get("jam");
+
+    if (urlKelas) {
+      setSelectedClassId(Number(urlKelas));
+      if (urlMapel) setMataPelajaran(urlMapel);
+      if (urlJam) setJamPelajaran(urlJam);
+      setHasAppliedUrlOrSchedule(true);
+    }
+  }, [searchParams]);
+
+  // Deteksi dan otomasi jadwal mengajar aktif berdasarkan waktu hari ini & jam sekarang
+  useEffect(() => {
+    if (!selectedGuruId || activeSchedules.length === 0) {
+      setCurrentTeachingSchedule(null);
+      return;
+    }
+
+    const dayNames = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"] as const;
+    const now = new Date();
+    const todayName = dayNames[now.getDay()];
+
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const matched = activeSchedules.find((j) => {
+      if (j.guruId !== Number(selectedGuruId)) return false;
+      if (j.hari !== todayName) return false;
+
+      if (!j.jamMulai || !j.jamSelesai) return false;
+      const [startH, startM] = j.jamMulai.split(":").map(Number);
+      const [endH, endM] = j.jamSelesai.split(":").map(Number);
+      const startMin = startH * 60 + startM;
+      const endMin = endH * 60 + endM;
+
+      return nowMinutes >= startMin && nowMinutes <= endMin;
+    });
+
+    if (matched) {
+      setCurrentTeachingSchedule(matched);
+      // Otomatis pasang jadwal jika belum pernah dipasang dari URL/jadwal aktif
+      if (!hasAppliedUrlOrSchedule) {
+        applySchedule(matched);
+        setHasAppliedUrlOrSchedule(true);
+      }
+    } else {
+      // Jika tidak dalam jam pas, cari jadwal terdekat hari ini
+      const todaySchedule = activeSchedules.find(
+        (j) => j.guruId === Number(selectedGuruId) && j.hari === todayName,
+      );
+      setCurrentTeachingSchedule(todaySchedule || null);
+    }
+  }, [selectedGuruId, activeSchedules, hasAppliedUrlOrSchedule]);
+
+  // Load Unattended Classes untuk guru piket
+  useEffect(() => {
+    if (!isPiketMode) return;
+    async function loadUnattended() {
+      try {
+        setLoadingUnattended(true);
+        const data = await absensiService.getUnattendedClasses(tanggal);
+        setUnattendedClasses(data);
+      } catch (err: any) {
+        setErrorMsg(err.message || "Gagal memuat kelas belum diabsen");
+      } finally {
+        setLoadingUnattended(false);
+      }
+    }
+    loadUnattended();
+  }, [isPiketMode, tanggal]);
+
   // Guru yang sedang aktif
   const activeGuru = useMemo(() => {
     if (!selectedGuruId) return null;
     return gurus.find((g) => g.id === Number(selectedGuruId)) || null;
   }, [selectedGuruId, gurus]);
 
-  // Daftar kelas yang relevan dengan guru
+  // Daftar kelas yang relevan dengan guru (baik dari wali kelas maupun jadwal pelajaran)
   const guruClasses = useMemo(() => {
     if (!activeGuru) return classes;
-    const taughtClasses = classes.filter(
-      (c) => c.waliKelasId === activeGuru.id,
-    );
-    return taughtClasses.length > 0 ? taughtClasses : classes;
-  }, [activeGuru, classes]);
+    const taughtClassIds = new Set<number>();
+    classes.forEach((c) => {
+      if (c.waliKelasId === activeGuru.id) taughtClassIds.add(c.id);
+    });
+    activeSchedules.forEach((s) => {
+      if (s.guruId === activeGuru.id && s.kelasId) taughtClassIds.add(s.kelasId);
+    });
+    const taughtClasses = classes.filter((c) => taughtClassIds.has(c.id));
+    return taughtClasses;
+  }, [activeGuru, classes, activeSchedules]);
 
-  // Set default kelas saat daftar kelas guru berubah
+  // Set default kelas saat daftar kelas guru berubah jika belum ditentukan
   useEffect(() => {
     if (guruClasses.length > 0) {
       const exists = guruClasses.some((c) => c.id === Number(selectedClassId));
-      if (!exists) {
+      if (!exists && !hasAppliedUrlOrSchedule) {
         setSelectedClassId(guruClasses[0].id);
       }
-    } else {
+    } else if (!hasAppliedUrlOrSchedule) {
       setSelectedClassId("");
     }
-  }, [guruClasses]);
+  }, [guruClasses, selectedClassId, hasAppliedUrlOrSchedule]);
 
   // 2. Ambil siswa di kelas yang sedang diajar
   useEffect(() => {
@@ -139,6 +254,7 @@ export default function AbsensiPage() {
         const existingSession = await absensiService.getAttendance(
           Number(selectedClassId),
           tanggal,
+          jamPelajaran,
         );
 
         if (
@@ -272,6 +388,7 @@ export default function AbsensiPage() {
         kelasId: Number(selectedClassId),
         kelasNama: activeClass.nama,
         guruId: activeGuru ? activeGuru.id : 0,
+        mode: isPiketMode ? ("piket" as const) : ("mengajar" as const),
         guruNama:
           activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar",
         tanggal,
@@ -309,6 +426,77 @@ export default function AbsensiPage() {
       return matchSearch && matchStatus;
     });
   }, [students, searchQuery, filterStatus]);
+
+  // Trigger Export Absensi (Excel / PDF)
+  const handleDownloadExport = async (format: "excel" | "pdf") => {
+    try {
+      setIsExporting(true);
+      setErrorMsg("");
+
+      // Siapkan parameter rentang tanggal berdasarkan exportRangeType
+      let sDate = exportStartDate;
+      let eDate = exportEndDate;
+
+      const now = new Date();
+      if (exportRangeType === "hari") {
+        sDate = tanggal;
+        eDate = tanggal;
+      } else if (exportRangeType === "minggu") {
+        const firstDay = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+        const lastDay = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+        sDate = firstDay.toISOString().split("T")[0];
+        eDate = lastDay.toISOString().split("T")[0];
+      } else if (exportRangeType === "bulan") {
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        sDate = new Date(y, m, 1).toISOString().split("T")[0];
+        eDate = new Date(y, m + 1, 0).toISOString().split("T")[0];
+      }
+
+      const params: { kelasId?: number; guruId?: number; startDate?: string; endDate?: string } = {
+        startDate: sDate,
+        endDate: eDate,
+      };
+
+      if (exportGuruFilter === "selected" && selectedGuruId) {
+        params.guruId = Number(selectedGuruId);
+      }
+      if (exportClassFilter === "selected" && selectedClassId) {
+        params.kelasId = Number(selectedClassId);
+      }
+
+      const token = localStorage.getItem("ideas_access_token");
+      const relativeUrl = absensiService.getExportUrl(format, params);
+      const fullUrl = `http://localhost:3000${relativeUrl}`;
+
+      const res = await fetch(fullUrl, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Gagal mengunduh file laporan ${format.toUpperCase()}`);
+      }
+
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `absensi_${format === "excel" ? "rekap.xlsx" : "rekap.pdf"}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+
+      setSuccessMsg(`Laporan absensi (${format.toUpperCase()}) berhasil diunduh.`);
+      setIsExportModalOpen(false);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Gagal mengunduh laporan absensi");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <>
@@ -368,8 +556,8 @@ export default function AbsensiPage() {
                     Kode: {activeGuru.kodeGuru}
                   </Badge>
                 )}
-                <Badge color="success" size="sm">
-                  Aktif Mengajar
+                <Badge color={isPiketMode ? "warning" : "success"} size="sm">
+                  {isPiketMode ? "Petugas Piket" : "Aktif Mengajar"}
                 </Badge>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -379,11 +567,33 @@ export default function AbsensiPage() {
             </div>
           </div>
 
-          {/* Jika admin atau ingin mengganti guru */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Tombol Guru Piket Mode */}
+            <Button
+              variant={isPiketMode ? "primary" : "outline"}
+              size="sm"
+              onClick={() => setIsPiketMode(!isPiketMode)}
+              className="gap-1.5"
+            >
+              <Icon name="shield" className="h-4 w-4" />
+              <span>{isPiketMode ? "Mode Piket Aktif" : "Mode Guru Piket"}</span>
+            </Button>
+
+            {/* Tombol Modal Export */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExportModalOpen(true)}
+              className="gap-1.5"
+            >
+              <Icon name="download" className="h-4 w-4" />
+              <span>Export Rekap</span>
+            </Button>
+
+            {/* Jika admin atau ingin mengganti guru */}
             <div className="flex items-center gap-2">
               <Label className="mb-0 text-xs text-gray-500 whitespace-nowrap">
-                Ganti Akun Guru:
+                Ganti Guru:
               </Label>
               <select
                 value={selectedGuruId}
@@ -403,6 +613,92 @@ export default function AbsensiPage() {
             </div>
           </div>
         </div>
+
+        {/* Pemberitahuan Jadwal Mengajar Guru Saat Ini */}
+        {currentTeachingSchedule && !isPiketMode && (
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50/60 p-3.5 dark:border-brand-900/40 dark:bg-brand-950/20">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
+                <Icon name="clock" className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-brand-900 dark:text-brand-300">
+                  Pemberitahuan Jam Mengajar: Absensi Sudah Bisa Diakses
+                </p>
+                <p className="text-xs text-brand-700 dark:text-brand-400">
+                  {selectedClassId === currentTeachingSchedule.kelasId ? (
+                    <>
+                      Saat ini Anda sedang mengajar <strong>Kelas {currentTeachingSchedule.kelas?.nama}</strong> (
+                      {currentTeachingSchedule.mataPelajaran?.nama || "Mata Pelajaran"}
+                      ) pukul {currentTeachingSchedule.jamMulai?.slice(0, 5)} -{" "}
+                      {currentTeachingSchedule.jamSelesai?.slice(0, 5)}. Formulir absensi telah otomatis disesuaikan.
+                    </>
+                  ) : (
+                    <>
+                      Hari ini Anda terjadwal di <strong>Kelas {currentTeachingSchedule.kelas?.nama}</strong> (
+                      {currentTeachingSchedule.mataPelajaran?.nama || "Mata Pelajaran"}
+                      ) pukul {currentTeachingSchedule.jamMulai?.slice(0, 5)} -{" "}
+                      {currentTeachingSchedule.jamSelesai?.slice(0, 5)}.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+            {selectedClassId !== currentTeachingSchedule.kelasId && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => applySchedule(currentTeachingSchedule)}
+                className="shrink-0 text-xs"
+              >
+                Terapkan Jadwal Ini
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Banner Guru Piket: Kelas Belum Diabsen */}
+        {isPiketMode && (
+          <div className="mt-4 rounded-lg border border-warning-200 bg-warning-50/60 p-4 dark:border-warning-900/40 dark:bg-warning-950/20">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-warning-800 dark:text-warning-300 font-medium text-xs">
+                <Icon name="alerttriangle" className="h-4 w-4 text-warning-600" />
+                <span>Daftar Kelas yang Belum Diabsen Hari Ini ({tanggal})</span>
+              </div>
+              <span className="text-xs text-warning-700 dark:text-warning-400">
+                {unattendedClasses.length} kelas menunggu
+              </span>
+            </div>
+
+            {loadingUnattended ? (
+              <p className="text-xs text-gray-500">Memeriksa status kelas...</p>
+            ) : unattendedClasses.length === 0 ? (
+              <p className="text-xs text-success-700 dark:text-success-400 font-medium">
+                Alhamdulillah, seluruh kelas aktif sudah selesai diabsen untuk tanggal ini.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {unattendedClasses.map((cls) => (
+                  <button
+                    key={cls.id}
+                    onClick={() => {
+                      setSelectedClassId(cls.id);
+                      setCatatanSesi(`Digantikan oleh Guru Piket: ${activeGuru?.pegawai?.namaLengkap || user?.username}`);
+                      setSuccessMsg(`Memilih Kelas ${cls.nama} untuk absensi pengganti oleh Guru Piket.`);
+                    }}
+                    className={`rounded-md px-3 py-1.5 text-xs font-medium border transition-colors ${
+                      selectedClassId === cls.id
+                        ? "bg-warning-600 text-white border-warning-600 shadow-sm"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-warning-500 dark:bg-gray-800 dark:text-gray-200"
+                    }`}
+                  >
+                    Kelas {cls.nama} {cls.waliKelas ? `(Wali: ${cls.waliKelas})` : ""}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Form Filter Sesi & Kelas */}
         <div className="mt-5 grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2 md:grid-cols-4 dark:border-gray-800">
@@ -1045,6 +1341,189 @@ export default function AbsensiPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Export Rekap Absensi */}
+      <Modal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        className="max-w-lg p-6"
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-900/30">
+              <Icon name="download" className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                Export Laporan Absensi
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Unduh rekap kehadiran siswa dalam format Excel atau PDF
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 py-4">
+          {/* Opsi Cakupan Kelas */}
+          <div>
+            <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              Cakupan Kelas
+            </Label>
+            <div className="mt-1.5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setExportClassFilter("selected")}
+                className={`rounded-lg border p-2.5 text-left text-xs font-medium transition ${
+                  exportClassFilter === "selected"
+                    ? "border-brand-500 bg-brand-50/50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                Kelas Saat Ini
+                <span className="block text-[11px] font-normal text-gray-500">
+                  {activeClass ? `Kelas ${activeClass.nama}` : "Pilih di dropdown"}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setExportClassFilter("all")}
+                className={`rounded-lg border p-2.5 text-left text-xs font-medium transition ${
+                  exportClassFilter === "all"
+                    ? "border-brand-500 bg-brand-50/50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                Semua Kelas
+                <span className="block text-[11px] font-normal text-gray-500">
+                  Seluruh rombel/tingkatan
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Opsi Cakupan Guru */}
+          <div>
+            <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              Guru Pengajar
+            </Label>
+            <div className="mt-1.5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setExportGuruFilter("selected")}
+                className={`rounded-lg border p-2.5 text-left text-xs font-medium transition ${
+                  exportGuruFilter === "selected"
+                    ? "border-brand-500 bg-brand-50/50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                Guru Terpilih
+                <span className="block text-[11px] font-normal text-gray-500 truncate">
+                  {activeGuru?.pegawai?.namaLengkap || "Guru aktif"}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setExportGuruFilter("all")}
+                className={`rounded-lg border p-2.5 text-left text-xs font-medium transition ${
+                  exportGuruFilter === "all"
+                    ? "border-brand-500 bg-brand-50/50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                Semua Guru
+                <span className="block text-[11px] font-normal text-gray-500">
+                  Seluruh sesi mengajar
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Periode Waktu */}
+          <div>
+            <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              Rentang Periode
+            </Label>
+            <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+              {(
+                [
+                  { key: "hari", label: "Hari Ini" },
+                  { key: "minggu", label: "Minggu Ini" },
+                  { key: "bulan", label: "Bulan Ini" },
+                  { key: "semester", label: "Kustom / Smt" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setExportRangeType(tab.key)}
+                  className={`rounded-lg py-2 text-center text-xs font-medium border transition ${
+                    exportRangeType === tab.key
+                      ? "border-brand-500 bg-brand-500 text-white"
+                      : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {exportRangeType === "semester" && (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[11px] text-gray-500">Dari Tanggal</Label>
+                  <Input
+                    type="date"
+                    value={exportStartDate}
+                    onChange={(e) => setExportStartDate(e.target.value)}
+                    className="mt-1 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px] text-gray-500">Sampai Tanggal</Label>
+                  <Input
+                    type="date"
+                    value={exportEndDate}
+                    onChange={(e) => setExportEndDate(e.target.value)}
+                    className="mt-1 text-xs"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal Action Buttons */}
+        <div className="flex items-center justify-end gap-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsExportModalOpen(false)}
+            disabled={isExporting}
+          >
+            Tutup
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleDownloadExport("pdf")}
+            disabled={isExporting}
+            className="gap-1.5 text-error-600 border-error-200 hover:bg-error-50 dark:border-error-800"
+          >
+            <Icon name="filetext" className="h-4 w-4" />
+            <span>{isExporting ? "Memproses..." : "Download PDF"}</span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => handleDownloadExport("excel")}
+            disabled={isExporting}
+            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            <Icon name="download" className="h-4 w-4" />
+            <span>{isExporting ? "Memproses..." : "Download Excel"}</span>
+          </Button>
+        </div>
+      </Modal>
     </>
   );
 }

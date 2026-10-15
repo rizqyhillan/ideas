@@ -12,8 +12,9 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([JadwalPelajaran])],
 
-  controllers: [JadwalController, ExportImportController],
+  controllers: [JadwalController],
 
-  providers: [JadwalService, JadwalExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: JadwalExportImportService }, PdfService],
+  providers: [JadwalService, JadwalExportImportService],
+  exports: [JadwalService, JadwalExportImportService],
 })
 export class JadwalModule {}

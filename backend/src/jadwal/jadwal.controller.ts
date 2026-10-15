@@ -3,6 +3,7 @@ import { JadwalService } from './jadwal.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('jadwal')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -10,13 +11,13 @@ export class JadwalController {
   constructor(private readonly jadwalService: JadwalService) {}
 
   @Get()
-  findAll() {
-    return this.jadwalService.findAll();
+  findAll(@CurrentUser() user?: any) {
+    return this.jadwalService.findAll(user);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.jadwalService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user?: any) {
+    return this.jadwalService.findOne(id, user);
   }
 
   @Post()

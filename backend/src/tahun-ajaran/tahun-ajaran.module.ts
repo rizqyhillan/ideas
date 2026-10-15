@@ -12,8 +12,9 @@ import { PdfService } from '../common/export/pdf.service';
 @Module({
   imports: [TypeOrmModule.forFeature([TahunAjaran])],
 
-  controllers: [TahunAjaranController, ExportImportController],
+  controllers: [TahunAjaranController],
 
-  providers: [TahunAjaranService, TahunAjaranExportImportService, { provide: EXPORT_IMPORT_SERVICE, useClass: TahunAjaranExportImportService }, PdfService],
+  providers: [TahunAjaranService, TahunAjaranExportImportService],
+  exports: [TahunAjaranService, TahunAjaranExportImportService],
 })
 export class TahunAjaranModule {}

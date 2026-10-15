@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Button from "../../components/ui/button/Button";
@@ -14,6 +14,8 @@ import {
   CreateCatatanKonselingPayload,
   VisibilitasKonseling,
 } from "../../services/academic-extras.service";
+import { siswaService, SiswaItem, guruService, GuruItem } from "../../services/master.service";
+import { useAuth } from "../../context/AuthContext";
 
 const visibilitasOptions: {
   value: VisibilitasKonseling;
@@ -26,6 +28,23 @@ const visibilitasOptions: {
 ];
 
 export default function KonselingPage() {
+  const { user } = useAuth();
+
+  const isSiswa = useMemo(() => {
+    return user?.roles?.includes("siswa");
+  }, [user]);
+
+  const canManageKonseling = useMemo(() => {
+    if (!user) return false;
+    return (
+      user.roles?.includes("admin") ||
+      user.roles?.includes("bk") ||
+      user.roles?.includes("guru_bk") ||
+      user.permissions?.includes("counseling.create") ||
+      user.permissions?.includes("konseling.create")
+    );
+  }, [user]);
+
   const [data, setData] = useState<CatatanKonselingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -34,6 +53,10 @@ export default function KonselingPage() {
   >("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Master data options for modal
+  const [studentOptions, setStudentOptions] = useState<SiswaItem[]>([]);
+  const [guruOptions, setGuruOptions] = useState<GuruItem[]>([]);
 
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -50,6 +73,24 @@ export default function KonselingPage() {
   });
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Load students & teachers for modal dropdowns
+  useEffect(() => {
+    if (!canManageKonseling) return;
+    async function loadMaster() {
+      try {
+        const [siswaRes, guruRes] = await Promise.all([
+          siswaService.getAll({ limit: 100 }),
+          guruService.getAll({ limit: 100 }),
+        ]);
+        setStudentOptions(siswaRes.data || []);
+        setGuruOptions(guruRes.data || []);
+      } catch {
+        // silent fallback
+      }
+    }
+    loadMaster();
+  }, [canManageKonseling]);
 
   async function loadData() {
     try {
@@ -81,8 +122,8 @@ export default function KonselingPage() {
   function openCreateModal() {
     setEditingId(null);
     setFormData({
-      siswaId: 1,
-      guruBkId: 1,
+      siswaId: studentOptions[0]?.id || 1,
+      guruBkId: guruOptions[0]?.id || 1,
       tanggal: new Date().toISOString().split("T")[0],
       topik: "",
       isi: "",
@@ -173,22 +214,24 @@ export default function KonselingPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
-            <select
-              value={visibilitasFilter === "" ? "" : visibilitasFilter}
-              onChange={(e) =>
-                setVisibilitasFilter(
-                  e.target.value as VisibilitasKonseling | "",
-                )
-              }
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
-            >
-              <option value="">Semua Visibilitas</option>
-              {visibilitasOptions.map((v) => (
-                <option key={v.value} value={v.value}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
+            {!isSiswa && (
+              <select
+                value={visibilitasFilter === "" ? "" : visibilitasFilter}
+                onChange={(e) =>
+                  setVisibilitasFilter(
+                    e.target.value as VisibilitasKonseling | "",
+                  )
+                }
+                className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
+              >
+                <option value="">Semua Visibilitas</option>
+                {visibilitasOptions.map((v) => (
+                  <option key={v.value} value={v.value}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+            )}
             <Input
               type="text"
               placeholder="Cari..."
@@ -199,13 +242,15 @@ export default function KonselingPage() {
               }}
               className="w-full sm:w-56"
             />
-            <Button
-              size="sm"
-              onClick={openCreateModal}
-              className="w-full sm:w-auto justify-center"
-            >
-              + Tambah Catatan
-            </Button>
+            {canManageKonseling && (
+              <Button
+                size="sm"
+                onClick={openCreateModal}
+                className="w-full sm:w-auto justify-center"
+              >
+                + Tambah Catatan
+              </Button>
+            )}
           </div>
         </div>
 
@@ -218,19 +263,21 @@ export default function KonselingPage() {
                 <th className="px-4 py-3">Topik</th>
                 <th className="px-4 py-3">Visibilitas</th>
                 <th className="px-4 py-3">Tindak Lanjut</th>
-                <th className="px-4 py-3 text-center">Aksi</th>
+                {canManageKonseling && (
+                  <th className="px-4 py-3 text-center">Aksi</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800 table-body-row">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                  <td colSpan={canManageKonseling ? 6 : 5} className="py-8 text-center text-gray-400">
                     Memuat data...
                   </td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                  <td colSpan={canManageKonseling ? 6 : 5} className="py-8 text-center text-gray-400">
                     Tidak ada data ditemukan.
                   </td>
                 </tr>
@@ -268,22 +315,24 @@ export default function KonselingPage() {
                     <td className="px-4 py-3.5 text-xs text-gray-500">
                       {item.tindakLanjut || "-"}
                     </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="btn-action-sm text-brand-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="btn-action-sm text-error-600"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
+                    {canManageKonseling && (
+                      <td className="px-4 py-3.5 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => openEditModal(item)}
+                            className="btn-action-sm text-brand-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="btn-action-sm text-error-600"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -339,20 +388,22 @@ export default function KonselingPage() {
                     Tindak lanjut: {item.tindakLanjut}
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openEditModal(item)}
-                    className="btn-action-sm text-brand-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="btn-action-sm text-error-600"
-                  >
-                    Hapus
-                  </button>
-                </div>
+                {canManageKonseling && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="btn-action-sm text-brand-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="btn-action-sm text-error-600"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -417,7 +468,15 @@ export default function KonselingPage() {
                 }
                 className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
               >
-                <option value={1}>Siswa 1</option>
+                {studentOptions.length > 0 ? (
+                  studentOptions.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.namaLengkap} ({s.nisn})
+                    </option>
+                  ))
+                ) : (
+                  <option value={1}>Pilih Siswa</option>
+                )}
               </select>
             </div>
             <div>
@@ -431,7 +490,15 @@ export default function KonselingPage() {
                 }
                 className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
               >
-                <option value={1}>Guru BK 1</option>
+                {guruOptions.length > 0 ? (
+                  guruOptions.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.pegawai?.namaLengkap || `Guru #${g.id}`}
+                    </option>
+                  ))
+                ) : (
+                  <option value={1}>Pilih Guru BK</option>
+                )}
               </select>
             </div>
           </div>
