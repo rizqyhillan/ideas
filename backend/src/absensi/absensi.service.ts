@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
@@ -160,6 +165,9 @@ export class AbsensiService {
 
   async create(dto: CreateAbsensiSesiDto, user: any) {
     const context = await this.resolveWriteContext(dto, user);
+    if (!dto.jamKe?.trim()) {
+      throw new BadRequestException('Jam pelajaran wajib diisi.');
+    }
     if (dto.items.length === 0) {
       throw new BadRequestException('Minimal satu data siswa wajib dikirim.');
     }
@@ -203,6 +211,24 @@ export class AbsensiService {
         .getOne();
 
       if (session) {
+        if (!this.isAdmin(user) && session.guruId !== context.guruId) {
+          throw new ForbiddenException(
+            'Guru hanya dapat memperbarui absensi yang dicatat atas namanya sendiri.',
+          );
+        }
+        const existingSubject = session.mataPelajaran?.trim().toLowerCase();
+        const requestedSubject = dto.mataPelajaran?.trim().toLowerCase();
+        if (
+          !this.isAdmin(user) &&
+          existingSubject &&
+          requestedSubject &&
+          existingSubject !== requestedSubject
+        ) {
+          throw new ConflictException(
+            'Sesi absensi untuk jam ini sudah tercatat untuk mata pelajaran lain.',
+          );
+        }
+
         session.guruId = context.guruId ?? session.guruId;
         session.jamKe = dto.jamKe ?? session.jamKe;
         session.mataPelajaran = dto.mataPelajaran ?? session.mataPelajaran;

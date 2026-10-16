@@ -9,6 +9,7 @@ import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 import { TahunAjaran } from '../database/entities/entities/TahunAjaran';
 import { Guru } from '../database/entities/entities/Guru';
 import { Siswa } from '../database/entities/entities/Siswa';
+import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 
 describe('ClassesService', () => {
   let service: ClassesService;
@@ -17,6 +18,7 @@ describe('ClassesService', () => {
   let tahunAjaranRepo: Partial<Record<keyof Repository<TahunAjaran>, jest.Mock>>;
   let guruRepo: Partial<Record<keyof Repository<Guru>, jest.Mock>>;
   let siswaRepo: Partial<Record<keyof Repository<Siswa>, jest.Mock>>;
+  let jadwalRepo: Partial<Record<keyof Repository<JadwalPelajaran>, jest.Mock>>;
   let dataSource: any;
   let mockKelas: any;
 
@@ -59,10 +61,16 @@ describe('ClassesService', () => {
 
     guruRepo = {
       findOne: jest.fn(),
+      createQueryBuilder: jest.fn(),
     };
 
     siswaRepo = {
       find: jest.fn(),
+    };
+
+    jadwalRepo = {
+      find: jest.fn(),
+      exists: jest.fn(),
     };
 
     dataSource = {
@@ -77,6 +85,7 @@ describe('ClassesService', () => {
         { provide: getRepositoryToken(TahunAjaran), useValue: tahunAjaranRepo },
         { provide: getRepositoryToken(Guru), useValue: guruRepo },
         { provide: getRepositoryToken(Siswa), useValue: siswaRepo },
+        { provide: getRepositoryToken(JadwalPelajaran), useValue: jadwalRepo },
         { provide: DataSource, useValue: dataSource },
       ],
     }).compile();
@@ -153,6 +162,34 @@ describe('ClassesService', () => {
       kelasRepo.findOne!.mockResolvedValue(null);
 
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('teacher access', () => {
+    const guruUser = { id: 7, userRoles2: [{ role: { code: 'guru' } }] };
+
+    it('allows a scheduled teacher to retrieve students in a class', async () => {
+      kelasRepo.findOne!.mockResolvedValue({ ...mockKelas, waliKelasId: 99 });
+      guruRepo.createQueryBuilder!.mockReturnValue({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({ id: 2 }),
+      });
+      jadwalRepo.exists!.mockResolvedValue(true);
+      siswaKelasRepo.find!.mockResolvedValue([]);
+
+      await expect(service.getClassStudents(1, guruUser)).resolves.toMatchObject({
+        success: true,
+        data: [],
+      });
+      expect(jadwalRepo.exists).toHaveBeenCalledWith({
+        where: {
+          guruId: 2,
+          kelasId: 1,
+          statusAktif: true,
+          deletedAt: expect.anything(),
+        },
+      });
     });
   });
 

@@ -12,6 +12,7 @@ import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 import { TahunAjaran } from '../database/entities/entities/TahunAjaran';
 import { Guru } from '../database/entities/entities/Guru';
 import { Siswa } from '../database/entities/entities/Siswa';
+import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
@@ -35,6 +36,9 @@ export class ClassesService {
 
     @InjectRepository(Siswa)
     private readonly siswaRepository: Repository<Siswa>,
+
+    @InjectRepository(JadwalPelajaran)
+    private readonly jadwalRepository: Repository<JadwalPelajaran>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -60,6 +64,14 @@ export class ClassesService {
     });
   }
 
+  private async findGuruForUser(userId: number): Promise<Guru | null> {
+    return this.guruRepository
+      .createQueryBuilder('guru')
+      .innerJoin('guru.pegawai', 'pegawai')
+      .where('pegawai.userId = :userId', { userId })
+      .getOne();
+  }
+
   private async assertTeacherScope(kelas: Kelas, user?: any) {
     const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
     if (roles.includes('siswa')) {
@@ -71,14 +83,23 @@ export class ClassesService {
     }
     if (!roles.includes('guru') || roles.includes('admin') || roles.includes('super_admin')) return;
 
-    const guru = await this.guruRepository
-      .createQueryBuilder('guru')
-      .innerJoin('guru.pegawai', 'pegawai')
-      .where('pegawai.userId = :userId', { userId: user.id })
-      .getOne();
+    const guru = await this.findGuruForUser(user.id);
 
-    if (!guru || kelas.waliKelasId !== guru.id) {
-      throw new BadRequestException('Guru hanya dapat mengakses kelas yang menjadi tanggung jawabnya');
+    const teachesClass = guru
+      ? await this.jadwalRepository.exists({
+          where: {
+            guruId: guru.id,
+            kelasId: kelas.id,
+            statusAktif: true,
+            deletedAt: IsNull(),
+          },
+        })
+      : false;
+
+    if (!guru || (kelas.waliKelasId !== guru.id && !teachesClass)) {
+      throw new BadRequestException(
+        'Guru hanya dapat mengakses kelas wali atau kelas pada jadwal mengajarnya',
+      );
     }
   }
 
@@ -184,15 +205,28 @@ export class ClassesService {
 
     const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
     if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin')) {
-      const guru = await this.guruRepository
-        .createQueryBuilder('guru')
-        .innerJoin('guru.pegawai', 'pegawai')
-        .where('pegawai.userId = :userId', { userId: user.id })
-        .getOne();
+      const guru = await this.findGuruForUser(user.id);
       if (!guru) {
         return { success: true, message: 'Classes retrieved successfully', data: [], meta: { page, limit, total: 0, lastPage: 0 } };
       }
-      qb.andWhere('kelas.waliKelasId = :currentGuruId', { currentGuruId: guru.id });
+      const schedules = await this.jadwalRepository.find({
+        where: {
+          guruId: guru.id,
+          statusAktif: true,
+          deletedAt: IsNull(),
+        },
+        select: { kelasId: true },
+      });
+      const teachingClassIds = [...new Set(schedules.map((schedule) => schedule.kelasId))];
+
+      if (teachingClassIds.length > 0) {
+        qb.andWhere(
+          '(kelas.waliKelasId = :currentGuruId OR kelas.id IN (:...teachingClassIds))',
+          { currentGuruId: guru.id, teachingClassIds },
+        );
+      } else {
+        qb.andWhere('kelas.waliKelasId = :currentGuruId', { currentGuruId: guru.id });
+      }
     }
     if (roles.includes('siswa')) {
       const siswa = await this.siswaRepository.findOne({ where: { userId: user.id, deletedAt: IsNull() } });

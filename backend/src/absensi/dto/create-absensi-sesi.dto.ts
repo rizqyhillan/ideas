@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class StudentAttendanceDto {
@@ -28,9 +28,9 @@ export class CreateAbsensiSesiDto {
   @IsDateString()
   tanggal: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  jamKe?: string;
+  jamKe: string;
 
   @IsOptional()
   @IsString()

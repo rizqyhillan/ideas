@@ -10,6 +10,21 @@ export class JadwalService {
     private jadwalRepo: Repository<JadwalPelajaran>
   ) {}
 
+  private toResponse(data: JadwalPelajaran) {
+    return {
+      ...data,
+      isActive: data.statusAktif,
+    };
+  }
+
+  private toPersistencePayload(body: any) {
+    const { isActive, statusAktif, ...payload } = body;
+    if (isActive !== undefined || statusAktif !== undefined) {
+      payload.statusAktif = isActive ?? statusAktif;
+    }
+    return payload;
+  }
+
   async findAll(
     user?: any,
     filters: {
@@ -49,11 +64,11 @@ export class JadwalService {
     }
     if (filters.hari) qb.andWhere('jadwal.hari = :hari', { hari: filters.hari });
     if (filters.isActive !== undefined) {
-      qb.andWhere('jadwal.isActive = :isActive', { isActive: filters.isActive });
+      qb.andWhere('jadwal.statusAktif = :isActive', { isActive: filters.isActive });
     }
 
     const data = await qb.orderBy('jadwal.hari', 'ASC').addOrderBy('jadwal.jamMulai', 'ASC').getMany();
-    return { success: true, data };
+    return { success: true, data: data.map((item) => this.toResponse(item)) };
   }
 
   async findOne(id: number, user?: any) {
@@ -67,17 +82,23 @@ export class JadwalService {
     if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin') && data.guru?.pegawai?.userId !== user.id) {
       throw new NotFoundException('Jadwal tidak ditemukan');
     }
-    return { success: true, data };
+    return { success: true, data: this.toResponse(data) };
   }
 
   async create(body: any) {
-    const newData = this.jadwalRepo.create(body);
-    await this.jadwalRepo.save(newData);
-    return { success: true, message: 'Jadwal berhasil ditambahkan', data: newData };
+    const newData = this.jadwalRepo.create(
+      this.toPersistencePayload(body) as Partial<JadwalPelajaran>,
+    );
+    const saved = await this.jadwalRepo.save(newData);
+    return {
+      success: true,
+      message: 'Jadwal berhasil ditambahkan',
+      data: this.toResponse(saved),
+    };
   }
 
   async update(id: number, body: any) {
-    await this.jadwalRepo.update(id, body);
+    await this.jadwalRepo.update(id, this.toPersistencePayload(body));
     return this.findOne(id);
   }
 

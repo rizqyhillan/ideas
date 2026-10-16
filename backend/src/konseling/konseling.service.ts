@@ -95,6 +95,9 @@ export class KonselingService {
       }
 
       qb.andWhere('k.siswaId = :mySiswaId', { mySiswaId: studentRecord.id });
+      qb.andWhere('k.visibilitas = :studentVisibility', {
+        studentVisibility: 'siswa',
+      });
     } else {
       if (params.siswaId) {
         qb.andWhere('k.siswaId = :siswaId', { siswaId: params.siswaId });
@@ -159,7 +162,8 @@ export class KonselingService {
       const studentRecord = await this.getStudentForUser(user);
       if (
         !studentRecord ||
-        data.siswaId !== studentRecord.id
+        data.siswaId !== studentRecord.id ||
+        data.visibilitas !== 'siswa'
       ) {
         throw new ForbiddenException(
           'Anda tidak memiliki akses ke catatan konseling ini',

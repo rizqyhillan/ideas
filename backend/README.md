@@ -33,6 +33,14 @@ $ pnpm install
 
 ## Compile and run the project
 
+Apply database migrations manually when needed:
+
+```bash
+$ pnpm run migrate
+```
+
+Every `start` command runs pending migrations before the application begins. Applied filenames are stored in the `schema_migrations` table, so existing databases receive each migration once.
+
 ```bash
 # development
 $ pnpm run start

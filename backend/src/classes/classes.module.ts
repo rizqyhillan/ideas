@@ -6,6 +6,7 @@ import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 import { TahunAjaran } from '../database/entities/entities/TahunAjaran';
 import { Guru } from '../database/entities/entities/Guru';
 import { Siswa } from '../database/entities/entities/Siswa';
+import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 
 import { ClassesController } from './classes.controller';
 import { ClassesService } from './classes.service';
@@ -22,6 +23,7 @@ import { PdfService } from '../common/export/pdf.service';
       TahunAjaran,
       Guru,
       Siswa,
+      JadwalPelajaran,
     ]),
   ],
   controllers: [ClassesController],
