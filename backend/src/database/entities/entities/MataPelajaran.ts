@@ -2,9 +2,12 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Guru } from './Guru';
 import { JadwalPelajaran } from './JadwalPelajaran';
 
 @Index('mata_pelajaran_pkey', ['id'], { unique: true })
@@ -24,6 +27,16 @@ export class MataPelajaran {
 
   @Column('boolean', { name: 'status_aktif', default: () => 'true' })
   statusAktif: boolean;
+
+  @Column('integer', { name: 'guru_pengampu_id', nullable: true })
+  guruPengampuId: number | null;
+
+  @ManyToOne(() => Guru, (guru) => guru.mataPelajarans, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn([{ name: 'guru_pengampu_id', referencedColumnName: 'id' }])
+  guruPengampu: Guru | null;
 
   @Column('timestamp with time zone', {
     name: 'created_at',

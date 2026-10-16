@@ -21,6 +21,10 @@ export class QueryGuruDto {
   search?: string;
 
   @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsOptional()
   @IsIn(['id', 'kodeGuru', 'createdAt'])
   sort: string = 'id';
 

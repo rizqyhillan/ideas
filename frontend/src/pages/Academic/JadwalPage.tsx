@@ -4,6 +4,7 @@ import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icons/ideas-icon";
 import {
@@ -20,17 +21,25 @@ import {
   semesterService,
   SemesterItem,
 } from "../../services/academic-extras.service";
+import { useAuth } from "../../context/AuthContext";
 
 type Hari = "senin" | "selasa" | "rabu" | "kamis" | "jumat" | "sabtu";
 
 const hariList: Hari[] = ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu"];
 
 export default function JadwalPage() {
+  const { user } = useAuth();
+  const isAdminUser = Boolean(
+    user?.roles?.includes("admin") || user?.roles?.includes("super_admin"),
+  );
   const [data, setData] = useState<JadwalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterKelas, setFilterKelas] = useState<number | "">("");
   const [filterHari, setFilterHari] = useState<Hari | "">("");
+  const [filterGuru, setFilterGuru] = useState<number | "">("");
+  const [filterMapel, setFilterMapel] = useState<number | "">("");
+  const [viewMode, setViewMode] = useState<"kalender" | "tabel">("kalender");
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -62,6 +71,8 @@ export default function JadwalPage() {
       if (search) params.search = search;
       if (filterKelas) params.kelasId = filterKelas;
       if (filterHari) params.hari = filterHari;
+      if (filterGuru && isAdminUser) params.guruId = filterGuru;
+      if (filterMapel) params.mataPelajaranId = filterMapel;
 
       const [jadwalRes, kelasRes, guruRes, mapelRes, semesterRes] =
         await Promise.all([
@@ -86,7 +97,7 @@ export default function JadwalPage() {
 
   useEffect(() => {
     loadData();
-  }, [search, filterKelas, filterHari]);
+  }, [search, filterKelas, filterHari, filterGuru, filterMapel, isAdminUser]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -207,9 +218,35 @@ export default function JadwalPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={openCreateModal}>
-              + Tambah Jadwal
-            </Button>
+            <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
+              <button
+                onClick={() => setViewMode("kalender")}
+                className={`px-3 py-1.5 flex items-center gap-1.5 transition-colors ${
+                  viewMode === "kalender"
+                    ? "bg-brand-500 text-white"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Icon name="calendar" size={14} />
+                Kalender
+              </button>
+              <button
+                onClick={() => setViewMode("tabel")}
+                className={`px-3 py-1.5 flex items-center gap-1.5 transition-colors ${
+                  viewMode === "tabel"
+                    ? "bg-brand-500 text-white"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                <Icon name="list" size={14} />
+                Tabel
+              </button>
+            </div>
+            {isAdminUser && (
+              <Button size="sm" onClick={openCreateModal}>
+                + Tambah Jadwal
+              </Button>
+            )}
           </div>
         </div>
 
@@ -222,34 +259,129 @@ export default function JadwalPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-48"
           />
-          <select
-            value={filterKelas}
-            onChange={(e) => setFilterKelas(Number(e.target.value) || "")}
-            className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-          >
-            <option value="">Semua Kelas</option>
-            {kelasList.map((k) => (
-              <option key={k.id} value={k.id}>
-                Kelas {k.nama}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filterHari}
-            onChange={(e) => setFilterHari((e.target.value as Hari) || "")}
-            className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-          >
-            <option value="">Semua Hari</option>
-            {hariList.map((h) => (
-              <option key={h} value={h}>
-                {h.charAt(0).toUpperCase() + h.slice(1)}
-              </option>
-            ))}
-          </select>
+          <div className="w-full sm:w-44">
+            <Select
+              value={filterKelas === "" ? "" : String(filterKelas)}
+              placeholder="Semua Kelas"
+              options={kelasList.map((k) => ({
+                value: String(k.id),
+                label: `Kelas ${k.nama}`,
+              }))}
+              onChange={(value) => setFilterKelas(Number(value) || "")}
+              className="h-10"
+            />
+          </div>
+          <div className="w-full sm:w-36">
+            <Select
+              value={filterHari}
+              placeholder="Semua Hari"
+              options={hariList.map((h) => ({
+                value: h,
+                label: h.charAt(0).toUpperCase() + h.slice(1),
+              }))}
+              onChange={(value) => setFilterHari((value as Hari) || "")}
+              className="h-10"
+            />
+          </div>
+          {isAdminUser && (
+            <div className="w-full sm:w-48">
+              <Select
+                value={filterGuru === "" ? "" : String(filterGuru)}
+                placeholder="Semua Guru"
+                options={guruList.map((guru) => ({
+                  value: String(guru.id),
+                  label: guru.pegawai?.namaLengkap || `Guru #${guru.id}`,
+                }))}
+                onChange={(value) => setFilterGuru(Number(value) || "")}
+                className="h-10"
+              />
+            </div>
+          )}
+          <div className="w-full sm:w-52">
+            <Select
+              value={filterMapel === "" ? "" : String(filterMapel)}
+              placeholder="Semua Mata Pelajaran"
+              options={mapelList.map((mapel) => ({
+                value: String(mapel.id),
+                label: mapel.nama,
+              }))}
+              onChange={(value) => setFilterMapel(Number(value) || "")}
+              className="h-10"
+            />
+          </div>
         </div>
 
+        {/* Kalender View */}
+        {viewMode === "kalender" && (
+          <div className="overflow-x-auto">
+            <div className="flex gap-3 min-w-[640px] pb-2">
+              {hariList.map((hari) => {
+                const jadwalHari = data.filter(
+                  (d) =>
+                    d.hari === hari &&
+                    (filterKelas === "" || d.kelasId === filterKelas) &&
+                    (filterGuru === "" || d.guruId === filterGuru) &&
+                    (filterMapel === "" || d.mataPelajaranId === filterMapel)
+                );
+                return (
+                  <div key={hari} className="flex-1 min-w-[140px]">
+                    <div className="mb-2 px-2 py-1 rounded-lg bg-brand-50 dark:bg-brand-500/10 text-center">
+                      <span className="text-xs font-semibold text-brand-600 dark:text-brand-400">
+                        {hari.charAt(0).toUpperCase() + hari.slice(1)}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {loading ? (
+                        <div className="h-16 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                      ) : jadwalHari.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-gray-400">
+                          —
+                        </div>
+                      ) : (
+                        jadwalHari
+                          .slice()
+                          .sort((a, b) =>
+                            (a.jamMulai || "").localeCompare(b.jamMulai || "")
+                          )
+                          .map((item) => (
+                            <div
+                              key={item.id}
+                              className={`p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 transition-colors ${isAdminUser ? "hover:border-brand-300 dark:hover:border-brand-600 cursor-pointer" : ""}`}
+                              onClick={isAdminUser ? () => openEditModal(item) : undefined}
+                            >
+                              <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 mb-0.5">
+                                {formatJam(item.jamMulai)}–{formatJam(item.jamSelesai)}
+                              </p>
+                              <p className="text-xs font-semibold text-gray-900 dark:text-white leading-snug">
+                                {mapelList.find((m) => m.id === item.mataPelajaranId)?.nama || "-"}
+                              </p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                {kelasList.find((k) => k.id === item.kelasId)?.nama || ""}
+                              </p>
+                              <p className="text-[11px] text-gray-400 truncate">
+                                {guruList.find((g) => g.id === item.guruId)?.pegawai?.namaLengkap || ""}
+                              </p>
+                              {item.ruang && (
+                                <p className="text-[11px] text-gray-400 flex items-center gap-0.5 mt-0.5">
+                                  <Icon name="mappin" size={10} />
+                                  {item.ruang}
+                                </p>
+                              )}
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Desktop Table */}
-        <div className="hidden md:block overflow-x-auto">
+        {viewMode === "tabel" && (
+          <>
+          <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="border-b border-gray-200 bg-gray-50/50 text-xs font-semibold uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
               <tr>
@@ -326,20 +458,24 @@ export default function JadwalPage() {
                       )}
                     </td>
                     <td className="px-4 py-3.5 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
-                        >
-                          Hapus
-                        </button>
-                      </div>
+                      {isAdminUser ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => openEditModal(item)}
+                            className="px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="px-2.5 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -396,28 +532,30 @@ export default function JadwalPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => openEditModal(item)}
-                      className="px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-error-600 bg-error-50 rounded-lg hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
-                    >
-                      Hapus
-                    </button>
-                  </div>
+                  {isAdminUser && (
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className="px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="px-3 py-1.5 text-xs font-medium text-error-600 bg-error-50 rounded-lg hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
           )}
         </div>
+          </>
+        )}
       </div>
-
-      {/* Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

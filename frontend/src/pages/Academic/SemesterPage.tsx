@@ -26,7 +26,7 @@ export default function SemesterPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<CreateSemesterPayload>({
-    tahunAjaranId: 1,
+    tahunAjaranId: 0,
     jenis: "ganjil",
     tanggalMulai: "",
     tanggalSelesai: "",
@@ -62,7 +62,7 @@ export default function SemesterPage() {
   function openCreateModal() {
     setEditingId(null);
     setFormData({
-      tahunAjaranId: tahunAjaranList[0]?.id || 1,
+      tahunAjaranId: tahunAjaranList[0]?.id || 0,
       jenis: "ganjil",
       tanggalMulai: "",
       tanggalSelesai: "",
@@ -141,7 +141,7 @@ export default function SemesterPage() {
       {error && <div className="alert-error-flat">{error}</div>}
 
       <div className="card-flat lg:p-6 p-4">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
               Daftar Semester
@@ -150,15 +150,15 @@ export default function SemesterPage() {
               Kelola semester akademik (Ganjil / Genap)
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Input
               type="text"
               placeholder="Cari semester..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-48 sm:w-64"
+              className="w-full sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal}>
+            <Button size="sm" className="w-full sm:w-auto" onClick={openCreateModal}>
               + Tambah Semester
             </Button>
           </div>
@@ -260,7 +260,7 @@ export default function SemesterPage() {
             </div>
           ) : (
             data.map((item) => (
-              <div key={item.id} className="card-flat">
+              <div key={item.id} className="card-flat p-3 sm:p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

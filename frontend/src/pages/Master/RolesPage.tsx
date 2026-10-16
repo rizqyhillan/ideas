@@ -546,7 +546,7 @@ export default function RolesPage() {
         className="max-w-4xl p-5 sm:p-7"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pr-10 sm:pr-12">
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 flex items-center justify-center">
@@ -563,8 +563,8 @@ export default function RolesPage() {
                 Centang tindakan modul yang diizinkan untuk peran ini. Folder modul yang tidak dicentang otomatis disembunyikan di sidebar dan ditolak via URL.
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 border border-brand-200/50 dark:border-brand-500/20 whitespace-nowrap">
                 {selectedPermIds.size} / {allPermissions.length} Aktif
               </span>
             </div>

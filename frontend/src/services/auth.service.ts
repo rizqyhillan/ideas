@@ -16,6 +16,11 @@ export interface UserProfile {
   username: string;
   email: string;
   namaLengkap?: string;
+  noTelepon?: string;
+  nip?: string;
+  nisn?: string;
+  pegawai?: any;
+  siswa?: any;
   status: string;
   lastLoginAt?: string;
   createdAt?: string;
@@ -29,6 +34,19 @@ export interface UserProfile {
 export interface LoginResult {
   accessToken: string;
   user: UserProfile;
+}
+
+export interface UpdateProfilePayload {
+  username?: string;
+  email?: string;
+  namaLengkap?: string;
+  noTelepon?: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword?: string;
 }
 
 export const authService = {
@@ -59,5 +77,33 @@ export const authService = {
       return res.data;
     }
     return res as UserProfile;
+  },
+
+  async updateProfile(payload: UpdateProfilePayload): Promise<UserProfile> {
+    const res = await apiFetch<ApiResponse<UserProfile> | UserProfile>(
+      "/auth/profile",
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if ("data" in res && res.data) {
+      return res.data;
+    }
+    return res as UserProfile;
+  },
+
+  async changePassword(
+    payload: ChangePasswordPayload,
+  ): Promise<{ success: boolean; message: string }> {
+    const res = await apiFetch<{ success: boolean; message: string }>(
+      "/auth/change-password",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
+    return res;
   },
 };

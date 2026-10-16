@@ -10,7 +10,17 @@ export class JadwalService {
     private jadwalRepo: Repository<JadwalPelajaran>
   ) {}
 
-  async findAll(user?: any) {
+  async findAll(
+    user?: any,
+    filters: {
+      search?: string;
+      kelasId?: number;
+      guruId?: number;
+      mataPelajaranId?: number;
+      hari?: string;
+      isActive?: boolean;
+    } = {},
+  ) {
     const qb = this.jadwalRepo.createQueryBuilder('jadwal')
       .leftJoinAndSelect('jadwal.kelas', 'kelas')
       .leftJoinAndSelect('jadwal.mataPelajaran', 'mataPelajaran')
@@ -24,7 +34,25 @@ export class JadwalService {
       qb.andWhere('pegawai.userId = :userId', { userId: user.id });
     }
 
-    const data = await qb.getMany();
+    if (filters.search) {
+      qb.andWhere(
+        '(LOWER(kelas.nama) LIKE :search OR LOWER(mataPelajaran.nama) LIKE :search OR LOWER(pegawai.namaLengkap) LIKE :search)',
+        { search: `%${filters.search.toLowerCase()}%` },
+      );
+    }
+    if (filters.kelasId) qb.andWhere('jadwal.kelasId = :kelasId', { kelasId: filters.kelasId });
+    if (filters.guruId) qb.andWhere('jadwal.guruId = :guruId', { guruId: filters.guruId });
+    if (filters.mataPelajaranId) {
+      qb.andWhere('jadwal.mataPelajaranId = :mataPelajaranId', {
+        mataPelajaranId: filters.mataPelajaranId,
+      });
+    }
+    if (filters.hari) qb.andWhere('jadwal.hari = :hari', { hari: filters.hari });
+    if (filters.isActive !== undefined) {
+      qb.andWhere('jadwal.isActive = :isActive', { isActive: filters.isActive });
+    }
+
+    const data = await qb.orderBy('jadwal.hari', 'ASC').addOrderBy('jadwal.jamMulai', 'ASC').getMany();
     return { success: true, data };
   }
 

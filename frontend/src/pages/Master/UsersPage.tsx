@@ -168,11 +168,13 @@ export default function UsersPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+              }}
+              className="select-ui w-full sm:w-auto"
             >
               <option value="">Semua Status</option>
               <option value="aktif">Aktif</option>
@@ -443,7 +445,7 @@ export default function UsersPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, role: e.target.value })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                className="select-ui"
                 required
               >
                 <option value="admin">Admin</option>
@@ -460,7 +462,7 @@ export default function UsersPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, status: e.target.value })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-300 bg-white dark:bg-gray-900 dark:border-gray-700 text-gray-800 dark:text-gray-200 shadow-theme-xs transition-colors focus:border-brand-500 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20"
               >
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>

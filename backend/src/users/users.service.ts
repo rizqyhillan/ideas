@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt';
 import { Users } from '../database/entities/entities/Users';
 import { Roles } from '../database/entities/entities/Roles';
 import { UserRoles } from '../database/entities/entities/UserRoles';
+import { Pegawai } from '../database/entities/entities/Pegawai';
+import { Siswa } from '../database/entities/entities/Siswa';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
@@ -25,6 +27,12 @@ export class UsersService {
 
     @InjectRepository(UserRoles)
     private readonly userRolesRepository: Repository<UserRoles>,
+
+    @InjectRepository(Pegawai)
+    private readonly pegawaiRepository: Repository<Pegawai>,
+
+    @InjectRepository(Siswa)
+    private readonly siswaRepository: Repository<Siswa>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -273,8 +281,9 @@ export class UsersService {
         id,
         deletedAt: IsNull(),
       },
-
       relations: {
+        pegawai: true,
+        siswa: true,
         userRoles2: {
           role: {
             rolePermissions: {
@@ -282,7 +291,6 @@ export class UsersService {
             },
           },
         },
-
         userPermissions2: {
           permission: true,
         },
@@ -312,6 +320,8 @@ export class UsersService {
     return this.usersRepository.findOne({
       where: [{ email: value }, { username: value }],
       relations: {
+        pegawai: true,
+        siswa: true,
         userRoles2: {
           role: {
             rolePermissions: {
@@ -330,5 +340,136 @@ export class UsersService {
     await this.usersRepository.update(id, {
       lastLoginAt: new Date(),
     });
+  }
+
+  async updateProfile(
+    userId: number,
+    dto: {
+      username?: string;
+      email?: string;
+      namaLengkap?: string;
+      noTelepon?: string;
+    },
+  ) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId, deletedAt: IsNull() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User tidak ditemukan');
+    }
+
+    const username = dto.username?.trim();
+    const email = dto.email === undefined ? undefined : dto.email?.trim() || null;
+    const namaLengkap = dto.namaLengkap === undefined ? undefined : dto.namaLengkap.trim();
+    const noTelepon = dto.noTelepon === undefined ? undefined : dto.noTelepon.trim() || null;
+
+    if (dto.username !== undefined && !username) {
+      throw new BadRequestException('Username wajib diisi');
+    }
+
+    if (username && username !== user.username) {
+      const existing = await this.findByUsername(username);
+      if (existing && existing.id !== userId) {
+        throw new BadRequestException('Username sudah digunakan');
+      }
+      user.username = username;
+    }
+
+    if (email !== undefined && email !== user.email) {
+      const existing = email ? await this.findByEmail(email) : null;
+      if (existing && existing.id !== userId) {
+        throw new BadRequestException('Email sudah digunakan');
+      }
+      user.email = email;
+    }
+
+    await this.usersRepository.save(user);
+
+    // Sync to Pegawai if user is linked to Pegawai
+    const pegawai = await this.pegawaiRepository.findOne({
+      where: { userId },
+    });
+    if (pegawai) {
+      if (namaLengkap !== undefined) {
+        if (!namaLengkap) throw new BadRequestException('Nama lengkap wajib diisi');
+        pegawai.namaLengkap = namaLengkap;
+      }
+      if (noTelepon !== undefined) pegawai.noTelepon = noTelepon;
+      if (email !== undefined) pegawai.email = email;
+      await this.pegawaiRepository.save(pegawai);
+    }
+
+    // Sync to Siswa if user is linked to Siswa
+    const siswa = await this.siswaRepository.findOne({
+      where: { userId },
+    });
+    if (siswa) {
+      if (namaLengkap !== undefined) {
+        if (!namaLengkap) throw new BadRequestException('Nama lengkap wajib diisi');
+        siswa.namaLengkap = namaLengkap;
+      }
+      if (noTelepon !== undefined) siswa.noTelepon = noTelepon;
+      if (email !== undefined) siswa.email = email;
+      await this.siswaRepository.save(siswa);
+    }
+
+    return {
+      success: true,
+      message: 'Profil berhasil diperbarui',
+    };
+  }
+
+  async changePassword(
+    userId: number,
+    dto: {
+      oldPassword?: string;
+      currentPassword?: string;
+      newPassword: string;
+      confirmPassword?: string;
+    },
+  ) {
+    const curPass = dto.currentPassword || dto.oldPassword;
+    if (!curPass) {
+      throw new BadRequestException('Password saat ini harus diisi');
+    }
+
+    if (!dto.newPassword || dto.newPassword.length < 6) {
+      throw new BadRequestException(
+        'Password baru harus memiliki minimal 6 karakter',
+      );
+    }
+
+    if (!dto.confirmPassword) {
+      throw new BadRequestException('Konfirmasi password wajib diisi');
+    }
+
+    if (dto.newPassword !== dto.confirmPassword) {
+      throw new BadRequestException(
+        'Konfirmasi password tidak cocok dengan password baru',
+      );
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: userId, deletedAt: IsNull() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User tidak ditemukan');
+    }
+
+    const isMatch = await bcrypt.compare(curPass, user.passwordHash);
+    if (!isMatch) {
+      throw new BadRequestException('Password saat ini salah');
+    }
+
+    user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    user.passwordChangedAt = new Date();
+    await this.usersRepository.save(user);
+
+    return {
+      success: true,
+      message: 'Password berhasil diubah',
+    };
   }
 }

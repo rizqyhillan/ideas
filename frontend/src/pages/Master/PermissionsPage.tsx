@@ -18,6 +18,7 @@ import {
 
 export default function PermissionsPage() {
   const [data, setData] = useState<PermissionItem[]>([]);
+  const [allModules, setAllModules] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [moduleFilter, setModuleFilter] = useState("");
@@ -31,10 +32,16 @@ export default function PermissionsPage() {
       } else {
         res = await permissionService.getAll();
       }
+      let items: PermissionItem[] = [];
       if (res && "data" in res) {
-        setData(res.data as PermissionItem[]);
+        items = res.data as PermissionItem[];
       } else if (Array.isArray(res)) {
-        setData(res);
+        items = res;
+      }
+      setData(items);
+      if (!moduleFilter && items.length > 0) {
+        const mods = Array.from(new Set(items.map((p) => p.module))).filter(Boolean);
+        setAllModules(mods);
       }
     } catch (err: any) {
       // handle error silently
@@ -47,14 +54,16 @@ export default function PermissionsPage() {
     loadData();
   }, [moduleFilter]);
 
-  useEffect(() => {
-    const modules = [...new Set(data.map((p) => p.module))];
-    if (modules.length > 0 && !moduleFilter) {
-      // could show filter UI
-    }
-  }, [data]);
-
-  const uniqueModules = [...new Set(data.map((p) => p.module))];
+  const filteredData = data.filter((item) => {
+    if (!search.trim()) return true;
+    const s = search.toLowerCase();
+    return (
+      item.code?.toLowerCase().includes(s) ||
+      item.module?.toLowerCase().includes(s) ||
+      item.action?.toLowerCase().includes(s) ||
+      (item.description && item.description.toLowerCase().includes(s))
+    );
+  });
 
   return (
     <>
@@ -78,10 +87,10 @@ export default function PermissionsPage() {
             <select
               value={moduleFilter}
               onChange={(e) => setModuleFilter(e.target.value)}
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
+              className="select-ui w-full sm:w-auto"
             >
               <option value="">Semua Module</option>
-              {uniqueModules.map((m) => (
+              {allModules.map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
@@ -114,14 +123,14 @@ export default function PermissionsPage() {
                     Memuat data...
                   </td>
                 </tr>
-              ) : data.length === 0 ? (
+              ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-gray-400">
                     Tidak ada data ditemukan.
                   </td>
                 </tr>
               ) : (
-                data.map((item) => (
+                filteredData.map((item) => (
                   <tr
                     key={item.id}
                     className="hover:bg-gray-50/80 dark:hover:bg-white/[0.02]"
@@ -150,12 +159,12 @@ export default function PermissionsPage() {
         <div className="block md:hidden space-y-3 mt-4">
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat data...</div>
-          ) : data.length === 0 ? (
+          ) : filteredData.length === 0 ? (
             <div className="py-8 text-center text-gray-400">
               Tidak ada data ditemukan.
             </div>
           ) : (
-            data.map((item) => (
+            filteredData.map((item) => (
               <div
                 key={item.id}
                 className="p-4 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/40"

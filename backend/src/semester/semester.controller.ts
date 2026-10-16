@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Post, Body, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Post, Body, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { SemesterService } from './semester.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -10,11 +10,13 @@ export class SemesterController {
   constructor(private readonly semesterService: SemesterService) {}
 
   @Get()
-  findAll() {
-    return this.semesterService.findAll();
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  findAll(@Query() query: any) {
+    return this.semesterService.findAll(query);
   }
 
   @Get(':id')
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.semesterService.findOne(id);
   }

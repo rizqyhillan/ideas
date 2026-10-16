@@ -261,6 +261,7 @@ export const guruService = {
     page?: number;
     limit?: number;
     search?: string;
+    role?: string;
     sort?: "id" | "kodeGuru" | "createdAt";
     order?: "ASC" | "DESC";
   }): Promise<{
@@ -271,6 +272,7 @@ export const guruService = {
     if (params?.page) searchParams.append("page", String(params.page));
     if (params?.limit) searchParams.append("limit", String(params.limit));
     if (params?.search) searchParams.append("search", params.search);
+    if (params?.role) searchParams.append("role", params.role);
     if (params?.sort) searchParams.append("sort", params.sort);
     if (params?.order) searchParams.append("order", params.order);
 

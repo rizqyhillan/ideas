@@ -9,6 +9,7 @@ import {
   mataPelajaranService,
   MataPelajaranItem,
 } from "../../services/academic-extras.service";
+import { guruService, GuruItem } from "../../services/master.service";
 
 export default function MataPelajaranPage() {
   const [data, setData] = useState<MataPelajaranItem[]>([]);
@@ -24,9 +25,11 @@ export default function MataPelajaranPage() {
     nama: "",
     deskripsi: "",
     isActive: true,
+    guruPengampuId: undefined as number | undefined,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [gurus, setGurus] = useState<GuruItem[]>([]);
 
   async function loadData() {
     try {
@@ -44,6 +47,10 @@ export default function MataPelajaranPage() {
     loadData();
   }, [search]);
 
+  useEffect(() => {
+    guruService.getAll({ limit: 200 }).then((res) => setGurus(res.data)).catch(() => {});
+  }, []);
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!formData.kode || !formData.nama) {
@@ -58,6 +65,7 @@ export default function MataPelajaranPage() {
         nama: formData.nama,
         deskripsi: formData.deskripsi,
         isActive: formData.isActive,
+        guruPengampuId: formData.guruPengampuId ?? null,
       };
       if (editingId) {
         await mataPelajaranService.update(editingId, payload);
@@ -90,7 +98,7 @@ export default function MataPelajaranPage() {
 
   function openCreateModal() {
     setEditingId(null);
-    setFormData({ kode: "", nama: "", deskripsi: "", isActive: true });
+    setFormData({ kode: "", nama: "", deskripsi: "", isActive: true, guruPengampuId: undefined });
     setFormError("");
     setIsModalOpen(true);
   }
@@ -102,6 +110,7 @@ export default function MataPelajaranPage() {
       nama: item.nama,
       deskripsi: item.deskripsi || "",
       isActive: item.isActive,
+      guruPengampuId: item.guruPengampuId ?? undefined,
     });
     setFormError("");
     setIsModalOpen(true);
@@ -119,7 +128,7 @@ export default function MataPelajaranPage() {
         <div className="mb-4 p-3 rounded-lg alert-error-flat">{errorMsg}</div>
       )}
       <div className="card-flat lg:p-6 p-4">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
               Daftar Mata Pelajaran
@@ -128,15 +137,15 @@ export default function MataPelajaranPage() {
               Kelola mata pelajaran yang diajarkan
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Input
               type="text"
               placeholder="Cari..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-48 sm:w-64"
+              className="w-full sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal}>
+            <Button size="sm" className="w-full sm:w-auto" onClick={openCreateModal}>
               + Tambah
             </Button>
           </div>
@@ -148,6 +157,7 @@ export default function MataPelajaranPage() {
                 <th className="px-4 py-3">No</th>
                 <th className="px-4 py-3">Kode</th>
                 <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Pengampu</th>
                 <th className="px-4 py-3">Deskripsi</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-center">Aksi</th>
@@ -156,13 +166,13 @@ export default function MataPelajaranPage() {
             <tbody className="table-body-row">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                  <td colSpan={7} className="py-8 text-center text-gray-400">
                     Memuat...
                   </td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                  <td colSpan={7} className="py-8 text-center text-gray-400">
                     Belum ada data
                   </td>
                 </tr>
@@ -178,6 +188,11 @@ export default function MataPelajaranPage() {
                     </td>
                     <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">
                       {item.nama}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-600 dark:text-gray-400">
+                      {item.guruPengampu?.pegawai?.namaLengkap
+                        ? item.guruPengampu.pegawai.namaLengkap
+                        : <span className="italic text-gray-400">-</span>}
                     </td>
                     <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">
                       {item.deskripsi || "-"}
@@ -244,6 +259,11 @@ export default function MataPelajaranPage() {
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {item.deskripsi || "-"}
                     </p>
+                    {item.guruPengampu?.pegawai?.namaLengkap && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Pengampu: {item.guruPengampu.pegawai.namaLengkap}
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button
@@ -315,6 +335,26 @@ export default function MataPelajaranPage() {
             />
           </div>
           <div>
+            <Label>Guru Pengampu</Label>
+            <select
+              value={formData.guruPengampuId ?? ""}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  guruPengampuId: e.target.value ? Number(e.target.value) : undefined,
+                })
+              }
+              className="select-ui"
+            >
+              <option value="">Pilih Guru Pengampu (Opsional)</option>
+              {gurus.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.pegawai?.namaLengkap}{g.kodeGuru ? ` (${g.kodeGuru})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <Label>Status</Label>
             <select
               value={formData.isActive ? "true" : "false"}
@@ -324,7 +364,7 @@ export default function MataPelajaranPage() {
                   isActive: e.target.value === "true",
                 })
               }
-              className="mt-1 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="select-ui mt-1 h-10"
             >
               <option value="true">Aktif</option>
               <option value="false">Nonaktif</option>

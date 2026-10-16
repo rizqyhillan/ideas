@@ -131,29 +131,27 @@ export default function TahunAjaranPage() {
 
       {/* Active Academic Year Banner */}
       {activeItem && (
-        <div className="mb-6 card-flat border border-brand-200 dark:border-brand-900/50">
-          <div className="flex items-center gap-3">
-            <div className="icon-box bg-brand-500 text-white shadow-sm">
-              <Icon name="GraduationCap" size={20} />
+        <div className="mb-6 card-flat border border-brand-200 bg-white p-4 sm:p-5 dark:border-brand-900/50 dark:bg-gray-900">
+          <div className="flex min-h-[68px] items-center gap-4 sm:gap-5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white shadow-sm sm:h-14 sm:w-14">
+              <Icon name="GraduationCap" size={22} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="mb-6">
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Tahun Ajaran {activeItem.nama}
-                </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Periode: {activeItem.tanggalMulai.split("T")[0]} s/d{" "}
-                  {activeItem.tanggalSelesai.split("T")[0]}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+              <div className="mb-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-600 sm:text-xs dark:text-brand-400">
                   Tahun Ajaran Aktif
                 </span>
                 <Badge color="success" size="sm">
                   Aktif
                 </Badge>
               </div>
+              <h1 className="text-lg font-bold leading-tight text-gray-900 sm:text-xl dark:text-white">
+                Tahun Ajaran {activeItem.nama}
+              </h1>
+              <p className="mt-1 text-xs leading-4 text-gray-500 dark:text-gray-400">
+                Periode: {activeItem.tanggalMulai.split("T")[0]} s/d{" "}
+                {activeItem.tanggalSelesai.split("T")[0]}
+              </p>
             </div>
           </div>
         </div>
@@ -181,15 +179,15 @@ export default function TahunAjaranPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Input
               type="text"
               placeholder="Cari tahun ajaran..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-48 sm:w-64"
+              className="w-full sm:w-64"
             />
-            <Button size="sm" onClick={openCreateModal}>
+            <Button size="sm" className="w-full sm:w-auto" onClick={openCreateModal}>
               + Tambah Tahun Ajaran
             </Button>
           </div>
@@ -284,7 +282,7 @@ export default function TahunAjaranPage() {
             </div>
           ) : (
             data.map((item) => (
-              <div key={item.id} className="card-flat">
+              <div key={item.id} className="card-flat p-3 sm:p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

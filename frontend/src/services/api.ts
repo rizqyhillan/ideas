@@ -111,3 +111,53 @@ export async function apiFetch<T = any>(
     throw error;
   }
 }
+
+export async function apiDownload(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<Blob> {
+  const token = getStoredToken();
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...(token ? { Authorization: "Bearer " + token } : {}),
+        ...(options.headers || {}),
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      let errorMessage = "Terjadi kesalahan pada server";
+      if (data) {
+        if (typeof data.message === "string") {
+          errorMessage = data.message;
+        } else if (Array.isArray(data.message)) {
+          errorMessage = data.message.join(", ");
+        } else if (data.error) {
+          errorMessage = data.error;
+        }
+      }
+
+      if (response.status === 401) {
+        clearStoredAuth();
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return await response.blob();
+  } catch (error: unknown) {
+    const err = error as Error;
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      throw new Error(
+        "Gagal terhubung ke server backend. Pastikan server backend sedang berjalan.",
+      );
+    }
+    throw error;
+  }
+}

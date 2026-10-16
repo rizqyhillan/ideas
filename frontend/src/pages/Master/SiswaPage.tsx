@@ -200,12 +200,13 @@ export default function SiswaPage() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
             <select
               value={statusFilter === "" ? "" : String(statusFilter)}
-              onChange={(e) =>
+              onChange={(e) => {
                 setStatusFilter(
                   e.target.value === "" ? "" : e.target.value === "true",
-                )
-              }
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
+                );
+                setPage(1);
+              }}
+              className="select-ui w-full sm:w-auto"
             >
               <option value="">Semua Status</option>
               <option value="true">Aktif</option>
@@ -536,7 +537,7 @@ export default function SiswaPage() {
                     jenisKelamin: e.target.value as "L" | "P",
                   })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                className="select-ui"
                 required
               >
                 <option value="L">Laki-laki (L)</option>

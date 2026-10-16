@@ -14,6 +14,7 @@ import { JadwalPelajaran } from './JadwalPelajaran';
 import { JadwalPiketGuru } from './JadwalPiketGuru';
 import { Kelas } from './Kelas';
 import { SesiAbsensiSiswa } from './SesiAbsensiSiswa';
+import { MataPelajaran } from './MataPelajaran';
 
 @Index('guru_pkey', ['id'], { unique: true })
 @Index('uq_guru_kode', ['kodeGuru'], { unique: true })
@@ -60,6 +61,9 @@ export class Guru {
 
   @OneToMany(() => JadwalPelajaran, (jadwalPelajaran) => jadwalPelajaran.guru)
   jadwalPelajarans: JadwalPelajaran[];
+
+  @OneToMany(() => MataPelajaran, (mataPelajaran) => mataPelajaran.guruPengampu)
+  mataPelajarans: MataPelajaran[];
 
   @OneToMany(() => JadwalPiketGuru, (jadwalPiketGuru) => jadwalPiketGuru.guru)
   jadwalPiketGurus: JadwalPiketGuru[];

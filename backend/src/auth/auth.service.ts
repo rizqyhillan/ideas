@@ -89,10 +89,32 @@ export class AuthService {
       }
     }
 
+    const namaLengkap =
+      user.pegawai?.namaLengkap || user.siswa?.namaLengkap || user.username;
+    const noTelepon =
+      user.pegawai?.noTelepon || user.siswa?.noTelepon || null;
+    const nip = user.pegawai?.nip || null;
+    const nisn = user.siswa?.nisn || null;
+
     return {
       ...userData,
+      namaLengkap,
+      noTelepon,
+      nip,
+      nisn,
+      pegawai: user.pegawai || null,
+      siswa: user.siswa || null,
       roles,
       permissions: Array.from(permissionsSet),
     };
+  }
+
+  async updateProfile(userId: number, dto: any) {
+    await this.usersService.updateProfile(userId, dto);
+    return this.me(userId);
+  }
+
+  async changePassword(userId: number, dto: any) {
+    return this.usersService.changePassword(userId, dto);
   }
 }

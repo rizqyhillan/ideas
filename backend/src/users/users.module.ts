@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../database/entities/entities/Users';
 import { Roles } from '../database/entities/entities/Roles';
 import { UserRoles } from '../database/entities/entities/UserRoles';
+import { Pegawai } from '../database/entities/entities/Pegawai';
+import { Siswa } from '../database/entities/entities/Siswa';
 
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -13,7 +15,7 @@ import { EXPORT_IMPORT_SERVICE } from '../common/export/export.service';
 import { PdfService } from '../common/export/pdf.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Users, Roles, UserRoles])],
+  imports: [TypeOrmModule.forFeature([Users, Roles, UserRoles, Pegawai, Siswa])],
 
   controllers: [UsersController],
 

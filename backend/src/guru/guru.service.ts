@@ -94,11 +94,21 @@ export class GuruService {
   }
 
   async findAll(query: QueryGuruDto, user?: any) {
-    const { page, limit, search, sort, order } = query;
+    const { page, limit, search, role, sort, order } = query;
 
     const qb = this.guruRepository.createQueryBuilder('guru');
 
     qb.leftJoinAndSelect('guru.pegawai', 'pegawai');
+
+    if (role) {
+      const roles = role.split(',').map((value) => value.trim()).filter(Boolean);
+      if (roles.length) {
+        qb.leftJoin('pegawai.user', 'userRoleOwner')
+          .leftJoin('userRoleOwner.userRoles2', 'guruUserRole')
+          .leftJoin('guruUserRole.role', 'guruRole')
+          .andWhere('guruRole.code IN (:...guruRoles)', { guruRoles: roles });
+      }
+    }
 
     const roles = user?.userRoles2?.map((item: any) => item.role?.code) ?? [];
     if (roles.includes('guru') && !roles.includes('admin') && !roles.includes('super_admin')) {

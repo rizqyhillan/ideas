@@ -28,6 +28,14 @@ export class AbsensiController {
     return this.absensiService.getUnattendedClasses(targetDate, req.user);
   }
 
+  @Get('piket/access')
+  @Permissions('absensi.list')
+  async checkPiketAccess(@Req() req: any, @Query('tanggal') tanggal: string) {
+    const targetDate = tanggal || new Date().toISOString().split('T')[0];
+    const allowed = await this.absensiService.canUsePiket(targetDate, req.user);
+    return { allowed };
+  }
+
   @Get('siswa')
   @Permissions('absensi.list')
   findOne(
@@ -35,14 +43,16 @@ export class AbsensiController {
     @Query('kelasId') kelasId: string,
     @Query('tanggal') tanggal: string,
     @Query('jamKe') jamKe?: string,
+    @Query('mataPelajaran') mataPelajaran?: string,
   ) {
     if (!kelasId || !tanggal) {
-      return { message: 'klasId dan tanggal wajib diisi' };
+      return { message: 'kelasId dan tanggal wajib diisi' };
     }
     return this.absensiService.findByKelasAndTanggal(
       Number(kelasId),
       tanggal,
       jamKe,
+      mataPelajaran,
       req.user,
     );
   }

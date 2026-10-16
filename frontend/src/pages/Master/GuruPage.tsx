@@ -9,6 +9,7 @@ import Badge from "../../components/ui/badge/Badge";
 import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import SearchableSelect from "../../components/form/SearchableSelect";
 import {
   guruService,
   GuruItem,
@@ -368,28 +369,26 @@ export default function GuruPage() {
             <Label>
               Pilih Pegawai <span className="text-error-500">*</span>
             </Label>
-            <select
+            <SearchableSelect
               disabled={Boolean(editingId)}
-              value={formData.pegawaiId}
-              onChange={(e) =>
-                setFormData({ ...formData, pegawaiId: Number(e.target.value) })
-              }
-              className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 disabled:opacity-60"
-              required
-            >
-              <option value="">Pilih Pegawai...</option>
-              {pegawaiList
+              options={pegawaiList
                 .filter(
                   (p) =>
                     !data.some((g) => g.pegawaiId === p.id) ||
                     p.id === formData.pegawaiId,
                 )
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.namaLengkap} {p.nip ? `(NIP: ${p.nip})` : ""}
-                  </option>
-                ))}
-            </select>
+                .map((p) => ({
+                  value: p.id,
+                  label: p.namaLengkap,
+                  sublabel: p.nip ? `NIP: ${p.nip}` : undefined,
+                }))}
+              value={formData.pegawaiId}
+              onChange={(val) =>
+                setFormData({ ...formData, pegawaiId: Number(val) })
+              }
+              placeholder="Pilih Pegawai..."
+              searchPlaceholder="Cari nama atau NIP pegawai..."
+            />
           </div>
 
           <div>

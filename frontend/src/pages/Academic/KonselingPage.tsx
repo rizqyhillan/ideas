@@ -8,6 +8,7 @@ import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Textarea from "../../components/form/input/TextArea";
+import SearchableSelect from "../../components/form/SearchableSelect";
 import {
   konselingService,
   CatatanKonselingItem,
@@ -64,8 +65,8 @@ export default function KonselingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<CreateCatatanKonselingPayload>({
-    siswaId: 1,
-    guruBkId: 1,
+    siswaId: 0,
+    guruBkId: 0,
     tanggal: new Date().toISOString().split("T")[0],
     topik: "",
     isi: "",
@@ -80,8 +81,8 @@ export default function KonselingPage() {
     async function loadMaster() {
       try {
         const [siswaRes, guruRes] = await Promise.all([
-          siswaService.getAll({ limit: 100 }),
-          guruService.getAll({ limit: 100 }),
+          siswaService.getAll({ limit: 100, statusAktif: true }),
+          guruService.getAll({ limit: 100, role: "bk,guru_bk" }),
         ]);
         setStudentOptions(siswaRes.data || []);
         setGuruOptions(guruRes.data || []);
@@ -91,6 +92,26 @@ export default function KonselingPage() {
     }
     loadMaster();
   }, [canManageKonseling]);
+
+  const studentSelectOptions = useMemo(
+    () =>
+      studentOptions.map((s) => ({
+        value: s.id,
+        label: s.namaLengkap,
+        sublabel: s.nisn ? `NISN: ${s.nisn}` : undefined,
+      })),
+    [studentOptions]
+  );
+
+  const guruSelectOptions = useMemo(
+    () =>
+      guruOptions.map((g) => ({
+        value: g.id,
+        label: g.pegawai?.namaLengkap || `Guru #${g.id}`,
+        sublabel: g.pegawai?.nip ? `NIP: ${g.pegawai.nip}` : undefined,
+      })),
+    [guruOptions]
+  );
 
   async function loadData() {
     try {
@@ -122,8 +143,8 @@ export default function KonselingPage() {
   function openCreateModal() {
     setEditingId(null);
     setFormData({
-      siswaId: studentOptions[0]?.id || 1,
-      guruBkId: guruOptions[0]?.id || 1,
+      siswaId: studentOptions[0]?.id || 0,
+      guruBkId: guruOptions[0]?.id || 0,
       tanggal: new Date().toISOString().split("T")[0],
       topik: "",
       isi: "",
@@ -149,8 +170,8 @@ export default function KonselingPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.topik || !formData.isi) {
-      setFormError("Topik dan Isi wajib diisi.");
+    if (!formData.siswaId || !formData.guruBkId || !formData.tanggal || !formData.topik || !formData.isi) {
+      setFormError("Siswa, Guru BK, tanggal, topik, dan isi wajib diisi.");
       return;
     }
     try {
@@ -217,12 +238,13 @@ export default function KonselingPage() {
             {!isSiswa && (
               <select
                 value={visibilitasFilter === "" ? "" : visibilitasFilter}
-                onChange={(e) =>
+                onChange={(e) => {
                   setVisibilitasFilter(
                     e.target.value as VisibilitasKonseling | "",
-                  )
-                }
-                className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 w-full sm:w-auto"
+                  );
+                  setPage(1);
+                }}
+                className="select-ui w-full sm:w-auto"
               >
                 <option value="">Semua Visibilitas</option>
                 {visibilitasOptions.map((v) => (
@@ -461,45 +483,29 @@ export default function KonselingPage() {
               <Label>
                 Siswa <span className="text-error-500">*</span>
               </Label>
-              <select
+              <SearchableSelect
+                options={studentSelectOptions}
                 value={formData.siswaId}
-                onChange={(e) =>
-                  setFormData({ ...formData, siswaId: Number(e.target.value) })
+                onChange={(val) =>
+                  setFormData({ ...formData, siswaId: Number(val) })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
-              >
-                {studentOptions.length > 0 ? (
-                  studentOptions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.namaLengkap} ({s.nisn})
-                    </option>
-                  ))
-                ) : (
-                  <option value={1}>Pilih Siswa</option>
-                )}
-              </select>
+                placeholder="Pilih Siswa..."
+                searchPlaceholder="Cari siswa atau NISN..."
+              />
             </div>
             <div>
               <Label>
                 Guru BK <span className="text-error-500">*</span>
               </Label>
-              <select
+              <SearchableSelect
+                options={guruSelectOptions}
                 value={formData.guruBkId}
-                onChange={(e) =>
-                  setFormData({ ...formData, guruBkId: Number(e.target.value) })
+                onChange={(val) =>
+                  setFormData({ ...formData, guruBkId: Number(val) })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
-              >
-                {guruOptions.length > 0 ? (
-                  guruOptions.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.pegawai?.namaLengkap || `Guru #${g.id}`}
-                    </option>
-                  ))
-                ) : (
-                  <option value={1}>Pilih Guru BK</option>
-                )}
-              </select>
+                placeholder="Pilih Guru BK..."
+                searchPlaceholder="Cari guru BK atau NIP..."
+              />
             </div>
           </div>
           <div>

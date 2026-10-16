@@ -227,25 +227,7 @@ export default function AdminDashboard() {
             />
           </div>
 
-          {/* Hak Akses */}
-          <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
-              Hak Akses
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {user?.roles?.map((role: any) => (
-                <span
-                  key={role.id || role.code}
-                  className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-md border border-gray-200 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-                >
-                  {role.name || role.code}
-                </span>
-              ))}
-              {(!user?.roles || user.roles.length === 0) && (
-                <span className="text-xs text-gray-400">Belum ada role</span>
-              )}
-            </div>
-          </div>
+
         </div>
       </div>
     </>

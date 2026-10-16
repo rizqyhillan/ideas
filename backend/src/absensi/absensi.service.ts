@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
@@ -11,6 +11,7 @@ import { Guru } from '../database/entities/entities/Guru';
 import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 import { JadwalPiketGuru } from '../database/entities/entities/JadwalPiketGuru';
 import { Siswa } from '../database/entities/entities/Siswa';
+import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 
 @Injectable()
 export class AbsensiService {
@@ -29,6 +30,8 @@ export class AbsensiService {
     private jadwalPiketGuruRepo: Repository<JadwalPiketGuru>,
     @InjectRepository(Siswa)
     private siswaRepo: Repository<Siswa>,
+    @InjectRepository(SiswaKelas)
+    private siswaKelasRepo: Repository<SiswaKelas>,
     private pdfService: PdfService,
   ) {}
 
@@ -73,6 +76,17 @@ export class AbsensiService {
     );
   }
 
+  async canUsePiket(tanggal: string, user?: any): Promise<boolean> {
+    if (this.isAdmin(user)) return true;
+
+    const guruId = await this.guruIdForUser(user);
+    if (!guruId || !(await this.isAssignedPiket(guruId, tanggal))) {
+      throw new ForbiddenException('Anda tidak memiliki jadwal piket pada tanggal tersebut.');
+    }
+
+    return true;
+  }
+
   private async hasTeachingSchedule(
     guruId: number,
     kelasId: number,
@@ -102,96 +116,142 @@ export class AbsensiService {
     if (!this.roles(user).includes('guru')) {
       throw new ForbiddenException('Hanya guru atau admin yang dapat mengisi absensi.');
     }
-    const guruId = await this.guruIdForUser(user);
-    if (!guruId) throw new ForbiddenException('Akun guru belum terhubung ke data guru.');
-    if (dto.guruId && dto.guruId !== guruId) {
+    const loggedInGuruId = await this.guruIdForUser(user);
+    if (!loggedInGuruId) throw new ForbiddenException('Akun guru belum terhubung ke data guru.');
+
+    // Identitas pencatat harus berasal dari akun yang sedang login.
+    if (dto.guruId !== undefined && dto.guruId !== loggedInGuruId) {
       throw new ForbiddenException('Guru hanya boleh mencatat absensi atas namanya sendiri.');
     }
 
     const mode = dto.mode ?? 'mengajar';
+
+    // Mode piket hanya boleh dipakai oleh guru yang memang ditugaskan piket.
     if (mode === 'piket') {
-      if (!(await this.isAssignedPiket(guruId, dto.tanggal))) {
+      if (!(await this.isAssignedPiket(loggedInGuruId, dto.tanggal))) {
         throw new ForbiddenException('Anda tidak memiliki jadwal piket pada tanggal tersebut.');
       }
-      const existing = await this.absensiSesiRepo.findOne({
-        where: { kelasId: dto.kelasId, tanggal: dto.tanggal },
-      });
-      if (existing && existing.guruId !== guruId) {
-        throw new ForbiddenException('Kelas tersebut sudah memiliki absensi.');
-      }
-    } else if (
-      !(await this.hasTeachingSchedule(
-        guruId,
-        dto.kelasId,
-        dto.tanggal,
-        dto.mataPelajaran === 'Pelajaran Terjadwal' ? undefined : dto.mataPelajaran,
-      ))
-    ) {
+      return { guruId: loggedInGuruId, mode };
+    }
+
+    if (mode === 'substitusi') {
+      throw new ForbiddenException('Mode substitusi belum memiliki penugasan yang valid.');
+    }
+
+    // Cek apakah wali kelas
+    const kelas = await this.kelasRepo.findOne({ where: { id: dto.kelasId } });
+    if (kelas && kelas.waliKelasId === loggedInGuruId) {
+      return { guruId: loggedInGuruId, mode };
+    }
+
+    // Cek jadwal mengajar reguler
+    const hasSchedule = await this.hasTeachingSchedule(
+      loggedInGuruId,
+      dto.kelasId,
+      dto.tanggal,
+      dto.mataPelajaran === 'Pelajaran Terjadwal' ? undefined : dto.mataPelajaran,
+    );
+    if (!hasSchedule) {
       throw new ForbiddenException('Kelas atau mata pelajaran tidak termasuk jadwal mengajar Anda pada tanggal tersebut.');
     }
-    return { guruId, mode };
+
+    return { guruId: loggedInGuruId, mode };
   }
 
   async create(dto: CreateAbsensiSesiDto, user: any) {
     const context = await this.resolveWriteContext(dto, user);
-    let session = await this.absensiSesiRepo
-      .createQueryBuilder('sesi')
-      .where('sesi.kelasId = :kelasId', { kelasId: dto.kelasId })
-      .andWhere('sesi.tanggal = :tanggal', { tanggal: dto.tanggal })
-      .andWhere(dto.jamKe ? 'sesi.jamKe = :jamKe' : 'sesi.jamKe IS NULL', {
-        jamKe: dto.jamKe,
-      })
-      .getOne();
-
-    if (session) {
-      session.guruId = context.guruId ?? session.guruId;
-      session.jamKe = dto.jamKe ?? session.jamKe;
-      session.mataPelajaran = dto.mataPelajaran ?? session.mataPelajaran;
-      session.catatan = dto.catatan ?? session.catatan;
-      session.savedAt = new Date();
-      await this.absensiSesiRepo.save(session);
-
-      await this.absensiSesiItemRepo.delete({ absensiSesiId: session.id });
-    } else {
-      session = this.absensiSesiRepo.create({
-        kelasId: dto.kelasId,
-        guruId: context.guruId,
-        tanggal: dto.tanggal,
-        jamKe: dto.jamKe ?? null,
-        mataPelajaran: dto.mataPelajaran ?? null,
-        catatan: dto.catatan ?? null,
-      });
-      session = await this.absensiSesiRepo.save(session);
+    if (dto.items.length === 0) {
+      throw new BadRequestException('Minimal satu data siswa wajib dikirim.');
     }
 
-    const items = dto.items.map((item) =>
-      this.absensiSesiItemRepo.create({
-        absensiSesiId: session.id,
-        siswaId: item.siswaId,
-        status: item.status,
-        keterangan: item.keterangan ?? null,
-      }),
-    );
+    const siswaIds = dto.items.map((item) => item.siswaId);
+    const uniqueSiswaIds = new Set(siswaIds);
+    if (uniqueSiswaIds.size !== siswaIds.length) {
+      throw new BadRequestException('Tidak boleh ada siswa yang sama lebih dari satu kali.');
+    }
 
-    await this.absensiSesiItemRepo.save(items);
+    const memberships = await this.siswaKelasRepo
+      .createQueryBuilder('siswaKelas')
+      .where('siswaKelas.kelasId = :kelasId', { kelasId: dto.kelasId })
+      .andWhere('siswaKelas.siswaId IN (:...siswaIds)', { siswaIds })
+      .andWhere('siswaKelas.isActive = true')
+      .andWhere('siswaKelas.tanggalMasuk <= :tanggal', { tanggal: dto.tanggal })
+      .andWhere(
+        '(siswaKelas.tanggalKeluar IS NULL OR siswaKelas.tanggalKeluar >= :tanggal)',
+        { tanggal: dto.tanggal },
+      )
+      .getMany();
 
-    return {
-      id: session.id,
-      kelasId: session.kelasId,
-      guruId: session.guruId,
-      tanggal: session.tanggal,
-      jamKe: session.jamKe,
-      mataPelajaran: session.mataPelajaran,
-      catatan: session.catatan,
-      savedAt: session.savedAt,
-      itemsCount: items.length,
-    };
+    const activeSiswaIds = new Set(memberships.map((membership) => membership.siswaId));
+    const invalidSiswaIds = siswaIds.filter((siswaId) => !activeSiswaIds.has(siswaId));
+    if (invalidSiswaIds.length > 0) {
+      throw new BadRequestException(
+        `Siswa bukan anggota aktif kelas yang dipilih: ${invalidSiswaIds.join(', ')}.`,
+      );
+    }
+
+    return this.absensiSesiRepo.manager.transaction(async (manager) => {
+      const sessionRepo = manager.getRepository(AbsensiSesi);
+      const itemRepo = manager.getRepository(AbsensiSesiItem);
+      let session = await sessionRepo
+        .createQueryBuilder('sesi')
+        .where('sesi.kelasId = :kelasId', { kelasId: dto.kelasId })
+        .andWhere('sesi.tanggal = :tanggal', { tanggal: dto.tanggal })
+        .andWhere(dto.jamKe ? 'sesi.jamKe = :jamKe' : 'sesi.jamKe IS NULL', {
+          jamKe: dto.jamKe,
+        })
+        .getOne();
+
+      if (session) {
+        session.guruId = context.guruId ?? session.guruId;
+        session.jamKe = dto.jamKe ?? session.jamKe;
+        session.mataPelajaran = dto.mataPelajaran ?? session.mataPelajaran;
+        session.catatan = dto.catatan ?? session.catatan;
+        session.savedAt = new Date();
+        session = await sessionRepo.save(session);
+        await itemRepo.delete({ absensiSesiId: session.id });
+      } else {
+        session = sessionRepo.create({
+          kelasId: dto.kelasId,
+          guruId: context.guruId,
+          tanggal: dto.tanggal,
+          jamKe: dto.jamKe ?? null,
+          mataPelajaran: dto.mataPelajaran ?? null,
+          catatan: dto.catatan ?? null,
+        });
+        session = await sessionRepo.save(session);
+      }
+
+      const items = dto.items.map((item) =>
+        itemRepo.create({
+          absensiSesiId: session.id,
+          siswaId: item.siswaId,
+          status: item.status,
+          keterangan: item.keterangan ?? null,
+        }),
+      );
+
+      await itemRepo.save(items);
+
+      return {
+        id: session.id,
+        kelasId: session.kelasId,
+        guruId: session.guruId,
+        tanggal: session.tanggal,
+        jamKe: session.jamKe,
+        mataPelajaran: session.mataPelajaran,
+        catatan: session.catatan,
+        savedAt: session.savedAt,
+        itemsCount: items.length,
+      };
+    });
   }
 
   async findByKelasAndTanggal(
     kelasId: number,
     tanggal: string,
     jamKe?: string,
+    mataPelajaran?: string,
     user?: any,
   ) {
     const qb = this.absensiSesiRepo
@@ -204,6 +264,12 @@ export class AbsensiService {
       .where('sesi.kelasId = :kelasId', { kelasId })
       .andWhere('sesi.tanggal = :tanggal', { tanggal })
       .andWhere(jamKe ? 'sesi.jamKe = :jamKe' : '1=1', { jamKe })
+      .andWhere(
+        mataPelajaran
+          ? 'LOWER(sesi.mataPelajaran) = LOWER(:mataPelajaran)'
+          : '1=1',
+        { mataPelajaran },
+      )
       .orderBy('items.siswaId', 'ASC');
 
     const session = await qb.getOne();
@@ -298,12 +364,7 @@ export class AbsensiService {
   }
 
   async getUnattendedClasses(tanggal: string, user?: any) {
-    if (!this.isAdmin(user)) {
-      const guruId = await this.guruIdForUser(user);
-      if (!guruId || !(await this.isAssignedPiket(guruId, tanggal))) {
-        throw new ForbiddenException('Daftar kelas belum diabsen hanya tersedia untuk guru piket.');
-      }
-    }
+    await this.canUsePiket(tanggal, user);
     const allClasses = await this.kelasRepo.find({
       where: { statusAktif: true },
       relations: ['waliKelas', 'waliKelas.pegawai'],

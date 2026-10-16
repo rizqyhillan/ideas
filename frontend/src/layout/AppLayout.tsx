@@ -31,7 +31,7 @@ const LayoutContent: React.FC = () => {
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
         <AppHeader />
-        <main className="mx-auto max-w-7xl p-4 sm:p-5 lg:p-6">
+        <main className="mx-auto max-w-7xl px-4 py-5 sm:p-5 lg:p-6">
           <Suspense fallback={<PageLoadingFallback />}>
             <Outlet />
           </Suspense>

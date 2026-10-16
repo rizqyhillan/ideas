@@ -42,18 +42,50 @@ const STORAGE_KEY_PREFIX = "ideas_absensi_records_";
 
 export const absensiService = {
   /**
-   * Menyimpan sesi absensi ke local storage (dan mencoba sync ke backend jika tersedia)
+   * Menyimpan sesi absensi ke backend lalu memperbarui cache lokal.
+   * Backend tetap menjadi sumber data utama.
    */
   async saveAttendance(
     record: AttendanceSessionRecord,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      // 1. Simpan di local storage berdasarkan kelas dan tanggal
-    const key = `${STORAGE_KEY_PREFIX}${record.kelasId}_${record.tanggal}_${record.jamKe || "default"}`;
-      const serialized = JSON.stringify(record);
-      localStorage.setItem(key, serialized);
+      // Kirim hanya field yang didefinisikan oleh CreateAbsensiSesiDto.
+      // Data presentasi siswa (nisn, namaLengkap, jenisKelamin) tetap dipakai
+      // oleh UI, tetapi bukan bagian dari payload API absensi.
+      const payload = {
+        kelasId: record.kelasId,
+        ...(record.guruId > 0 ? { guruId: record.guruId } : {}),
+        ...(record.mode ? { mode: record.mode } : {}),
+        tanggal: record.tanggal,
+        ...(record.jamKe ? { jamKe: record.jamKe } : {}),
+        ...(record.mataPelajaran ? { mataPelajaran: record.mataPelajaran } : {}),
+        ...(record.catatan ? { catatan: record.catatan } : {}),
+        items: record.items.map(({ siswaId, status, keterangan }) => ({
+          siswaId,
+          status,
+          ...(keterangan ? { keterangan } : {}),
+        })),
+      };
 
-      // Simpan juga ke index riwayat absensi kelas
+      // Simpan ke backend terlebih dahulu.
+      const response = await apiFetch<ApiResponse<{ id?: number; savedAt?: string }>>(
+        "/absensi/siswa",
+        {
+        method: "POST",
+        body: JSON.stringify(payload),
+        },
+      );
+
+      const syncedRecord: AttendanceSessionRecord = {
+        ...record,
+        id: response.data?.id ?? record.id,
+        savedAt: response.data?.savedAt ?? record.savedAt,
+      };
+
+      // Cache hanya diperbarui setelah server berhasil menyimpan.
+      const key = `${STORAGE_KEY_PREFIX}${record.kelasId}_${record.tanggal}_${record.jamKe || "default"}`;
+      localStorage.setItem(key, JSON.stringify(syncedRecord));
+
       const indexKey = `${STORAGE_KEY_PREFIX}index_${record.kelasId}`;
       const existingHistoryJson = localStorage.getItem(indexKey);
       const historyList: string[] = existingHistoryJson
@@ -63,12 +95,6 @@ export const absensiService = {
         historyList.push(record.tanggal);
         localStorage.setItem(indexKey, JSON.stringify(historyList));
       }
-
-      // 2. Kirim ke backend (endpoint /absensi/siswa)
-      await apiFetch("/absensi/siswa", {
-        method: "POST",
-        body: JSON.stringify(record),
-      });
 
       return {
         success: true,
@@ -87,23 +113,22 @@ export const absensiService = {
     kelasId: number,
     tanggal: string,
     jamKe?: string,
+    mataPelajaran?: string,
   ): Promise<AttendanceSessionRecord | null> {
     const key = `${STORAGE_KEY_PREFIX}${kelasId}_${tanggal}_${jamKe || "default"}`;
-    const dataJson = localStorage.getItem(key);
-    if (!dataJson) {
-      // Coba fetch dari backend
-      const res = await apiFetch<ApiResponse<AttendanceSessionRecord>>(
-        `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}${jamKe ? `&jamKe=${encodeURIComponent(jamKe)}` : ""}`,
-      );
-      if (res.data) return res.data;
+    const res = await apiFetch<ApiResponse<AttendanceSessionRecord>>(
+      `/absensi/siswa?kelasId=${kelasId}&tanggal=${tanggal}${jamKe ? `&jamKe=${encodeURIComponent(jamKe)}` : ""}${mataPelajaran ? `&mataPelajaran=${encodeURIComponent(mataPelajaran)}` : ""}`,
+    );
+
+    if (!res.data) {
+      // Hapus cache lama agar tidak muncul lagi sebagai sesi yang valid.
+      localStorage.removeItem(key);
       return null;
     }
 
-    try {
-      return JSON.parse(dataJson) as AttendanceSessionRecord;
-    } catch {
-      return null;
-    }
+    // Cache mengikuti data terbaru dari server, bukan sebaliknya.
+    localStorage.setItem(key, JSON.stringify(res.data));
+    return res.data;
   },
 
   /**
@@ -134,14 +159,17 @@ export const absensiService = {
   async getUnattendedClasses(
     tanggal: string,
   ): Promise<Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>> {
-    try {
-      const res = await apiFetch<Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>>(
-        `/absensi/unattended?tanggal=${tanggal}`,
-      );
-      return res || [];
-    } catch {
-      return [];
-    }
+    const res = await apiFetch<ApiResponse<Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>>>(
+      `/absensi/unattended?tanggal=${tanggal}`,
+    );
+    return res.data || [];
+  },
+
+  async checkPiketAccess(tanggal: string): Promise<boolean> {
+    const res = await apiFetch<ApiResponse<{ allowed: boolean }>>(
+      `/absensi/piket/access?tanggal=${tanggal}`,
+    );
+    return res.data?.allowed === true;
   },
 
   /**

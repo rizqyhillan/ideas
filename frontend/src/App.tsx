@@ -6,6 +6,8 @@ import AppLayout from "./layout/AppLayout";
 
 // Halaman auth & error
 import SignIn from "./pages/AuthPages/SignIn";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
+import Register from "./pages/AuthPages/Register";
 import NotFound from "./pages/AuthPages/NotFound";
 
 // Dashboard per role (Lazy loaded)
@@ -39,6 +41,8 @@ export default function App() {
       <Routes>
         {/* Halaman auth */}
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Halaman dilindungi */}
         <Route element={<ProtectedRoute />}>

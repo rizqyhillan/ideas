@@ -22,21 +22,23 @@ import { QuerySiswaDto } from './dto/query-siswa.dto';
 
 @Controller('siswa')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class SiswaController {
   constructor(private readonly siswaService: SiswaService) {}
 
   @Post()
+  @Roles('admin')
   create(@Body() dto: CreateSiswaDto) {
     return this.siswaService.create(dto);
   }
 
   @Get()
+  @Roles('admin', 'guru', 'bk', 'guru_bk')
   findAll(@Query() query: QuerySiswaDto) {
     return this.siswaService.findAll(query);
   }
 
   @Get(':id')
+  @Roles('admin', 'guru', 'bk', 'guru_bk')
   findOne(
     @Param('id', ParseIntPipe)
     id: number,
@@ -45,6 +47,7 @@ export class SiswaController {
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(
     @Param('id', ParseIntPipe)
     id: number,
@@ -54,6 +57,7 @@ export class SiswaController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(
     @Param('id', ParseIntPipe)
     id: number,

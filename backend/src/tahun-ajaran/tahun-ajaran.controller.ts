@@ -22,31 +22,35 @@ import { QueryTahunAjaranDto } from './dto/query-tahun-ajaran.dto';
 
 @Controller('tahun-ajaran')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class TahunAjaranController {
   constructor(private readonly tahunAjaranService: TahunAjaranService) {}
 
   @Post()
+  @Roles('admin')
   create(@Body() createTahunAjaranDto: CreateTahunAjaranDto) {
     return this.tahunAjaranService.create(createTahunAjaranDto);
   }
 
   @Get()
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
   findAll(@Query() query: QueryTahunAjaranDto) {
     return this.tahunAjaranService.findAll(query);
   }
 
   @Get('active')
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
   getActive() {
     return this.tahunAjaranService.getActive();
   }
 
   @Get(':id')
+  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.tahunAjaranService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTahunAjaranDto: UpdateTahunAjaranDto,
@@ -55,6 +59,7 @@ export class TahunAjaranController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.tahunAjaranService.remove(id);
   }

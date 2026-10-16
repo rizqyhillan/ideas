@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   UnauthorizedException,
   UseGuards,
@@ -39,6 +40,42 @@ export class AuthController {
     }
 
     return this.authService.me(Number(userId));
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  updateProfile(
+    @CurrentUser()
+    user: JwtPayload & { id?: number },
+    @Body() dto: { username?: string; email?: string; namaLengkap?: string; noTelepon?: string },
+  ) {
+    const userId = user?.sub ?? user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Sesi login tidak valid');
+    }
+
+    return this.authService.updateProfile(Number(userId), dto);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @CurrentUser()
+    user: JwtPayload & { id?: number },
+    @Body()
+    dto: {
+      oldPassword?: string;
+      currentPassword?: string;
+      newPassword: string;
+      confirmPassword?: string;
+    },
+  ) {
+    const userId = user?.sub ?? user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Sesi login tidak valid');
+    }
+
+    return this.authService.changePassword(Number(userId), dto);
   }
 
   @Get('test-permission')

@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { SemesterController } from './semester.controller';
 import { SemesterService } from './semester.service';
 import { Semester } from '../database/entities/entities/Semester';
+import { TahunAjaran } from '../database/entities/entities/TahunAjaran';
 
 import { SemesterExportImportService } from './export-import.service';
 import { ExportImportController } from '../common/export/export-imports.controller';
@@ -10,7 +11,7 @@ import { EXPORT_IMPORT_SERVICE } from '../common/export/export.service';
 import { PdfService } from '../common/export/pdf.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Semester])],
+  imports: [TypeOrmModule.forFeature([Semester, TahunAjaran])],
 
   controllers: [SemesterController],
 

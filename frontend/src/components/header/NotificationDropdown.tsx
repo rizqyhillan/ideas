@@ -77,8 +77,8 @@ export default function NotificationDropdown() {
         onClick={toggleDropdown}
       >
         {notifying && (
-          <span className="absolute right-1 top-1 z-10 h-2.5 w-2.5 rounded-full bg-brand-500">
-            <span className="absolute inline-flex w-full h-full bg-brand-400 rounded-full opacity-75 animate-ping"></span>
+          <span className="absolute right-0.5 top-0.5 z-10 flex h-3 w-3 items-center justify-center rounded-full bg-brand-500 ring-2 ring-white dark:ring-gray-900">
+            <span className="absolute inset-0 rounded-full bg-brand-400 opacity-75 animate-ping"></span>
           </span>
         )}
         <Icon name="bell" size={20} className="text-gray-500 dark:text-gray-400" />
@@ -87,7 +87,7 @@ export default function NotificationDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute right-0 mt-3 flex max-h-[480px] w-[320px] sm:w-[360px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900 z-50"
+        className="fixed left-1/2 top-[136px] z-50 mt-0 flex max-h-[min(70vh,480px)] w-[calc(100vw-2rem)] max-w-[360px] -translate-x-1/2 flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-[360px] sm:translate-x-0"
       >
         <div className="flex items-center justify-between pb-3 mb-2 border-b border-gray-100 dark:border-gray-800">
           <div>
@@ -112,7 +112,7 @@ export default function NotificationDropdown() {
               <Link
                 to={item.link}
                 onClick={closeDropdown}
-                className={`flex gap-3 rounded-xl p-3 transition-colors ${
+                className={`flex gap-2.5 rounded-xl p-2.5 transition-colors sm:gap-3 sm:p-3 ${
                   item.unread
                     ? "bg-brand-50/40 hover:bg-brand-50/80 dark:bg-brand-950/20 dark:hover:bg-brand-950/30"
                     : "hover:bg-gray-50 dark:hover:bg-white/[0.03]"
@@ -130,10 +130,10 @@ export default function NotificationDropdown() {
                       {item.time}
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2">
+                  <p className="hidden text-[11px] text-gray-600 dark:text-gray-300 leading-snug line-clamp-2 sm:block">
                     {item.desc}
                   </p>
-                  <span className="inline-block mt-1 text-[9px] uppercase font-semibold tracking-wider text-brand-600 dark:text-brand-400">
+                  <span className="hidden mt-1 text-[9px] uppercase font-semibold tracking-wider text-brand-600 dark:text-brand-400 sm:inline-block">
                     {item.category}
                   </span>
                 </div>

@@ -22,8 +22,8 @@ export class CreateAbsensiSesiDto {
   guruId?: number;
 
   @IsOptional()
-  @IsIn(['mengajar', 'piket'])
-  mode?: 'mengajar' | 'piket';
+  @IsIn(['mengajar', 'piket', 'substitusi'])
+  mode?: 'mengajar' | 'piket' | 'substitusi';
 
   @IsDateString()
   tanggal: string;

@@ -7,6 +7,7 @@ import { Guru } from '../database/entities/entities/Guru';
 import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 import { JadwalPiketGuru } from '../database/entities/entities/JadwalPiketGuru';
 import { Siswa } from '../database/entities/entities/Siswa';
+import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 import { AbsensiController } from './absensi.controller';
 import { AbsensiService } from './absensi.service';
 import { PdfService } from '../common/export/pdf.service';
@@ -21,6 +22,7 @@ import { PdfService } from '../common/export/pdf.service';
       JadwalPelajaran,
       JadwalPiketGuru,
       Siswa,
+      SiswaKelas,
     ]),
   ],
   controllers: [AbsensiController],

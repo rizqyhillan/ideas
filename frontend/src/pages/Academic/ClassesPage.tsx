@@ -8,6 +8,7 @@ import { Modal } from "../../components/ui/modal";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Checkbox from "../../components/form/input/Checkbox";
+import Select from "../../components/form/Select";
 import {
   classesService,
   ClassItem,
@@ -74,7 +75,7 @@ export default function ClassesPage() {
       const [taRes, guruRes, siswaRes] = await Promise.all([
         tahunAjaranService.getAll({ sort: "id", order: "DESC" }),
         guruService.getAll({ limit: 100 }),
-        siswaService.getAll({ limit: 500, statusAktif: true }),
+        siswaService.getAll({ limit: 100, statusAktif: true }),
       ]);
       setTahunAjarans(taRes.data);
       setGurus(guruRes.data);
@@ -286,41 +287,37 @@ export default function ClassesPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Filter Tahun Ajaran */}
+            {/* Filter */}
             <div className="icon-box">
               <Icon name="filter" size={18} />
             </div>
-            <select
-              value={selectedTaId}
-              onChange={(e) =>
-                setSelectedTaId(e.target.value ? Number(e.target.value) : "")
-              }
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
-            >
-              <option value="">Semua Tahun Ajaran</option>
-              {tahunAjarans.map((ta) => (
-                <option key={ta.id} value={ta.id}>
-                  {ta.nama} {ta.isActive ? " (Aktif)" : ""}
-                </option>
-              ))}
-            </select>
-
-            {/* Filter Tingkat */}
-            <div className="icon-box">
-              <Icon name="filter" size={18} />
+            <div className="w-full sm:w-48">
+              <Select
+                value={selectedTaId === "" ? "" : String(selectedTaId)}
+                placeholder="Semua Tahun Ajaran"
+                options={tahunAjarans.map((ta) => ({
+                  value: String(ta.id),
+                  label: `${ta.nama}${ta.isActive ? " (Aktif)" : ""}`,
+                }))}
+                onChange={(value) =>
+                  setSelectedTaId(value ? Number(value) : "")
+                }
+              />
             </div>
-            <select
-              value={selectedTingkat}
-              onChange={(e) =>
-                setSelectedTingkat(e.target.value ? Number(e.target.value) : "")
-              }
-              className="h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
-            >
-              <option value="">Semua Tingkat</option>
-              <option value="7">Kelas 7</option>
-              <option value="8">Kelas 8</option>
-              <option value="9">Kelas 9</option>
-            </select>
+            <div className="w-full sm:w-40">
+              <Select
+                value={selectedTingkat === "" ? "" : String(selectedTingkat)}
+                placeholder="Semua Tingkat"
+                options={[
+                  { value: "7", label: "Kelas 7" },
+                  { value: "8", label: "Kelas 8" },
+                  { value: "9", label: "Kelas 9" },
+                ]}
+                onChange={(value) =>
+                  setSelectedTingkat(value ? Number(value) : "")
+                }
+              />
+            </div>
 
             <div className="icon-box">
               <Icon name="search" size={18} />
@@ -348,7 +345,7 @@ export default function ClassesPage() {
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-            <thead className="table-head border-b border-gray-200 dark:border-gray-800">
+            <thead className="table-head sticky top-0 border-b border-gray-200 dark:border-gray-800">
               <tr>
                 <th className="px-4 py-3">Nama Kelas</th>
                 <th className="px-4 py-3">Tingkat</th>
@@ -527,20 +524,24 @@ export default function ClassesPage() {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => openEditClassModal(cls)}
-                      className="btn-action-sm"
-                    >
-                      <Icon name="edit" size={14} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClass(cls.id)}
-                      className="btn-action-sm text-error-600"
-                    >
-                      <Icon name="trash" size={14} />
-                      Hapus
-                    </button>
+                    {canUpdate && (
+                      <button
+                        onClick={() => openEditClassModal(cls)}
+                        className="btn-action-sm"
+                      >
+                        <Icon name="edit" size={14} />
+                        Edit
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDeleteClass(cls.id)}
+                        className="btn-action-sm text-error-600"
+                      >
+                        <Icon name="trash" size={14} />
+                        Hapus
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -592,7 +593,7 @@ export default function ClassesPage() {
                   tahunAjaranId: Number(e.target.value),
                 })
               }
-              className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+              className="select-ui"
               required
             >
               <option value="">Pilih Tahun Ajaran</option>
@@ -631,7 +632,7 @@ export default function ClassesPage() {
                     tingkat: Number(e.target.value),
                   })
                 }
-                className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                className="select-ui"
                 required
               >
                 <option value={7}>Kelas 7</option>
@@ -653,7 +654,7 @@ export default function ClassesPage() {
                     : undefined,
                 })
               }
-              className="w-full h-11 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                className="select-ui"
             >
               <option value="">Pilih Guru Wali Kelas (Opsional)</option>
               {gurus.map((g) => (
@@ -730,10 +731,10 @@ export default function ClassesPage() {
       <Modal
         isOpen={isStudentsModalOpen}
         onClose={() => setIsStudentsModalOpen(false)}
-        className="max-w-2xl p-6"
+        className="max-h-[90vh] max-w-2xl overflow-y-auto p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-start gap-3 pr-8">
             <div className="icon-box">
               <Icon name="users" size={20} />
             </div>
@@ -745,9 +746,11 @@ export default function ClassesPage() {
                 Daftar siswa aktif terdaftar pada rombel ini
               </p>
             </div>
-            <Badge color="light" size="sm">
-              Total: {classStudents.length} Siswa
-            </Badge>
+            <span className="shrink-0">
+              <Badge color="light" size="sm">
+                Total: {classStudents.length} Siswa
+              </Badge>
+            </span>
           </div>
         </div>
 
@@ -771,7 +774,7 @@ export default function ClassesPage() {
               onChange={(e) =>
                 setSelectedSiswaId(e.target.value ? Number(e.target.value) : "")
               }
-              className="w-full h-10 px-3 text-sm rounded-lg border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+              className="select-ui h-10"
               required
             >
               <option value="">Pilih Siswa untuk Ditambahkan...</option>
@@ -791,7 +794,7 @@ export default function ClassesPage() {
         </form>
 
         {/* Students List */}
-        <div className="card-flat max-h-72 overflow-y-auto">
+        <div className="card-flat max-h-72 overflow-auto">
           {loadingStudents ? (
             <div className="py-6 text-center text-gray-400">
               Memuat daftar siswa...
@@ -802,7 +805,7 @@ export default function ClassesPage() {
             </div>
           ) : (
             <table className="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-              <thead className="table-head sticky top-0 border-b border-gray-200 dark:border-gray-800">
+              <thead className="table-head sticky top-0 z-10 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
                 <tr>
                   <th className="px-3 py-2.5">No</th>
                   <th className="px-3 py-2.5">NISN / NIS</th>
@@ -849,15 +852,6 @@ export default function ClassesPage() {
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
-          <button
-            type="button"
-            onClick={() => setIsStudentsModalOpen(false)}
-            className="btn-action-sm"
-          >
-            Tutup
-          </button>
-        </div>
       </Modal>
     </>
   );

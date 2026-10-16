@@ -98,6 +98,12 @@ export interface MataPelajaranItem {
   nama: string;
   deskripsi?: string;
   isActive: boolean;
+  guruPengampuId?: number | null;
+  guruPengampu?: {
+    id: number;
+    kodeGuru?: string | null;
+    pegawai: { namaLengkap: string };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -107,6 +113,7 @@ export interface CreateMataPelajaranPayload {
   nama: string;
   deskripsi?: string;
   isActive?: boolean;
+  guruPengampuId?: number | null;
 }
 
 export interface UpdateMataPelajaranPayload extends Partial<CreateMataPelajaranPayload> {}
@@ -224,6 +231,7 @@ export interface QueryJadwalParams {
   search?: string;
   kelasId?: number;
   guruId?: number;
+  mataPelajaranId?: number;
   semesterId?: number;
   hari?: NamaHari;
   isActive?: boolean;
@@ -242,6 +250,8 @@ export const jadwalService = {
     if (params?.search) sp.append("search", params.search);
     if (params?.kelasId) sp.append("kelasId", String(params.kelasId));
     if (params?.guruId) sp.append("guruId", String(params.guruId));
+    if (params?.mataPelajaranId)
+      sp.append("mataPelajaranId", String(params.mataPelajaranId));
     if (params?.semesterId) sp.append("semesterId", String(params.semesterId));
     if (params?.hari) sp.append("hari", params.hari);
     if (params?.isActive !== undefined)

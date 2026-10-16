@@ -471,6 +471,7 @@ CREATE TABLE mata_pelajaran (
     nama VARCHAR(150) NOT NULL,
     deskripsi TEXT,
     status_aktif BOOLEAN NOT NULL DEFAULT TRUE,
+    guru_pengampu_id INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ,
@@ -478,7 +479,9 @@ CREATE TABLE mata_pelajaran (
     CONSTRAINT ck_mata_pelajaran_kode_not_blank
         CHECK (BTRIM(kode) <> ''),
     CONSTRAINT ck_mata_pelajaran_nama_not_blank
-        CHECK (BTRIM(nama) <> '')
+        CHECK (BTRIM(nama) <> ''),
+    CONSTRAINT fk_mata_pelajaran_guru_pengampu
+        FOREIGN KEY (guru_pengampu_id) REFERENCES guru(id) ON DELETE SET NULL
 );
 
 CREATE UNIQUE INDEX uq_mata_pelajaran_kode_ci
@@ -488,6 +491,9 @@ CREATE UNIQUE INDEX uq_mata_pelajaran_kode_ci
 CREATE UNIQUE INDEX uq_mata_pelajaran_nama_ci
     ON mata_pelajaran (LOWER(nama))
     WHERE deleted_at IS NULL;
+
+CREATE INDEX idx_mata_pelajaran_guru_pengampu
+    ON mata_pelajaran (guru_pengampu_id);
 
 CREATE TRIGGER trg_mata_pelajaran_updated_at
 BEFORE UPDATE ON mata_pelajaran

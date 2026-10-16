@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   ForbiddenException,
@@ -178,6 +179,13 @@ export class KonselingService {
     const student = await this.siswaRepo.findOne({ where: { id: studentId } });
     if (!student) throw new NotFoundException('Siswa tidak ditemukan');
 
+    if (!body.tanggal || !body.topik?.trim() || !body.isi?.trim()) {
+      throw new BadRequestException('Tanggal, topik, dan isi konseling wajib diisi');
+    }
+    if (!['rahasia', 'internal_bk', 'siswa'].includes(body.visibilitas)) {
+      throw new BadRequestException('Visibilitas konseling tidak valid');
+    }
+
     const currentGuru = await this.getGuruForUser(user);
     let guruBkId = body.guruBkId ? Number(body.guruBkId) : null;
 
@@ -221,6 +229,19 @@ export class KonselingService {
       ...body,
       updatedBy: user?.id ?? null,
     };
+
+    if (patch.tanggal !== undefined && !patch.tanggal) {
+      throw new BadRequestException('Tanggal konseling wajib diisi');
+    }
+    if (patch.topik !== undefined && !patch.topik.trim()) {
+      throw new BadRequestException('Topik konseling wajib diisi');
+    }
+    if (patch.isi !== undefined && !patch.isi.trim()) {
+      throw new BadRequestException('Isi konseling wajib diisi');
+    }
+    if (patch.visibilitas !== undefined && !['rahasia', 'internal_bk', 'siswa'].includes(patch.visibilitas)) {
+      throw new BadRequestException('Visibilitas konseling tidak valid');
+    }
 
     if (patch.siswaId !== undefined) {
       const studentId = Number(patch.siswaId);

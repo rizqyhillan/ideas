@@ -21,10 +21,14 @@ import {
 import { jadwalService, JadwalItem } from "../../services/academic-extras.service";
 import { useAuth } from "../../context/AuthContext";
 import { Icon } from "../../components/icons/ideas-icon";
+import { apiDownload } from "../../services/api";
 
 export default function AbsensiPage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const isAdminUser = Boolean(
+    user?.roles?.includes("admin") || user?.roles?.includes("super_admin"),
+  );
 
   // Master options
   const [gurus, setGurus] = useState<GuruItem[]>([]);
@@ -40,6 +44,7 @@ export default function AbsensiPage() {
     Array<{ id: number; nama: string; tingkat: number; ruang: string | null; kapasitas: number | null; waliKelas: string | null }>
   >([]);
   const [loadingUnattended, setLoadingUnattended] = useState<boolean>(false);
+  const [checkingPiketAccess, setCheckingPiketAccess] = useState<boolean>(false);
 
   // Jadwal aktif & notifikasi jam pelajaran
   const [activeSchedules, setActiveSchedules] = useState<JadwalItem[]>([]);
@@ -196,8 +201,11 @@ export default function AbsensiPage() {
         setLoadingUnattended(true);
         const data = await absensiService.getUnattendedClasses(tanggal);
         setUnattendedClasses(data);
-      } catch (err: any) {
-        setErrorMsg(err.message || "Gagal memuat kelas belum diabsen");
+      } catch (err: unknown) {
+        const error = err as Error;
+        setIsPiketMode(false);
+        setUnattendedClasses([]);
+        setErrorMsg(error.message || "Gagal memuat kelas belum diabsen");
       } finally {
         setLoadingUnattended(false);
       }
@@ -210,6 +218,27 @@ export default function AbsensiPage() {
     if (!selectedGuruId) return null;
     return gurus.find((g) => g.id === Number(selectedGuruId)) || null;
   }, [selectedGuruId, gurus]);
+
+  const handleTogglePiket = async () => {
+    if (isPiketMode) {
+      setIsPiketMode(false);
+      setUnattendedClasses([]);
+      return;
+    }
+
+    try {
+      setCheckingPiketAccess(true);
+      setErrorMsg("");
+      await absensiService.checkPiketAccess(tanggal);
+      setIsPiketMode(true);
+    } catch (err: unknown) {
+      const error = err as Error;
+      setIsPiketMode(false);
+      setErrorMsg(error.message || "Anda tidak memiliki jadwal piket pada tanggal tersebut.");
+    } finally {
+      setCheckingPiketAccess(false);
+    }
+  };
 
   // Daftar kelas yang relevan dengan guru (baik dari wali kelas maupun jadwal pelajaran)
   const guruClasses = useMemo(() => {
@@ -225,17 +254,24 @@ export default function AbsensiPage() {
     return taughtClasses;
   }, [activeGuru, classes, activeSchedules]);
 
+  const availableClasses = useMemo(() => {
+    if (isPiketMode || user?.roles?.includes("admin") || user?.roles?.includes("super_admin")) {
+      return classes;
+    }
+    return guruClasses;
+  }, [isPiketMode, user, classes, guruClasses]);
+
   // Set default kelas saat daftar kelas guru berubah jika belum ditentukan
   useEffect(() => {
-    if (guruClasses.length > 0) {
-      const exists = guruClasses.some((c) => c.id === Number(selectedClassId));
+    if (availableClasses.length > 0) {
+      const exists = availableClasses.some((c) => c.id === Number(selectedClassId));
       if (!exists && !hasAppliedUrlOrSchedule) {
-        setSelectedClassId(guruClasses[0].id);
+        setSelectedClassId(availableClasses[0].id);
       }
     } else if (!hasAppliedUrlOrSchedule) {
       setSelectedClassId("");
     }
-  }, [guruClasses, selectedClassId, hasAppliedUrlOrSchedule]);
+  }, [availableClasses, selectedClassId, hasAppliedUrlOrSchedule]);
 
   // 2. Ambil siswa di kelas yang sedang diajar
   useEffect(() => {
@@ -255,6 +291,7 @@ export default function AbsensiPage() {
           Number(selectedClassId),
           tanggal,
           jamPelajaran,
+          mataPelajaran || undefined,
         );
 
         if (
@@ -299,7 +336,7 @@ export default function AbsensiPage() {
     }
 
     loadClassStudentsAndAttendance();
-  }, [selectedClassId, tanggal]);
+  }, [selectedClassId, tanggal, jamPelajaran]);
 
   // Selected Class details
   const activeClass = useMemo(() => {
@@ -374,6 +411,14 @@ export default function AbsensiPage() {
       setErrorMsg("Pilih kelas terlebih dahulu.");
       return;
     }
+    if (!activeGuru) {
+      setErrorMsg(
+        isAdminUser
+          ? "Pilih guru yang akan dicatat pada sesi absensi."
+          : "Akun guru belum terhubung ke data guru.",
+      );
+      return;
+    }
     if (students.length === 0) {
       setErrorMsg("Tidak ada data siswa untuk disimpan.");
       return;
@@ -387,7 +432,7 @@ export default function AbsensiPage() {
       const record = {
         kelasId: Number(selectedClassId),
         kelasNama: activeClass.nama,
-        guruId: activeGuru ? activeGuru.id : 0,
+        guruId: activeGuru.id,
         mode: isPiketMode ? ("piket" as const) : ("mengajar" as const),
         guruNama:
           activeGuru?.pegawai?.namaLengkap || user?.username || "Guru Pengajar",
@@ -465,21 +510,8 @@ export default function AbsensiPage() {
         params.kelasId = Number(selectedClassId);
       }
 
-      const token = localStorage.getItem("ideas_access_token");
       const relativeUrl = absensiService.getExportUrl(format, params);
-      const fullUrl = `http://localhost:3000${relativeUrl}`;
-
-      const res = await fetch(fullUrl, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error(`Gagal mengunduh file laporan ${format.toUpperCase()}`);
-      }
-
-      const blob = await res.blob();
+      const blob = await apiDownload(relativeUrl);
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
@@ -572,11 +604,18 @@ export default function AbsensiPage() {
             <Button
               variant={isPiketMode ? "primary" : "outline"}
               size="sm"
-              onClick={() => setIsPiketMode(!isPiketMode)}
+              onClick={handleTogglePiket}
+              disabled={checkingPiketAccess}
               className="gap-1.5"
             >
               <Icon name="shield" className="h-4 w-4" />
-              <span>{isPiketMode ? "Mode Piket Aktif" : "Mode Guru Piket"}</span>
+              <span>
+                {checkingPiketAccess
+                  ? "Memeriksa jadwal piket..."
+                  : isPiketMode
+                    ? "Mode Piket Aktif"
+                    : "Mode Guru Piket"}
+              </span>
             </Button>
 
             {/* Tombol Modal Export */}
@@ -590,8 +629,9 @@ export default function AbsensiPage() {
               <span>Export Rekap</span>
             </Button>
 
-            {/* Jika admin atau ingin mengganti guru */}
-            <div className="flex items-center gap-2">
+            {/* Hanya admin yang dapat memilih guru pencatat */}
+            {isAdminUser && (
+              <div className="flex items-center gap-2">
               <Label className="mb-0 text-xs text-gray-500 whitespace-nowrap">
                 Ganti Guru:
               </Label>
@@ -603,6 +643,7 @@ export default function AbsensiPage() {
                 disabled={loadingInitial}
                 className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
               >
+                <option value="">Pilih guru</option>
                 {gurus.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.pegawai?.namaLengkap || `Guru #${g.id}`}{" "}
@@ -610,7 +651,8 @@ export default function AbsensiPage() {
                   </option>
                 ))}
               </select>
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -709,12 +751,12 @@ export default function AbsensiPage() {
             <select
               value={selectedClassId}
               onChange={(e) => setSelectedClassId(Number(e.target.value) || "")}
-              className="mt-1 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-medium text-gray-800 shadow-theme-xs transition-colors focus:border-brand-500 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             >
-              {guruClasses.length === 0 ? (
+              {availableClasses.length === 0 ? (
                 <option value="">Tidak ada kelas tersedia</option>
               ) : (
-                guruClasses.map((c) => (
+                availableClasses.map((c) => (
                   <option key={c.id} value={c.id}>
                     Kelas {c.nama} (Tingkat {c.tingkat})
                   </option>
@@ -1495,14 +1537,6 @@ export default function AbsensiPage() {
 
         {/* Modal Action Buttons */}
         <div className="flex items-center justify-end gap-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsExportModalOpen(false)}
-            disabled={isExporting}
-          >
-            Tutup
-          </Button>
           <Button
             size="sm"
             variant="outline"
