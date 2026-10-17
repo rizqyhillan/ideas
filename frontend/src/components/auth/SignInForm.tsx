@@ -75,7 +75,7 @@ export default function SignInForm() {
                     value={identifier}
                     disabled={isSubmitting}
                     onChange={(event) => setIdentifier(event.target.value)}
-                    placeholder="guruutama atau nama@ideas.id"
+                    placeholder="username, email atau NUPTK/NISN"
                   />
                 </div>
                 <div>
