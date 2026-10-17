@@ -35,7 +35,7 @@ export class KonselingService {
 
   private isBk(user: any): boolean {
     const roles = this.extractRoles(user);
-    return roles.includes('bk') || roles.includes('guru_bk');
+    return roles.includes('guru_bk');
   }
 
   private async getStudentForUser(user: any): Promise<Siswa | null> {

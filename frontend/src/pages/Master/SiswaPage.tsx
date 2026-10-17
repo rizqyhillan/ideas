@@ -13,14 +13,16 @@ import {
   siswaService,
   SiswaItem,
   CreateSiswaPayload,
+  usersService,
 } from "../../services/master.service";
 import { useAuth } from "../../context/AuthContext";
 
 export default function SiswaPage() {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const canCreate = hasPermission("students.create");
   const canUpdate = hasPermission("students.update");
   const canDelete = hasPermission("students.delete");
+  const isAdminUser = Boolean(user?.roles?.includes("admin"));
 
   const [data, setData] = useState<SiswaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,7 @@ export default function SiswaPage() {
   });
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isProvisioning, setIsProvisioning] = useState(false);
 
   async function loadData() {
     try {
@@ -160,6 +163,23 @@ export default function SiswaPage() {
     }
   }
 
+  async function handleProvisionAccounts() {
+    if (!confirm("Buat/sinkronkan akun untuk seluruh siswa aktif?")) return;
+    try {
+      setIsProvisioning(true);
+      const result = await usersService.provisionAccounts("siswa");
+      setSuccessMsg(
+        `Akun siswa: ${result.created} dibuat, ${result.linked} ditautkan, ${result.alreadyLinked} sudah terhubung` +
+          (result.skipped ? `, ${result.skipped} dilewati.` : "."),
+      );
+      setTimeout(() => setSuccessMsg(""), 6000);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Gagal membuat akun siswa");
+    } finally {
+      setIsProvisioning(false);
+    }
+  }
+
   return (
     <>
       <PageMeta
@@ -223,6 +243,17 @@ export default function SiswaPage() {
               }}
               className="w-full sm:w-56"
             />
+            {isAdminUser && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleProvisionAccounts}
+                disabled={isProvisioning}
+                className="w-full sm:w-auto justify-center"
+              >
+                {isProvisioning ? "Menyinkronkan..." : "Buat Akun Siswa"}
+              </Button>
+            )}
             {canCreate && (
               <Button
                 size="sm"

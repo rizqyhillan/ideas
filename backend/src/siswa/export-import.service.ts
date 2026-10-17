@@ -17,7 +17,24 @@ export class SiswaExportImportService extends ExportImportService {
   }
 
   async getAllMasterData(): Promise<any[]> {
-    return this.siswaRepository.find({ where: { deletedAt: IsNull() } });
+    const rows = await this.siswaRepository.find({ where: { deletedAt: IsNull() } });
+
+    return rows.map((siswa) => ({
+      id: siswa.id,
+      nisn: siswa.nisn,
+      nis: siswa.nis,
+      namaLengkap: siswa.namaLengkap,
+      jenisKelamin: siswa.jenisKelamin,
+      tempatLahir: siswa.tempatLahir,
+      tanggalLahir: siswa.tanggalLahir,
+      email: siswa.email,
+      noTelepon: siswa.noTelepon,
+      alamat: siswa.alamat,
+      namaWali: siswa.namaWali,
+      noTeleponWali: siswa.noTeleponWali,
+      statusAktif: siswa.statusAktif,
+      userId: siswa.userId,
+    }));
   }
 
   async importToMaster(master: string, rows: any[]): Promise<number> {

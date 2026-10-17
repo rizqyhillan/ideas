@@ -16,9 +16,13 @@ import {
   CreateGuruPayload,
   pegawaiService,
   PegawaiItem,
+  usersService,
 } from "../../services/master.service";
+import { useAuth } from "../../context/AuthContext";
 
 export default function GuruPage() {
+  const { user } = useAuth();
+  const isAdminUser = Boolean(user?.roles?.includes("admin"));
   const [data, setData] = useState<GuruItem[]>([]);
   const [pegawaiList, setPegawaiList] = useState<PegawaiItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +40,7 @@ export default function GuruPage() {
   });
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isProvisioning, setIsProvisioning] = useState(false);
 
   async function loadData() {
     try {
@@ -117,6 +122,23 @@ export default function GuruPage() {
     }
   }
 
+  async function handleProvisionAccounts() {
+    if (!confirm("Buat/sinkronkan akun untuk seluruh guru yang memiliki NUPTK?")) return;
+    try {
+      setIsProvisioning(true);
+      const result = await usersService.provisionAccounts("guru", "guru");
+      setSuccessMsg(
+        `Akun guru: ${result.created} dibuat, ${result.linked} ditautkan, ${result.alreadyLinked} sudah terhubung` +
+          (result.skipped ? `, ${result.skipped} dilewati.` : "."),
+      );
+      setTimeout(() => setSuccessMsg(""), 6000);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Gagal membuat akun guru");
+    } finally {
+      setIsProvisioning(false);
+    }
+  }
+
   return (
     <>
       <PageMeta
@@ -157,6 +179,15 @@ export default function GuruPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full sm:w-64"
             />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleProvisionAccounts}
+              disabled={!isAdminUser || isProvisioning}
+              className="w-full sm:w-auto justify-center"
+            >
+              {isProvisioning ? "Menyinkronkan..." : "Buat Akun Guru"}
+            </Button>
             <Button
               size="sm"
               onClick={openCreateModal}

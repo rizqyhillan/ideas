@@ -11,6 +11,7 @@ import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
 import { AbsensiController } from './absensi.controller';
 import { AbsensiService } from './absensi.service';
 import { PdfService } from '../common/export/pdf.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PdfService } from '../common/export/pdf.service';
       Siswa,
       SiswaKelas,
     ]),
+    NotificationsModule,
   ],
   controllers: [AbsensiController],
   providers: [AbsensiService, PdfService],

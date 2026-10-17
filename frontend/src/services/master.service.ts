@@ -347,6 +347,37 @@ export interface UpdateUserPayload {
 }
 
 export const usersService = {
+  async provisionAccounts(
+    source: "guru" | "siswa",
+    role?: "guru" | "guru_bk",
+  ): Promise<{
+    source: "guru" | "siswa";
+    role: string;
+    total: number;
+    created: number;
+    linked: number;
+    alreadyLinked: number;
+    skipped: number;
+    skippedWithoutIdentifier: number;
+  }> {
+    const res = await apiFetch<
+      ApiResponse<{
+        source: "guru" | "siswa";
+        role: string;
+        total: number;
+        created: number;
+        linked: number;
+        alreadyLinked: number;
+        skipped: number;
+        skippedWithoutIdentifier: number;
+      }>
+    >("/users/provision-accounts", {
+      method: "POST",
+      body: JSON.stringify({ source, ...(role ? { role } : {}) }),
+    });
+    return res.data!;
+  },
+
   async getAll(params?: {
     page?: number;
     limit?: number;

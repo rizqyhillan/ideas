@@ -32,13 +32,13 @@ export class SiswaController {
   }
 
   @Get()
-  @Roles('admin', 'guru', 'bk', 'guru_bk')
+  @Roles('admin', 'guru', 'guru_bk')
   findAll(@Query() query: QuerySiswaDto) {
     return this.siswaService.findAll(query);
   }
 
   @Get(':id')
-  @Roles('admin', 'guru', 'bk', 'guru_bk')
+  @Roles('admin', 'guru', 'guru_bk')
   findOne(
     @Param('id', ParseIntPipe)
     id: number,

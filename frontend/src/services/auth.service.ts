@@ -8,6 +8,7 @@ export interface UserRole {
     code: string;
     name: string;
     description?: string;
+    rolePermissions?: Array<{ permission?: { code: string } }>;
   };
 }
 
@@ -19,16 +20,16 @@ export interface UserProfile {
   noTelepon?: string;
   nip?: string;
   nisn?: string;
-  pegawai?: any;
-  siswa?: any;
+  pegawai?: Record<string, unknown>;
+  siswa?: Record<string, unknown>;
   status: string;
   lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
   userRoles2?: UserRole[];
-  userPermissions2?: any[];
-  roles?: string[];
-  permissions?: string[];
+  userPermissions2?: unknown[];
+  roles?: Array<string | { code: string }>;
+  permissions?: Array<string | { code: string }>;
 }
 
 export interface LoginResult {

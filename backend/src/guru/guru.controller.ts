@@ -38,7 +38,7 @@ export class GuruController {
   }
 
   @Get()
-  @Roles('admin', 'guru', 'bk', 'guru_bk')
+  @Roles('admin', 'guru', 'guru_bk')
   findAll(
     @Query()
     query: QueryGuruDto,
@@ -48,13 +48,13 @@ export class GuruController {
   }
 
   @Get('me')
-  @Roles('guru', 'bk', 'guru_bk')
+  @Roles('guru', 'guru_bk')
   findMe(@CurrentUser() user: any) {
     return this.guruService.findByUser(user);
   }
 
   @Get(':id')
-  @Roles('admin', 'guru', 'bk', 'guru_bk')
+  @Roles('admin', 'guru', 'guru_bk')
   findOne(
     @Param('id', ParseIntPipe)
     id: number,

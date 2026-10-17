@@ -10,13 +10,13 @@ export class SemesterController {
   constructor(private readonly semesterService: SemesterService) {}
 
   @Get()
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findAll(@Query() query: any) {
     return this.semesterService.findAll(query);
   }
 
   @Get(':id')
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.semesterService.findOne(id);
   }

@@ -22,7 +22,7 @@ export class KonselingController {
   constructor(private readonly konselingService: KonselingService) {}
 
   @Get()
-  @Roles('admin', 'guru_bk', 'bk', 'siswa')
+  @Roles('admin', 'guru_bk', 'siswa')
   findAll(
     @CurrentUser() user: any,
     @Query('page') page?: string,
@@ -48,19 +48,19 @@ export class KonselingController {
   }
 
   @Get(':id')
-  @Roles('admin', 'guru_bk', 'bk', 'siswa')
+  @Roles('admin', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: any) {
     return this.konselingService.findOneSecure(id, user);
   }
 
   @Post()
-  @Roles('admin', 'guru_bk', 'bk')
+  @Roles('admin', 'guru_bk')
   create(@Body() body: any, @CurrentUser() user: any) {
     return this.konselingService.createSecure(body, user);
   }
 
   @Patch(':id')
-  @Roles('admin', 'guru_bk', 'bk')
+  @Roles('admin', 'guru_bk')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
@@ -70,7 +70,7 @@ export class KonselingController {
   }
 
   @Delete(':id')
-  @Roles('admin', 'guru_bk', 'bk')
+  @Roles('admin', 'guru_bk')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.konselingService.remove(id);
   }

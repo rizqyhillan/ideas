@@ -14,6 +14,7 @@ export interface SemesterItem {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  tahunAjaran?: { id: number; nama: string };
 }
 
 export interface CreateSemesterPayload {
@@ -292,6 +293,88 @@ export const jadwalService = {
 };
 
 // ===========================================================================
+// JADWAL GURU PIKET
+// ===========================================================================
+export interface JadwalGuruPiketItem {
+  id: number;
+  semesterId: number;
+  nama: string;
+  hari: NamaHari;
+  jamMulai: string;
+  jamSelesai: string;
+  lokasi?: string | null;
+  statusAktif: boolean;
+  guruIds: number[];
+  gurus: Array<{
+    id: number;
+    kodeGuru?: string | null;
+    namaLengkap: string;
+    nip?: string | null;
+  }>;
+  semester?: {
+    id: number;
+    jenis: JenisSemester;
+    tahunAjaranId: number;
+    tahunAjaranNama: string;
+  } | null;
+}
+
+export interface JadwalGuruPiketPayload {
+  semesterId: number;
+  nama: string;
+  hari: NamaHari;
+  jamMulai: string;
+  jamSelesai: string;
+  lokasi?: string | null;
+  statusAktif?: boolean;
+  guruIds?: number[];
+}
+
+export const jadwalGuruPiketService = {
+  async getAll(params?: {
+    semesterId?: number;
+    hari?: NamaHari;
+    statusAktif?: boolean;
+    search?: string;
+  }): Promise<JadwalGuruPiketItem[]> {
+    const sp = new URLSearchParams();
+    if (params?.semesterId) sp.append("semesterId", String(params.semesterId));
+    if (params?.hari) sp.append("hari", params.hari);
+    if (params?.statusAktif !== undefined)
+      sp.append("statusAktif", String(params.statusAktif));
+    if (params?.search) sp.append("search", params.search);
+    const qs = sp.toString();
+    const res = await apiFetch<ApiResponse<JadwalGuruPiketItem[]>>(
+      `/jadwal-piket${qs ? `?${qs}` : ""}`,
+    );
+    return res.data || [];
+  },
+
+  async create(payload: JadwalGuruPiketPayload): Promise<JadwalGuruPiketItem> {
+    const res = await apiFetch<ApiResponse<JadwalGuruPiketItem>>(
+      "/jadwal-piket",
+      { method: "POST", body: JSON.stringify(payload) },
+    );
+    return res.data!;
+  },
+
+  async update(
+    id: number,
+    payload: Partial<JadwalGuruPiketPayload>,
+  ): Promise<JadwalGuruPiketItem> {
+    const res = await apiFetch<ApiResponse<JadwalGuruPiketItem>>(
+      `/jadwal-piket/${id}`,
+      { method: "PATCH", body: JSON.stringify(payload) },
+    );
+    return res.data!;
+  },
+
+  async archive(id: number): Promise<void> {
+    await apiFetch(`/jadwal-piket/${id}`, { method: "DELETE" });
+  },
+};
+
+// ===========================================================================
 // CATATAN KONSELING (BK)
 // ===========================================================================
 
@@ -436,7 +519,7 @@ export const konselingService = {
   async getGuruBKLIST(): Promise<
     { id: number; pegawai: { namaLengkap: string } }[]
   > {
-    const res = await apiFetch<ApiResponse<any[]>>(`/guru?role=bk`);
+    const res = await apiFetch<ApiResponse<any[]>>(`/guru?role=guru_bk`);
     return res.data || [];
   },
 };

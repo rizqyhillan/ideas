@@ -446,7 +446,8 @@
 .semester-page .ui-select-trigger,
 .konseling-page .ui-input,
 .konseling-page .ui-select-trigger,
-.absensi-page .ui-input {
+.absensi-page .ui-input,
+.absensi-page .ui-select-trigger {
   min-height: 40px;
 }
 

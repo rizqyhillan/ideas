@@ -23,6 +23,8 @@ const navItems: NavItem[] = [
       { name: "Kelas & Rombel", path: "/academic/classes", pro: false },
       { name: "Mata Pelajaran", path: "/academic/mata-pelajaran", pro: false },
       { name: "Jadwal Pelajaran", path: "/academic/jadwal", pro: false },
+      { name: "Jadwal Guru Piket", path: "/academic/jadwal-guru-piket", pro: false },
+      { name: "Kelola Jadwal Guru Piket", path: "/academic/kelola-jadwal-guru-piket", pro: false },
       { name: "Absensi Siswa", path: "/academic/absensi", pro: false },
       { name: "Konseling (BK)", path: "/academic/konseling", pro: false },
     ],
@@ -88,10 +90,10 @@ const AppSidebar: React.FC = () => {
 
     const isAdmin = userRoles.includes("admin") || userRoles.includes("super_admin");
     const isGuru = userRoles.includes("guru");
-    const isBk = userRoles.includes("bk") || userRoles.includes("guru_bk");
+    const isBk = userRoles.includes("guru_bk");
     const isSiswa = userRoles.includes("siswa");
     const roleMenu: Record<string, string[]> = {
-      guru: ["Dashboard", "Jadwal Pelajaran", "Absensi Siswa"],
+      guru: ["Dashboard", "Jadwal Pelajaran", "Jadwal Guru Piket", "Absensi Siswa"],
       bk: ["Dashboard", "Konseling (BK)"],
       guru_bk: ["Dashboard", "Konseling (BK)"],
       siswa: ["Dashboard", "Konseling (BK)"],
@@ -118,6 +120,8 @@ const AppSidebar: React.FC = () => {
 
         if (item.subItems) {
           const allowedSub = item.subItems.filter((sub) => {
+            if (sub.name === "Kelola Jadwal Guru Piket" && !isAdmin) return false;
+            if (sub.name === "Jadwal Guru Piket" && !isAdmin && !isGuru) return false;
             if ((sub.name === "Tahun Ajaran" || sub.name === "Semester") && !isAdmin) {
               return false;
             }

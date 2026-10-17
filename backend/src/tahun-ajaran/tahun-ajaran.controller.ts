@@ -32,19 +32,19 @@ export class TahunAjaranController {
   }
 
   @Get()
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findAll(@Query() query: QueryTahunAjaranDto) {
     return this.tahunAjaranService.findAll(query);
   }
 
   @Get('active')
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   getActive() {
     return this.tahunAjaranService.getActive();
   }
 
   @Get(':id')
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.tahunAjaranService.findOne(id);
   }

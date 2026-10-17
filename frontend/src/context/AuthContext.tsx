@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
 import { authService, UserProfile } from "../services/auth.service";
@@ -127,27 +128,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside AuthProvider");
-  const rolesFromRelations =
-    context.user?.userRoles2?.map((r: any) => r.role?.code).filter(Boolean) ||
-    [];
-  const permissionsFromRelations =
-    context.user?.userRoles2
-      ?.flatMap(
-        (r: any) =>
-          r.role?.rolePermissions?.map((rp: any) => rp.permission?.code) || [],
-      )
-      .filter(Boolean) || [];
-  const userWithRoles = {
-    ...context.user,
-    roles: [
-      ...(context.user?.roles?.map((r: any) => r.code || r) || []),
-      ...rolesFromRelations,
-    ],
-    permissions: [
-      ...(context.user?.permissions?.map((p: any) => p.code || p) || []),
-      ...permissionsFromRelations,
-    ],
-  };
+  const userWithRoles = useMemo(() => {
+    const rolesFromRelations =
+      context.user?.userRoles2
+        ?.map((role) => role.role?.code)
+        .filter((code): code is string => Boolean(code)) ||
+      [];
+    const permissionsFromRelations =
+      context.user?.userRoles2
+        ?.flatMap(
+          (role) =>
+            role.role?.rolePermissions?.map((permission) => permission.permission?.code) || [],
+        )
+        .filter((code): code is string => Boolean(code)) || [];
+
+    return {
+      ...context.user,
+      roles: [
+        ...(context.user?.roles?.map((role) =>
+          typeof role === "string" ? role : role.code,
+        ) || []),
+        ...rolesFromRelations,
+      ],
+      permissions: [
+        ...(context.user?.permissions?.map((permission) =>
+          typeof permission === "string" ? permission : permission.code,
+        ) || []),
+        ...permissionsFromRelations,
+      ],
+    };
+  }, [context.user]);
 
   const hasPermission = (perm: string): boolean => {
     if (!context.isAuthenticated) return false;

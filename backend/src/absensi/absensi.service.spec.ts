@@ -63,6 +63,7 @@ describe('AbsensiService session ownership', () => {
       {},
       { createQueryBuilder: jest.fn().mockReturnValue(membershipQuery) },
       {} as any,
+      { createForUsers: jest.fn() } as any,
     );
   });
 

@@ -22,6 +22,7 @@ const ClassesPage = lazy(() => import("./pages/Academic/ClassesPage"));
 const AbsensiPage = lazy(() => import("./pages/Academic/AbsensiPage"));
 const MataPelajaranPage = lazy(() => import("./pages/Academic/MataPelajaranPage"));
 const JadwalPage = lazy(() => import("./pages/Academic/JadwalPage"));
+const JadwalGuruPiketPage = lazy(() => import("./pages/Academic/JadwalGuruPiketPage"));
 const KonselingPage = lazy(() => import("./pages/Academic/KonselingPage"));
 
 // Halaman master data (Lazy loaded)
@@ -84,6 +85,19 @@ export default function App() {
               <Route path="/academic/jadwal" element={<JadwalPage />} />
             </Route>
 
+            <Route path="/academic/jadwal-guru-piket" element={
+              <RoleBasedDashboard role="guru">
+                <JadwalGuruPiketPage />
+              </RoleBasedDashboard>
+            } />
+
+            <Route element={<AdminOnlyRoute />}>
+              <Route
+                path="/academic/kelola-jadwal-guru-piket"
+                element={<JadwalGuruPiketPage canManage />}
+              />
+            </Route>
+
             <Route element={<ProtectedRoute requiredPermission={["student_attendance.view", "absensi.list", "laporan.absensi"]} />}>
               <Route path="/academic/absensi" element={<AbsensiPage />} />
             </Route>
@@ -141,7 +155,7 @@ function RoleBasedDashboard({
     if (isAdmin) {
       return <AdminDashboard />;
     }
-    if (userRoles.includes("guru") || userRoles.includes("guru_bk") || userRoles.includes("bk")) {
+    if (userRoles.includes("guru") || userRoles.includes("guru_bk")) {
       return <GuruDashboard />;
     }
     if (userRoles.includes("siswa")) {

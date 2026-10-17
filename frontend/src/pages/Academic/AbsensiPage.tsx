@@ -6,7 +6,9 @@ import Button from "../../components/ui/button/Button";
 import Badge from "../../components/ui/badge/Badge";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
+import ActionAlert, { type ActionAlertConfig } from "../../components/ui/alert/ActionAlert";
 import {
   classesService,
   ClassItem,
@@ -29,6 +31,9 @@ export default function AbsensiPage() {
   const isAdminUser = Boolean(
     user?.roles?.includes("admin") || user?.roles?.includes("super_admin"),
   );
+  const currentUserId = user?.id;
+  const currentUsername = user?.username;
+  const currentEmail = user?.email;
 
   // Master options
   const [gurus, setGurus] = useState<GuruItem[]>([]);
@@ -82,32 +87,44 @@ export default function AbsensiPage() {
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [actionAlert, setActionAlert] = useState<ActionAlertConfig | null>(null);
+
+  const requestAction = (
+    alert: Omit<ActionAlertConfig, "onConfirm">,
+    onConfirm: () => void,
+  ) => setActionAlert({ ...alert, onConfirm });
 
   // 1. Initial Load: Ambil data guru dan kelas
   useEffect(() => {
+    let active = true;
+
     async function loadInit() {
       try {
         setLoadingInitial(true);
-        const [guruRes, classesRes, jadwalRes] = await Promise.all([
-          guruService.getAll({ limit: 100 }),
+        setErrorMsg("");
+        const [guruData, classesRes, jadwalRes] = await Promise.all([
+          isAdminUser
+            ? guruService.getAll({ limit: 100 }).then((response) => response.data)
+            : guruService.getMe().then((guru) => (guru ? [guru] : [])),
           classesService.getAll({ statusAktif: true, limit: 100 }),
           jadwalService.getAll({ limit: 200, isActive: true }),
         ]);
+        if (!active) return;
 
-        setGurus(guruRes.data);
+        setGurus(guruData);
         setClasses(classesRes.data);
         setActiveSchedules(jadwalRes.data);
 
         // Cari guru yang sesuai dengan akun login
         let currentGuru: GuruItem | undefined;
-        if (user) {
-          currentGuru = guruRes.data.find(
+        if (currentUserId) {
+          currentGuru = guruData.find(
             (g) =>
-              g.pegawai?.userId === user.id ||
+              g.pegawai?.userId === currentUserId ||
               (g.pegawai?.email &&
-                user.email &&
-                g.pegawai.email.toLowerCase() === user.email.toLowerCase()) ||
-              g.kodeGuru === user.username,
+                currentEmail &&
+                g.pegawai.email.toLowerCase() === currentEmail.toLowerCase()) ||
+              g.kodeGuru === currentUsername,
           );
         }
 
@@ -115,18 +132,27 @@ export default function AbsensiPage() {
           setSelectedGuruId(currentGuru.id);
         }
       } catch (err: unknown) {
+        if (!active) return;
         const error = err as Error;
         setErrorMsg(error.message || "Gagal memuat data master guru dan kelas");
       } finally {
-        setLoadingInitial(false);
+        if (active) setLoadingInitial(false);
       }
     }
 
-    loadInit();
-  }, [user]);
+    if (!currentUserId) {
+      setLoadingInitial(false);
+      return;
+    }
+
+    void loadInit();
+    return () => {
+      active = false;
+    };
+  }, [currentUserId, currentUsername, currentEmail, isAdminUser]);
 
   // Otomatis terapkan jadwal mengajar aktif jika tombol "Terapkan Jadwal" diklik
-  const applySchedule = (sched: JadwalItem) => {
+  const applySchedule = (sched: JadwalItem, showFeedback = true) => {
     setSelectedClassId(sched.kelasId);
     if (sched.jamMulai && sched.jamSelesai) {
       setJamPelajaran(`${sched.jamMulai.slice(0, 5)} - ${sched.jamSelesai.slice(0, 5)}`);
@@ -134,7 +160,48 @@ export default function AbsensiPage() {
     if (sched.mataPelajaran?.nama) {
       setMataPelajaran(sched.mataPelajaran.nama);
     }
-    setSuccessMsg(`Memilih Kelas ${sched.kelas?.nama} (${sched.mataPelajaran?.nama || "Pelajaran Terjadwal"}) sesuai jadwal mengajar.`);
+    if (showFeedback) {
+      setSuccessMsg(`Memilih Kelas ${sched.kelas?.nama} (${sched.mataPelajaran?.nama || "Pelajaran Terjadwal"}) sesuai jadwal mengajar.`);
+    }
+  };
+
+  const handleApplySchedule = (sched: JadwalItem) => {
+    requestAction(
+      {
+        variant: "info",
+        title: "Terapkan jadwal mengajar ini?",
+        message: `Kelas ${sched.kelas?.nama || "-"} dan mata pelajaran ${sched.mataPelajaran?.nama || "Pelajaran Terjadwal"} akan dipilih untuk formulir absensi.`,
+        confirmLabel: "Terapkan jadwal",
+      },
+      () => {
+        applySchedule(sched, false);
+        setActionAlert({
+          variant: "success",
+          title: "Jadwal diterapkan",
+          message: `Formulir absensi disesuaikan dengan kelas ${sched.kelas?.nama || "-"}.`,
+        });
+      },
+    );
+  };
+
+  const handleSelectPiketClass = (kelas: (typeof unattendedClasses)[number]) => {
+    requestAction(
+      {
+        variant: "info",
+        title: `Pilih kelas ${kelas.nama}?`,
+        message: "Kelas ini akan digunakan sebagai target absensi pengganti oleh guru piket.",
+        confirmLabel: "Pilih kelas",
+      },
+      () => {
+        setSelectedClassId(kelas.id);
+        setCatatanSesi(`Digantikan oleh Guru Piket: ${activeGuru?.pegawai?.namaLengkap || user?.username}`);
+        setActionAlert({
+          variant: "success",
+          title: "Kelas dipilih",
+          message: `Kelas ${kelas.nama} siap diabsen oleh guru piket.`,
+        });
+      },
+    );
   };
 
   // Cek parameter URL (misalnya diarahkan dari Dashboard Guru)
@@ -219,10 +286,15 @@ export default function AbsensiPage() {
     return gurus.find((g) => g.id === Number(selectedGuruId)) || null;
   }, [selectedGuruId, gurus]);
 
-  const handleTogglePiket = async () => {
+  const togglePiketMode = async () => {
     if (isPiketMode) {
       setIsPiketMode(false);
       setUnattendedClasses([]);
+      setActionAlert({
+        variant: "success",
+        title: "Mode piket dinonaktifkan",
+        message: "Anda kembali ke mode absensi mengajar biasa.",
+      });
       return;
     }
 
@@ -231,13 +303,36 @@ export default function AbsensiPage() {
       setErrorMsg("");
       await absensiService.checkPiketAccess(tanggal);
       setIsPiketMode(true);
+      setActionAlert({
+        variant: "success",
+        title: "Mode piket aktif",
+        message: "Jadwal piket Anda terverifikasi. Anda dapat memilih kelas yang belum diabsen.",
+      });
     } catch (err: unknown) {
       const error = err as Error;
       setIsPiketMode(false);
-      setErrorMsg(error.message || "Anda tidak memiliki jadwal piket pada tanggal tersebut.");
+      setActionAlert({
+        variant: "error",
+        title: "Mode piket tidak dapat diaktifkan",
+        message: error.message || "Anda tidak memiliki jadwal piket pada tanggal tersebut.",
+      });
     } finally {
       setCheckingPiketAccess(false);
     }
+  };
+
+  const handleTogglePiket = () => {
+    requestAction(
+      {
+        variant: "warning",
+        title: isPiketMode ? "Nonaktifkan mode piket?" : "Aktifkan mode piket?",
+        message: isPiketMode
+          ? "Anda akan kembali ke absensi mengajar biasa."
+          : `Sistem akan memeriksa jadwal piket untuk ${tanggal} sebelum mode diaktifkan.`,
+        confirmLabel: isPiketMode ? "Nonaktifkan" : "Periksa & aktifkan",
+      },
+      () => void togglePiketMode(),
+    );
   };
 
   // Daftar kelas yang relevan dengan guru (baik dari wali kelas maupun jadwal pelajaran)
@@ -277,12 +372,14 @@ export default function AbsensiPage() {
   useEffect(() => {
     if (!selectedClassId) {
       setStudents([]);
+      setLoadingStudents(false);
       return;
     }
 
     async function loadClassStudentsAndAttendance() {
       try {
         setLoadingStudents(true);
+        setStudents([]);
         setErrorMsg("");
         setSuccessMsg("");
 
@@ -291,8 +388,8 @@ export default function AbsensiPage() {
           Number(selectedClassId),
           tanggal,
           jamPelajaran,
-          mataPelajaran || undefined,
         );
+        if (!active) return;
 
         if (
           existingSession &&
@@ -311,6 +408,7 @@ export default function AbsensiPage() {
           // Ambil siswa aktif di kelas dari backend
           const classStudents: ClassStudentItem[] =
             await classesService.getClassStudents(Number(selectedClassId));
+          if (!active) return;
 
           // Inisialisasi: DEFAULT SEMUA SISWA ADALAH "hadir"
           const initialItems: StudentAttendanceItem[] = classStudents.map(
@@ -328,14 +426,19 @@ export default function AbsensiPage() {
           setStudents(initialItems);
         }
       } catch (err: unknown) {
+        if (!active) return;
         const error = err as Error;
         setErrorMsg(error.message || "Gagal memuat siswa di kelas ini");
       } finally {
-        setLoadingStudents(false);
+        if (active) setLoadingStudents(false);
       }
     }
 
-    loadClassStudentsAndAttendance();
+    let active = true;
+    void loadClassStudentsAndAttendance();
+    return () => {
+      active = false;
+    };
   }, [selectedClassId, tanggal, jamPelajaran]);
 
   // Selected Class details
@@ -395,32 +498,48 @@ export default function AbsensiPage() {
   };
 
   const handleMarkAllHadir = () => {
-    setStudents((prev) =>
-      prev.map((student) => ({
-        ...student,
-        status: "hadir",
-        keterangan: "",
-      })),
+    requestAction(
+      {
+        variant: "warning",
+        title: "Tandai semua siswa hadir?",
+        message: `Status ${students.length} siswa akan diubah menjadi Hadir. Aksi ini tidak mengubah status siswa satu per satu.`,
+        confirmLabel: "Ya, tandai semua",
+      },
+      () => {
+        setStudents((prev) =>
+          prev.map((student) => ({
+            ...student,
+            status: "hadir",
+            keterangan: "",
+          })),
+        );
+        setActionAlert({
+          variant: "success",
+          title: "Semua siswa ditandai hadir",
+          message: `${students.length} siswa berhasil ditandai Hadir.`,
+        });
+      },
     );
-    setSuccessMsg("Semua siswa berhasil ditandai 'Hadir'.");
   };
 
   // Simpan Absensi
-  const handleSaveAttendance = async () => {
+  const saveAttendance = async () => {
     if (!selectedClassId || !activeClass) {
-      setErrorMsg("Pilih kelas terlebih dahulu.");
+      setActionAlert({ variant: "error", title: "Kelas belum dipilih", message: "Pilih kelas terlebih dahulu." });
       return;
     }
     if (!activeGuru) {
-      setErrorMsg(
-        isAdminUser
+      setActionAlert({
+        variant: "error",
+        title: "Guru belum dipilih",
+        message: isAdminUser
           ? "Pilih guru yang akan dicatat pada sesi absensi."
           : "Akun guru belum terhubung ke data guru.",
-      );
+      });
       return;
     }
     if (students.length === 0) {
-      setErrorMsg("Tidak ada data siswa untuk disimpan.");
+      setActionAlert({ variant: "error", title: "Tidak ada data siswa", message: "Tidak ada data siswa untuk disimpan." });
       return;
     }
 
@@ -445,13 +564,52 @@ export default function AbsensiPage() {
       };
 
       const result = await absensiService.saveAttendance(record);
-      setSuccessMsg(result.message);
+      setActionAlert({
+        variant: "success",
+        title: "Absensi berhasil disimpan",
+        message: result.message,
+      });
     } catch (err: unknown) {
       const error = err as Error;
-      setErrorMsg(error.message || "Gagal menyimpan absensi siswa");
+      setActionAlert({
+        variant: "error",
+        title: "Absensi gagal disimpan",
+        message: error.message || "Gagal menyimpan absensi siswa",
+      });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSaveAttendance = () => {
+    if (!selectedClassId || !activeClass) {
+      setActionAlert({ variant: "error", title: "Kelas belum dipilih", message: "Pilih kelas terlebih dahulu." });
+      return;
+    }
+    if (!activeGuru) {
+      setActionAlert({
+        variant: "error",
+        title: "Guru belum dipilih",
+        message: isAdminUser
+          ? "Pilih guru yang akan dicatat pada sesi absensi."
+          : "Akun guru belum terhubung ke data guru.",
+      });
+      return;
+    }
+    if (students.length === 0) {
+      setActionAlert({ variant: "error", title: "Tidak ada data siswa", message: "Tidak ada data siswa untuk disimpan." });
+      return;
+    }
+
+    requestAction(
+      {
+        variant: "warning",
+        title: "Simpan absensi?",
+        message: `Absensi ${students.length} siswa kelas ${activeClass.nama} untuk ${tanggal} akan disimpan.`,
+        confirmLabel: "Ya, simpan",
+      },
+      () => void saveAttendance(),
+    );
   };
 
   // Statistik Kehadiran
@@ -473,7 +631,7 @@ export default function AbsensiPage() {
   }, [students, searchQuery, filterStatus]);
 
   // Trigger Export Absensi (Excel / PDF)
-  const handleDownloadExport = async (format: "excel" | "pdf") => {
+  const downloadExport = async (format: "excel" | "pdf") => {
     try {
       setIsExporting(true);
       setErrorMsg("");
@@ -521,13 +679,34 @@ export default function AbsensiPage() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(blobUrl);
 
-      setSuccessMsg(`Laporan absensi (${format.toUpperCase()}) berhasil diunduh.`);
       setIsExportModalOpen(false);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Gagal mengunduh laporan absensi");
+      setActionAlert({
+        variant: "success",
+        title: "Export berhasil",
+        message: `Laporan absensi ${format.toUpperCase()} berhasil diunduh.`,
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : null;
+      setActionAlert({
+        variant: "error",
+        title: "Export gagal",
+        message: error?.message || "Gagal mengunduh laporan absensi",
+      });
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleDownloadExport = (format: "excel" | "pdf") => {
+    requestAction(
+      {
+        variant: "info",
+        title: `Unduh rekap ${format.toUpperCase()}?`,
+        message: `Rekap absensi dengan cakupan ${exportRangeType} akan disiapkan dan diunduh.`,
+        confirmLabel: "Unduh sekarang",
+      },
+      () => void downloadExport(format),
+    );
   };
 
   return (
@@ -631,26 +810,24 @@ export default function AbsensiPage() {
 
             {/* Hanya admin yang dapat memilih guru pencatat */}
             {isAdminUser && (
-              <div className="flex w-full items-center gap-2 sm:w-auto">
-              <Label className="mb-0 shrink-0 whitespace-nowrap text-xs text-gray-500">
-                Ganti Guru:
-              </Label>
-              <select
-                value={selectedGuruId}
-                onChange={(e) =>
-                  setSelectedGuruId(Number(e.target.value) || "")
-                }
-                disabled={loadingInitial}
-                className="h-9 min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 sm:flex-none"
-              >
-                <option value="">Pilih guru</option>
-                {gurus.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.pegawai?.namaLengkap || `Guru #${g.id}`}{" "}
-                    {g.kodeGuru ? ` (${g.kodeGuru})` : ""}
-                  </option>
-                ))}
-              </select>
+              <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+                <Label htmlFor="absensi-guru-select" className="mb-0 shrink-0 whitespace-nowrap text-xs text-gray-500">
+                  Ganti Guru:
+                </Label>
+                <div className="min-w-0 flex-1 sm:w-64 sm:flex-none">
+                  <Select
+                    id="absensi-guru-select"
+                    value={selectedGuruId ? String(selectedGuruId) : ""}
+                    onChange={(value) => setSelectedGuruId(Number(value) || "")}
+                    disabled={loadingInitial || gurus.length === 0}
+                    placeholder="Pilih guru"
+                    options={gurus.map((guru) => ({
+                      value: String(guru.id),
+                      label: `${guru.pegawai?.namaLengkap || `Guru #${guru.id}`}${guru.kodeGuru ? ` (${guru.kodeGuru})` : ""}`,
+                    }))}
+                    className="h-10 text-xs"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -690,7 +867,7 @@ export default function AbsensiPage() {
               <Button
                 size="sm"
                 variant="primary"
-                onClick={() => applySchedule(currentTeachingSchedule)}
+                onClick={() => handleApplySchedule(currentTeachingSchedule)}
                 className="w-full shrink-0 justify-center text-xs sm:w-auto"
               >
                 Terapkan Jadwal Ini
@@ -723,11 +900,7 @@ export default function AbsensiPage() {
                 {unattendedClasses.map((cls) => (
                   <button
                     key={cls.id}
-                    onClick={() => {
-                      setSelectedClassId(cls.id);
-                      setCatatanSesi(`Digantikan oleh Guru Piket: ${activeGuru?.pegawai?.namaLengkap || user?.username}`);
-                      setSuccessMsg(`Memilih Kelas ${cls.nama} untuk absensi pengganti oleh Guru Piket.`);
-                    }}
+                    onClick={() => handleSelectPiketClass(cls)}
                     className={`rounded-md px-3 py-1.5 text-xs font-medium border transition-colors ${
                       selectedClassId === cls.id
                         ? "bg-warning-600 text-white border-warning-600 shadow-sm"
@@ -745,24 +918,28 @@ export default function AbsensiPage() {
         {/* Form Filter Sesi & Kelas */}
         <div className="absensi-form mt-5 grid grid-cols-1 gap-3 border-t border-gray-100 pt-4 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 dark:border-gray-800">
           <div>
-            <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+            <Label
+              htmlFor="absensi-class-select"
+              className="text-xs font-semibold text-gray-700 dark:text-gray-300"
+            >
               Kelas yang Sedang Diajar <span className="text-error-500">*</span>
             </Label>
-            <select
-              value={selectedClassId}
-              onChange={(e) => setSelectedClassId(Number(e.target.value) || "")}
-              className="mt-1 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 shadow-theme-xs transition-colors focus:border-brand-500 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-            >
-              {availableClasses.length === 0 ? (
-                <option value="">Tidak ada kelas tersedia</option>
-              ) : (
-                availableClasses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    Kelas {c.nama} (Tingkat {c.tingkat})
-                  </option>
-                ))
-              )}
-            </select>
+            <Select
+              id="absensi-class-select"
+              value={selectedClassId ? String(selectedClassId) : ""}
+              onChange={(value) => setSelectedClassId(Number(value) || "")}
+              disabled={loadingInitial || availableClasses.length === 0}
+              placeholder={
+                availableClasses.length === 0
+                  ? "Tidak ada kelas tersedia"
+                  : "Pilih kelas"
+              }
+              options={availableClasses.map((kelas) => ({
+                value: String(kelas.id),
+                label: `Kelas ${kelas.nama} (Tingkat ${kelas.tingkat})`,
+              }))}
+              className="mt-1 h-10 text-sm font-medium"
+            />
             {activeClass && (
               <span className="mt-1 block text-xs text-brand-600 dark:text-brand-400">
                 Ruang: {activeClass.ruang || "-"} | Kapasitas:{" "}
@@ -1560,6 +1737,15 @@ export default function AbsensiPage() {
           </Button>
         </div>
       </Modal>
+      <ActionAlert
+        config={actionAlert}
+        onClose={() => setActionAlert(null)}
+        onConfirm={() => {
+          const confirmedAction = actionAlert?.onConfirm;
+          setActionAlert(null);
+          confirmedAction?.();
+        }}
+      />
     </div>
   );
 }

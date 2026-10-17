@@ -19,6 +19,8 @@ import { JadwalModule } from './jadwal/jadwal.module';
 import { KonselingModule } from './konseling/konseling.module';
 import { RolesModule } from './roles/roles.module';
 import { ExportModule } from './common/export/export.module';
+import { JadwalPiketModule } from './jadwal-piket/jadwal-piket.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -46,6 +48,8 @@ import { ExportModule } from './common/export/export.module';
     SemesterModule,
     MataPelajaranModule,
     JadwalModule,
+    JadwalPiketModule,
+    NotificationsModule,
     KonselingModule,
     RolesModule,
     ExportModule,

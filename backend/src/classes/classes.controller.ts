@@ -38,13 +38,13 @@ export class ClassesController {
   }
 
   @Get()
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findAll(@Query() query: QueryClassDto, @CurrentUser() user?: JwtPayload) {
     return user ? this.classesService.findAll(query, user) : this.classesService.findAll(query);
   }
 
   @Get(':id')
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user?: JwtPayload) {
     return user ? this.classesService.findOne(id, user) : this.classesService.findOne(id);
   }
@@ -83,7 +83,7 @@ export class ClassesController {
   }
 
   @Get(':id/students')
-  @Roles('admin', 'guru', 'bk', 'guru_bk', 'siswa')
+  @Roles('admin', 'guru', 'guru_bk', 'siswa')
   getClassStudents(@Param('id', ParseIntPipe) id: number, @CurrentUser() user?: JwtPayload) {
     return user ? this.classesService.getClassStudents(id, user) : this.classesService.getClassStudents(id);
   }

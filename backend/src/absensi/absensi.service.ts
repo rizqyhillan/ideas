@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { AbsensiSesi } from '../database/entities/entities/AbsensiSesi';
 import { AbsensiSesiItem } from '../database/entities/entities/AbsensiSesiItem';
@@ -17,6 +17,7 @@ import { JadwalPelajaran } from '../database/entities/entities/JadwalPelajaran';
 import { JadwalPiketGuru } from '../database/entities/entities/JadwalPiketGuru';
 import { Siswa } from '../database/entities/entities/Siswa';
 import { SiswaKelas } from '../database/entities/entities/SiswaKelas';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AbsensiService {
@@ -38,6 +39,7 @@ export class AbsensiService {
     @InjectRepository(SiswaKelas)
     private siswaKelasRepo: Repository<SiswaKelas>,
     private pdfService: PdfService,
+    private notificationsService: NotificationsService,
   ) {}
 
   private roles(user: any): string[] {
@@ -209,6 +211,7 @@ export class AbsensiService {
           jamKe: dto.jamKe,
         })
         .getOne();
+      const previousStatuses = new Map<number, string>();
 
       if (session) {
         if (!this.isAdmin(user) && session.guruId !== context.guruId) {
@@ -235,6 +238,13 @@ export class AbsensiService {
         session.catatan = dto.catatan ?? session.catatan;
         session.savedAt = new Date();
         session = await sessionRepo.save(session);
+        const previousItems = await itemRepo.find({
+          where: { absensiSesiId: session.id },
+          select: ['siswaId', 'status'],
+        });
+        for (const item of previousItems) {
+          previousStatuses.set(item.siswaId, item.status);
+        }
         await itemRepo.delete({ absensiSesiId: session.id });
       } else {
         session = sessionRepo.create({
@@ -258,6 +268,58 @@ export class AbsensiService {
       );
 
       await itemRepo.save(items);
+
+      const changedItems = dto.items.filter((item) => {
+        const previousStatus = previousStatuses.get(item.siswaId);
+        return (
+          previousStatus !== item.status &&
+          (item.status !== 'hadir' || previousStatus !== undefined)
+        );
+      });
+      if (changedItems.length > 0) {
+        const changedStudentIds = changedItems.map((item) => item.siswaId);
+        const students = await manager.getRepository(Siswa).find({
+          where: { id: In(changedStudentIds) },
+          select: ['id', 'userId'],
+        });
+        const classInfo = await manager.getRepository(Kelas).findOne({
+          where: { id: dto.kelasId },
+          select: ['id', 'nama'],
+        });
+        const studentById = new Map(students.map((student) => [student.id, student]));
+        const groups = new Map<string, { status: string; updated: boolean; userIds: number[] }>();
+        for (const item of changedItems) {
+          const userId = studentById.get(item.siswaId)?.userId;
+          if (!userId) continue;
+          const updated = previousStatuses.has(item.siswaId);
+          const key = `${item.status}:${updated}`;
+          const group = groups.get(key) ?? {
+            status: item.status,
+            updated,
+            userIds: [],
+          };
+          group.userIds.push(userId);
+          groups.set(key, group);
+        }
+
+        const subject = session.mataPelajaran ? ` • ${session.mataPelajaran}` : '';
+        const lesson = session.jamKe ? `, jam ke-${session.jamKe}` : '';
+        for (const group of groups.values()) {
+          const statusLabel =
+            group.status.charAt(0).toUpperCase() + group.status.slice(1);
+          const action = group.updated ? `diperbarui menjadi ${statusLabel}` : `tercatat ${statusLabel}`;
+          await this.notificationsService.createForUsers(
+            {
+              userIds: group.userIds,
+              title: `Pembaruan absensi: ${statusLabel}`,
+              description: `Status kehadiran Anda di kelas ${classInfo?.nama ?? dto.kelasId} pada ${dto.tanggal}${lesson}${subject} ${action}.`,
+              category: 'Absensi',
+              link: '/siswa/dashboard',
+            },
+            manager,
+          );
+        }
+      }
 
       return {
         id: session.id,

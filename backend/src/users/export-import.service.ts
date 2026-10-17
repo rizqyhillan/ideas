@@ -17,7 +17,8 @@ export class UsersExportImportService extends ExportImportService {
   }
 
   async getAllMasterData(): Promise<any[]> {
-    return this.usersRepository.find({ where: { deletedAt: IsNull() } });
+    const users = await this.usersRepository.find({ where: { deletedAt: IsNull() } });
+    return users.map(({ passwordHash, deletedAt, ...user }) => user);
   }
 
   async importToMaster(master: string, rows: any[]): Promise<number> {

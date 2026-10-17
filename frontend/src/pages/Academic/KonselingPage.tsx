@@ -39,7 +39,6 @@ export default function KonselingPage() {
     if (!user) return false;
     return (
       user.roles?.includes("admin") ||
-      user.roles?.includes("bk") ||
       user.roles?.includes("guru_bk") ||
       user.permissions?.includes("counseling.create") ||
       user.permissions?.includes("konseling.create")
@@ -82,7 +81,7 @@ export default function KonselingPage() {
       try {
         const [siswaRes, guruRes] = await Promise.all([
           siswaService.getAll({ limit: 100, statusAktif: true }),
-          guruService.getAll({ limit: 100, role: "bk,guru_bk" }),
+          guruService.getAll({ limit: 100, role: "guru_bk" }),
         ]);
         setStudentOptions(siswaRes.data || []);
         setGuruOptions(guruRes.data || []);
