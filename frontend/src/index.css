@@ -2,6 +2,7 @@
 layer(base);
 
 @import "tailwindcss";
+@import "./styles/design-system.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -134,9 +135,9 @@ layer(base);
   --color-warning-900: #7a2e0e;
   --color-warning-950: #4e1d09;
 
-  --color-theme-pink-500: #ee46bc;
+  --color-theme-pink-500: #737373;
 
-  --color-theme-purple-500: #7a5af8;
+  --color-theme-purple-500: #525252;
 
   --shadow-theme-md: 0px 4px 8px -2px rgba(16, 24, 40, 0.1),
     0px 2px 4px -2px rgba(16, 24, 40, 0.06);
@@ -148,7 +149,7 @@ layer(base);
   --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
     0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(0, 0, 0, 0.12);
   --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1),
     0px 1px 3px 0px rgba(16, 24, 40, 0.1);
   --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05),
@@ -300,80 +301,6 @@ layer(base);
   @apply border-brand-500 bg-brand-500;
 }
 
-/* ============ IDEaS Design System ============ */
-/* Gelombang 1: Custom utilities — radius 8px, card flats */
-
-@utility radius-8 {
-  @apply rounded-lg;  /* 8px — satu-satunya radius standar */
-}
-
-@utility radius-6 {
-  @apply rounded-md;
-}
-
-@utility card-flat {
-  @apply bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-800
-     rounded-lg shadow-sm;
-}
-
-@utility card-flat-body {
-  @apply p-4 sm:p-5 lg:p-6;
-}
-
-@utility page-container {
-  @apply mx-auto max-w-7xl p-4 sm:p-5 lg:p-6 space-y-6;
-}
-
-@utility table-cell {
-  @apply px-4 py-3.5 text-sm text-gray-700 dark:text-gray-300;
-}
-
-@utility alert-success-flat {
-  @apply bg-success-50 border border-success-200 text-success-700
-     dark:bg-success-950/25 dark:border-success-800/30 dark:text-success-300
-     rounded-md px-3 py-2 text-sm font-medium;
-}
-
-@utility alert-error-flat {
-  @apply bg-error-50 border border-error-200 text-error-700
-     dark:bg-error-950/25 dark:border-error-800/30 dark:text-error-300
-     rounded-md px-3 py-2 text-sm font-medium;
-}
-
-@utility alert-info-flat {
-  @apply bg-blue-50 border border-blue-200 text-blue-700
-     dark:bg-blue-950/25 dark:border-blue-800/30 dark:text-blue-300
-     rounded-md px-3 py-2 text-sm font-medium;
-}
-
-@utility table-head {
-  @apply px-4 py-3 text-xs font-semibold uppercase text-gray-500
-     border-b border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/30 dark:text-gray-400;
-}
-
-@utility table-body-row {
-  @apply divide-y divide-gray-200 dark:divide-gray-800 hover:bg-gray-50/50
-     dark:hover:bg-gray-800/20 transition-colors;
-}
-
-@utility btn-action-sm {
-  @apply inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium
-     rounded-md border transition-colors;
-}
-
-@utility icon-box {
-  @apply inline-flex items-center justify-center rounded-lg
-     w-9 h-9 shrink-0;
-}
-
-@utility select-ui {
-  @apply h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm
-    text-gray-800 shadow-theme-xs transition-colors focus:border-brand-500
-    focus:outline-hidden focus:ring-3 focus:ring-brand-500/20
-    dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200;
-}
-
-/* ============ END Design System ============ */
 .apexcharts-legend-text {
   @apply !text-gray-700 dark:!text-gray-400;
 }
@@ -864,4 +791,14 @@ span.flatpickr-weekday,
 
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
+}
+
+/* Keep the visual language consistent when legacy Tailwind classes are used. */
+@layer utilities {
+  .rounded-md,
+  .rounded-lg,
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: var(--ui-radius-md);
+  }
 }

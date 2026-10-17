@@ -1,5 +1,6 @@
 import type React from "react";
 import { Link } from "react-router";
+import { twMerge } from "tailwind-merge";
 
 interface DropdownItemProps {
   tag?: "a" | "button";
@@ -16,11 +17,11 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   to,
   onClick,
   onItemClick,
-  baseClassName = "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+  baseClassName = "ui-dropdown-item",
   className = "",
   children,
 }) => {
-  const combinedClasses = `${baseClassName} ${className}`.trim();
+  const combinedClasses = twMerge(baseClassName, className);
 
   const handleClick = (event: React.MouseEvent) => {
     if (tag === "button") {

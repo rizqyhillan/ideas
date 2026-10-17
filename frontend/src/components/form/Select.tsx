@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { Icon } from "../icons/ideas-icon";
 
 interface Option {
@@ -87,11 +88,11 @@ const Select: React.FC<SelectProps> = ({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         onKeyDown={handleKeyDown}
-        className={`flex h-11 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 text-left text-sm shadow-theme-xs transition-colors focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-800 ${
-          selectedOption
-            ? "text-gray-800 dark:text-white/90"
-            : "text-gray-400 dark:text-gray-400"
-        } ${className}`}
+        className={twMerge(
+          "ui-select-trigger",
+          !selectedOption && "is-placeholder",
+          className,
+        )}
       >
         <span className="truncate">{selectedOption?.label ?? placeholder}</span>
         <Icon
@@ -105,7 +106,7 @@ const Select: React.FC<SelectProps> = ({
         <div
           role="listbox"
           aria-labelledby={id}
-          className="absolute z-50 mt-1.5 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-theme-lg dark:border-gray-700 dark:bg-gray-900"
+          className="ui-select-menu"
         >
           {options.map((option, index) => {
             const isSelected = option.value === selectedValue;
@@ -119,13 +120,11 @@ const Select: React.FC<SelectProps> = ({
                 aria-selected={isSelected}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => handleSelect(option.value)}
-                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                  isSelected
-                    ? "bg-brand-50 font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"
-                    : isActive
-                      ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
-                      : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60"
-                }`}
+                className={twMerge(
+                  "ui-select-option",
+                  isSelected && "is-selected",
+                  isActive && !isSelected && "is-active",
+                )}
               >
                 <span className="truncate">{option.label}</span>
                 {isSelected && <Icon name="check" size={16} className="ml-3 shrink-0" />}

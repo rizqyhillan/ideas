@@ -133,17 +133,17 @@ export default function SemesterPage() {
   }
 
   return (
-    <>
+    <div className="semester-page">
       <PageMeta title="Semester | IdEaS" description="Kelola semester ajaran" />
       <PageBreadcrumb pageTitle="Semester" />
 
       {successMsg && <div className="alert-success-flat">{successMsg}</div>}
       {error && <div className="alert-error-flat">{error}</div>}
 
-      <div className="card-flat lg:p-6 p-4">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="card-flat p-4 sm:p-5 lg:p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            <h3 className="text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
               Daftar Semester
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -251,7 +251,7 @@ export default function SemesterPage() {
           </table>
         </div>
 
-        <div className="md:hidden space-y-3">
+        <div className="space-y-3 md:hidden">
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat...</div>
           ) : data.length === 0 ? (
@@ -260,11 +260,11 @@ export default function SemesterPage() {
             </div>
           ) : (
             data.map((item) => (
-              <div key={item.id} className="card-flat p-3 sm:p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-gray-900 dark:text-white">
+              <div key={item.id} className="academic-mobile-card">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="academic-mobile-card__content">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="break-words text-sm font-bold text-gray-900 dark:text-white">
                         {tahunAjaranList.find(
                           (t) => t.id === item.tahunAjaranId,
                         )?.nama || "-"}
@@ -281,14 +281,14 @@ export default function SemesterPage() {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                    <div className="mt-2 space-y-0.5 text-xs text-gray-500 dark:text-gray-400">
                       <p>Mulai: {item.tanggalMulai?.split("T")[0] || "-"}</p>
                       <p>
                         Selesai: {item.tanggalSelesai?.split("T")[0] || "-"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="academic-mobile-card__actions">
                     <button
                       onClick={() => openEditModal(item)}
                       className="btn-action-sm"
@@ -314,7 +314,7 @@ export default function SemesterPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-lg p-6"
+        className="semester-modal w-[calc(100%-1rem)] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -322,7 +322,7 @@ export default function SemesterPage() {
           </h3>
         </div>
         {formError && <div className="alert-error-flat">{formError}</div>}
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
           <div>
             <Label htmlFor="tahun-ajaran">Tahun Ajaran *</Label>
             <Select
@@ -341,7 +341,7 @@ export default function SemesterPage() {
               }
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label htmlFor="jenis-semester">Jenis Semester *</Label>
               <Select
@@ -360,7 +360,7 @@ export default function SemesterPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label>Tanggal Mulai *</Label>
               <Input
@@ -396,7 +396,7 @@ export default function SemesterPage() {
               Jadikan Semester Aktif
             </Label>
           </div>
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-800 sm:gap-3 sm:pt-4">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -411,6 +411,6 @@ export default function SemesterPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

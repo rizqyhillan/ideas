@@ -531,7 +531,7 @@ export default function AbsensiPage() {
   };
 
   return (
-    <>
+    <div className="absensi-page">
       <PageMeta
         title="Absensi Siswa - IdEaS"
         description="Pencatatan kehadiran siswa sesuai kelas dan akun guru pengajar"
@@ -570,15 +570,15 @@ export default function AbsensiPage() {
       )}
 
       {/* Hero Guru Aktif Banner */}
-      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="mb-5 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:mb-6 sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3.5">
+          <div className="flex min-w-0 items-start gap-3 sm:items-center sm:gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400">
               <Icon name="user" className="h-6 w-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="break-words text-base font-semibold text-gray-800 dark:text-white sm:text-lg">
                   {activeGuru?.pegawai?.namaLengkap ||
                     user?.username ||
                     "Guru Pengajar"}
@@ -592,21 +592,21 @@ export default function AbsensiPage() {
                   {isPiketMode ? "Petugas Piket" : "Aktif Mengajar"}
                 </Badge>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="break-words text-xs text-gray-500 dark:text-gray-400">
                 NIP: {activeGuru?.pegawai?.nip || "-"} | Email:{" "}
                 {activeGuru?.pegawai?.email || user?.email || "-"}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             {/* Tombol Guru Piket Mode */}
             <Button
               variant={isPiketMode ? "primary" : "outline"}
               size="sm"
               onClick={handleTogglePiket}
               disabled={checkingPiketAccess}
-              className="gap-1.5"
+              className="w-full justify-center gap-1.5 sm:w-auto"
             >
               <Icon name="shield" className="h-4 w-4" />
               <span>
@@ -623,7 +623,7 @@ export default function AbsensiPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsExportModalOpen(true)}
-              className="gap-1.5"
+              className="w-full justify-center gap-1.5 sm:w-auto"
             >
               <Icon name="download" className="h-4 w-4" />
               <span>Export Rekap</span>
@@ -631,8 +631,8 @@ export default function AbsensiPage() {
 
             {/* Hanya admin yang dapat memilih guru pencatat */}
             {isAdminUser && (
-              <div className="flex items-center gap-2">
-              <Label className="mb-0 text-xs text-gray-500 whitespace-nowrap">
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+              <Label className="mb-0 shrink-0 whitespace-nowrap text-xs text-gray-500">
                 Ganti Guru:
               </Label>
               <select
@@ -641,7 +641,7 @@ export default function AbsensiPage() {
                   setSelectedGuruId(Number(e.target.value) || "")
                 }
                 disabled={loadingInitial}
-                className="h-9 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="h-9 min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-xs text-gray-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 sm:flex-none"
               >
                 <option value="">Pilih guru</option>
                 {gurus.map((g) => (
@@ -658,12 +658,12 @@ export default function AbsensiPage() {
 
         {/* Pemberitahuan Jadwal Mengajar Guru Saat Ini */}
         {currentTeachingSchedule && !isPiketMode && (
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50/60 p-3.5 dark:border-brand-900/40 dark:bg-brand-950/20">
-            <div className="flex items-center gap-3">
+          <div className="mt-4 flex flex-col gap-3 rounded-lg border border-brand-200 bg-brand-50/60 p-3.5 dark:border-brand-900/40 dark:bg-brand-950/20 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3 sm:items-center">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
                 <Icon name="clock" className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0 break-words">
                 <p className="text-xs font-semibold text-brand-900 dark:text-brand-300">
                   Pemberitahuan Jam Mengajar: Absensi Sudah Bisa Diakses
                 </p>
@@ -691,7 +691,7 @@ export default function AbsensiPage() {
                 size="sm"
                 variant="primary"
                 onClick={() => applySchedule(currentTeachingSchedule)}
-                className="shrink-0 text-xs"
+                className="w-full shrink-0 justify-center text-xs sm:w-auto"
               >
                 Terapkan Jadwal Ini
               </Button>
@@ -702,8 +702,8 @@ export default function AbsensiPage() {
         {/* Banner Guru Piket: Kelas Belum Diabsen */}
         {isPiketMode && (
           <div className="mt-4 rounded-lg border border-warning-200 bg-warning-50/60 p-4 dark:border-warning-900/40 dark:bg-warning-950/20">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-warning-800 dark:text-warning-300 font-medium text-xs">
+            <div className="mb-2 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start gap-2 text-xs font-medium text-warning-800 dark:text-warning-300 sm:items-center">
                 <Icon name="alerttriangle" className="h-4 w-4 text-warning-600" />
                 <span>Daftar Kelas yang Belum Diabsen Hari Ini ({tanggal})</span>
               </div>
@@ -743,7 +743,7 @@ export default function AbsensiPage() {
         )}
 
         {/* Form Filter Sesi & Kelas */}
-        <div className="mt-5 grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2 md:grid-cols-4 dark:border-gray-800">
+        <div className="absensi-form mt-5 grid grid-cols-1 gap-3 border-t border-gray-100 pt-4 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 dark:border-gray-800">
           <div>
             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
               Kelas yang Sedang Diajar <span className="text-error-500">*</span>
@@ -751,7 +751,7 @@ export default function AbsensiPage() {
             <select
               value={selectedClassId}
               onChange={(e) => setSelectedClassId(Number(e.target.value) || "")}
-              className="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-medium text-gray-800 shadow-theme-xs transition-colors focus:border-brand-500 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              className="mt-1 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-800 shadow-theme-xs transition-colors focus:border-brand-500 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             >
               {availableClasses.length === 0 ? (
                 <option value="">Tidak ada kelas tersedia</option>
@@ -812,20 +812,20 @@ export default function AbsensiPage() {
       </div>
 
       {/* Ringkasan Kehadiran Realtime (Metric Cards) */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:gap-3 sm:grid-cols-5">
+        <div className="absensi-stat rounded-lg border border-gray-200 bg-white p-3 shadow-theme-xs dark:border-gray-800 dark:bg-gray-900 sm:p-4">
           <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
             Total Siswa
           </p>
-          <div className="mt-2 flex items-baseline justify-between">
+          <div className="mt-1 flex flex-col gap-1 sm:mt-2 sm:flex-row sm:items-baseline sm:justify-between">
             <span className="text-2xl font-bold text-gray-800 dark:text-white">
               {stats.total}
             </span>
-            <span className="text-xs text-gray-400">siswa terdaftar</span>
+            <span className="text-[10px] text-gray-400 sm:text-xs">siswa terdaftar</span>
           </div>
         </div>
 
-        <div className="rounded-xl border border-success-200 bg-success-50/50 p-4 shadow-theme-xs dark:border-success-900/30 dark:bg-success-950/20">
+        <div className="absensi-stat rounded-lg border border-success-200 bg-success-50/50 p-3 shadow-theme-xs dark:border-success-900/30 dark:bg-success-950/20 sm:p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-success-700 dark:text-success-400">
               Hadir
@@ -843,7 +843,7 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-warning-200 bg-warning-50/50 p-4 shadow-theme-xs dark:border-warning-900/30 dark:bg-warning-950/20">
+        <div className="absensi-stat rounded-lg border border-warning-200 bg-warning-50/50 p-3 shadow-theme-xs dark:border-warning-900/30 dark:bg-warning-950/20 sm:p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-warning-700 dark:text-warning-400">
               Sakit (S)
@@ -857,7 +857,7 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4 shadow-theme-xs dark:border-blue-900/30 dark:bg-blue-950/20">
+        <div className="absensi-stat rounded-lg border border-blue-200 bg-blue-50/50 p-3 shadow-theme-xs dark:border-blue-900/30 dark:bg-blue-950/20 sm:p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
               Izin (I)
@@ -871,7 +871,7 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-error-200 bg-error-50/50 p-4 shadow-theme-xs dark:border-error-900/30 dark:bg-error-950/20">
+        <div className="absensi-stat rounded-lg border border-error-200 bg-error-50/50 p-3 shadow-theme-xs dark:border-error-900/30 dark:bg-error-950/20 sm:p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-error-700 dark:text-error-400">
               Alpa (A)
@@ -887,14 +887,14 @@ export default function AbsensiPage() {
       </div>
 
       {/* Tabel Absensi Siswa */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-lg border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-gray-900">
         {/* Table Header Controls */}
-        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
-          <div>
-            <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:gap-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
+          <div className="min-w-0">
+            <h3 className="break-words text-base font-semibold text-gray-800 dark:text-white">
               Daftar Siswa Kelas {activeClass?.nama || ""}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 break-words text-xs text-gray-500 dark:text-gray-400">
               Menampilkan {filteredStudents.length} siswa di kelas yang sedang
               diajar. Tekan tombol pada tulisan{" "}
               <strong className="text-success-600 font-semibold">
@@ -932,7 +932,7 @@ export default function AbsensiPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
+        <div className="flex flex-col gap-3 border-b border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:border-gray-800">
           <div className="w-full sm:w-72">
             <Input
               type="text"
@@ -943,8 +943,9 @@ export default function AbsensiPage() {
             />
           </div>
 
-          <div className="flex items-center gap-1 overflow-x-auto text-xs">
+          <div className="flex min-w-0 items-center gap-1 overflow-x-auto text-xs">
             <span className="mr-2 text-gray-500">Filter Status:</span>
+            <div className="flex min-w-max items-center gap-1">
             {[
               { key: "all", label: "Semua", count: stats.total },
               { key: "hadir", label: "Hadir", count: stats.hadir },
@@ -964,6 +965,7 @@ export default function AbsensiPage() {
                 {tab.label} ({tab.count})
               </button>
             ))}
+            </div>
           </div>
         </div>
 
@@ -1207,7 +1209,7 @@ export default function AbsensiPage() {
         </div>
 
         {/* Mobile Cards View */}
-        <div className="block md:hidden p-3 sm:p-4 space-y-3">
+        <div className="space-y-3 p-3 sm:p-4 md:hidden">
           {loadingStudents ? (
             <div className="py-12 text-center text-gray-500 dark:text-gray-400">
               <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent"></div>
@@ -1230,7 +1232,7 @@ export default function AbsensiPage() {
               return (
                 <div
                   key={student.siswaId}
-                  className={`p-3.5 rounded-xl border transition-all ${
+                  className={`min-w-0 rounded-lg border p-3 transition-all ${
                     isHadir
                       ? "bg-white border-gray-200 dark:bg-gray-800/40 dark:border-gray-700"
                       : isSakit
@@ -1240,16 +1242,16 @@ export default function AbsensiPage() {
                           : "bg-error-50/40 border-error-200 dark:bg-error-950/20 dark:border-error-900/40"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2 mb-2.5">
-                    <div className="flex items-center gap-2">
+                  <div className="mb-2.5 flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-start gap-2">
                       <span className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
-                      <div>
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                      <div className="min-w-0">
+                        <h4 className="break-words text-sm font-bold leading-tight text-gray-900 dark:text-white">
                           {student.namaLengkap}
                         </h4>
-                        <span className="text-[11px] text-gray-400 font-mono">
+                        <span className="break-words text-[11px] font-mono text-gray-400">
                           NISN: {student.nisn}{" "}
                           {student.nis ? `• NIS: ${student.nis}` : ""}
                         </span>
@@ -1267,7 +1269,7 @@ export default function AbsensiPage() {
                   </div>
 
                   {/* 4 Tombol Status */}
-                  <div className="grid grid-cols-4 gap-1.5 mb-2">
+                  <div className="mb-2 grid grid-cols-4 gap-1">
                     <button
                       type="button"
                       onClick={() =>
@@ -1351,8 +1353,8 @@ export default function AbsensiPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 p-5 sm:flex-row dark:border-gray-800">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col items-start justify-between gap-3 border-t border-gray-100 p-4 sm:flex-row sm:items-center sm:p-5 dark:border-gray-800">
+          <div className="break-words text-xs text-gray-500 dark:text-gray-400">
             Total Siswa: <strong>{stats.total}</strong> | Hadir:{" "}
             <strong className="text-success-600">{stats.hadir}</strong> | Sakit:{" "}
             <strong className="text-warning-600">{stats.sakit}</strong> | Izin:{" "}
@@ -1360,7 +1362,7 @@ export default function AbsensiPage() {
             <strong className="text-error-600">{stats.alpa}</strong>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
             <Button
               size="sm"
               variant="outline"
@@ -1388,7 +1390,7 @@ export default function AbsensiPage() {
       <Modal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
-        className="max-w-lg p-6"
+        className="absensi-export-modal w-[calc(100%-1rem)] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
           <div className="flex items-center gap-2.5">
@@ -1406,7 +1408,7 @@ export default function AbsensiPage() {
           </div>
         </div>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 py-3 sm:space-y-4 sm:py-4">
           {/* Opsi Cakupan Kelas */}
           <div>
             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
@@ -1486,7 +1488,7 @@ export default function AbsensiPage() {
             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
               Rentang Periode
             </Label>
-            <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+            <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-1.5">
               {(
                 [
                   { key: "hari", label: "Hari Ini" },
@@ -1536,13 +1538,13 @@ export default function AbsensiPage() {
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
+        <div className="grid grid-cols-1 gap-2 border-t border-gray-100 pt-3 dark:border-gray-800 sm:flex sm:items-center sm:justify-end sm:gap-2.5 sm:pt-4">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleDownloadExport("pdf")}
             disabled={isExporting}
-            className="gap-1.5 text-error-600 border-error-200 hover:bg-error-50 dark:border-error-800"
+            className="w-full justify-center gap-1.5 text-error-600 border-error-200 hover:bg-error-50 sm:w-auto"
           >
             <Icon name="filetext" className="h-4 w-4" />
             <span>{isExporting ? "Memproses..." : "Download PDF"}</span>
@@ -1551,13 +1553,13 @@ export default function AbsensiPage() {
             size="sm"
             onClick={() => handleDownloadExport("excel")}
             disabled={isExporting}
-            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="w-full justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white sm:w-auto"
           >
             <Icon name="download" className="h-4 w-4" />
             <span>{isExporting ? "Memproses..." : "Download Excel"}</span>
           </Button>
         </div>
       </Modal>
-    </>
+    </div>
   );
 }

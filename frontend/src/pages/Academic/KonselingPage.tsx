@@ -207,7 +207,7 @@ export default function KonselingPage() {
   }
 
   return (
-    <>
+    <div className="konseling-page">
       <PageMeta
         title="Catatan Konseling | IdEaS"
         description="Kelola catatan konseling siswa"
@@ -223,9 +223,9 @@ export default function KonselingPage() {
         <div className="mb-4 p-3 rounded-lg alert-error-flat">{errorMsg}</div>
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 lg:p-6 card-flat">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
+      <div className="card-flat p-4 sm:p-5 lg:p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <Icon name="Brain" className="icon-box mr-2 align-middle" />
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 inline-flex items-center">
               Daftar Catatan Konseling
@@ -234,7 +234,7 @@ export default function KonselingPage() {
               Catatan konseling siswa oleh guru BK
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
             {!isSiswa && (
               <select
                 value={visibilitasFilter === "" ? "" : visibilitasFilter}
@@ -362,7 +362,7 @@ export default function KonselingPage() {
           </table>
         </div>
 
-        <div className="block md:hidden space-y-3 mt-4">
+        <div className="mt-4 block space-y-3 md:hidden">
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat data...</div>
           ) : data.length === 0 ? (
@@ -373,21 +373,23 @@ export default function KonselingPage() {
             data.map((item) => (
               <div
                 key={item.id}
-                className="p-4 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 card-flat"
+                className="academic-mobile-card"
               >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div>
+                <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-2">
                     <Icon
                       name="BookOpen"
                       size={18}
-                      className="icon-box mt-0.5 text-gray-500 dark:text-gray-400"
+                      className="icon-box mt-0.5 shrink-0 text-gray-500 dark:text-gray-400"
                     />
-                    <h4 className="font-semibold text-gray-900 dark:text-white truncate ml-2">
-                      {item.topik}
-                    </h4>
-                    <div className="text-xs text-gray-500">
-                      <div>Siswa: {item.siswa?.namaLengkap || "-"}</div>
-                      <div>{item.tanggal?.split("T")[0]}</div>
+                    <div className="academic-mobile-card__content">
+                      <h4 className="break-words font-semibold leading-snug text-gray-900 dark:text-white">
+                        {item.topik}
+                      </h4>
+                      <div className="mt-1 break-words text-xs text-gray-500">
+                        <div>Siswa: {item.siswa?.namaLengkap || "-"}</div>
+                        <div>{item.tanggal?.split("T")[0]}</div>
+                      </div>
                     </div>
                   </div>
                   <Badge
@@ -406,12 +408,12 @@ export default function KonselingPage() {
                   </Badge>
                 </div>
                 {item.tindakLanjut && (
-                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+                  <div className="mb-3 break-words text-xs text-gray-600 dark:text-gray-300">
                     Tindak lanjut: {item.tindakLanjut}
                   </div>
                 )}
                 {canManageKonseling && (
-                  <div className="flex gap-2">
+                  <div className="academic-mobile-card__actions">
                     <button
                       onClick={() => openEditModal(item)}
                       className="btn-action-sm text-brand-600"
@@ -432,11 +434,11 @@ export default function KonselingPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500">
+          <div className="flex flex-col items-start gap-3 border-t border-gray-100 pt-4 text-xs text-gray-500 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
             <span>
               Halaman {page} dari {totalPages}
             </span>
-            <div className="flex gap-2">
+            <div className="academic-mobile-card__actions sm:flex sm:w-auto">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
@@ -459,7 +461,7 @@ export default function KonselingPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-lg p-4 sm:p-6"
+        className="konseling-modal w-[calc(100%-1rem)] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -476,9 +478,9 @@ export default function KonselingPage() {
         )}
         <form
           onSubmit={handleSave}
-          className="space-y-4 max-h-[70vh] overflow-y-auto px-1"
+          className="space-y-3 overflow-y-auto px-1 sm:space-y-4"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label>
                 Siswa <span className="text-error-500">*</span>
@@ -557,7 +559,7 @@ export default function KonselingPage() {
           </div>
           <div>
             <Label>Visibilitas</Label>
-            <div className="grid grid-cols-3 gap-2 mt-1">
+            <div className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-3 mt-1">
               {visibilitasOptions.map((v) => (
                 <label
                   key={v.value}
@@ -581,7 +583,7 @@ export default function KonselingPage() {
               ))}
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-800 sm:gap-3 sm:pt-4">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -595,6 +597,6 @@ export default function KonselingPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

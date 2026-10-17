@@ -195,7 +195,7 @@ export default function JadwalPage() {
   };
 
   return (
-    <>
+    <div className="jadwal-page">
       <PageBreadcrumb pageTitle="Jadwal Pelajaran" />
       {successMsg && (
         <div className="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium dark:bg-green-500/10 dark:border-green-500/30 dark:text-green-400">
@@ -207,21 +207,21 @@ export default function JadwalPage() {
           {errorMsg}
         </div>
       )}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
-        <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5 lg:p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            <h3 className="text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
               Daftar Jadwal Pelajaran
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Kelola jadwal mengajar per kelas dan guru
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <div className="flex w-full overflow-hidden rounded-lg border border-gray-200 text-xs font-medium dark:border-gray-700 sm:w-auto">
               <button
                 onClick={() => setViewMode("kalender")}
-                className={`px-3 py-1.5 flex items-center gap-1.5 transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 transition-colors sm:flex-none ${
                   viewMode === "kalender"
                     ? "bg-brand-500 text-white"
                     : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -232,7 +232,7 @@ export default function JadwalPage() {
               </button>
               <button
                 onClick={() => setViewMode("tabel")}
-                className={`px-3 py-1.5 flex items-center gap-1.5 transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-1.5 transition-colors sm:flex-none ${
                   viewMode === "tabel"
                     ? "bg-brand-500 text-white"
                     : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -243,7 +243,7 @@ export default function JadwalPage() {
               </button>
             </div>
             {isAdminUser && (
-              <Button size="sm" onClick={openCreateModal}>
+              <Button size="sm" onClick={openCreateModal} className="w-full sm:w-auto">
                 + Tambah Jadwal
               </Button>
             )}
@@ -251,13 +251,13 @@ export default function JadwalPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="jadwal-filter mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-4 dark:border-gray-800 sm:gap-3">
           <Input
             type="text"
             placeholder="Cari..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-48"
+            className="w-full sm:w-48"
           />
           <div className="w-full sm:w-44">
             <Select
@@ -346,14 +346,17 @@ export default function JadwalPage() {
                           .map((item) => (
                             <div
                               key={item.id}
-                              className={`p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 transition-colors ${isAdminUser ? "hover:border-brand-300 dark:hover:border-brand-600 cursor-pointer" : ""}`}
+                              className={`rounded-lg border border-gray-200 bg-white p-2.5 dark:border-gray-700 dark:bg-gray-900/60 transition-colors ${isAdminUser ? "hover:border-brand-300 dark:hover:border-brand-600 cursor-pointer" : ""}`}
                               onClick={isAdminUser ? () => openEditModal(item) : undefined}
                             >
                               <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400 mb-0.5">
                                 {formatJam(item.jamMulai)}–{formatJam(item.jamSelesai)}
                               </p>
-                              <p className="text-xs font-semibold text-gray-900 dark:text-white leading-snug">
+                              <p className="text-xs font-semibold leading-snug text-gray-900 dark:text-white">
                                 {mapelList.find((m) => m.id === item.mataPelajaranId)?.nama || "-"}
+                              </p>
+                              <p className="mt-0.5 text-[10px] text-gray-400">
+                                Kode: {mapelList.find((m) => m.id === item.mataPelajaranId)?.kode || "-"}
                               </p>
                               <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
                                 {kelasList.find((k) => k.id === item.kelasId)?.nama || ""}
@@ -425,17 +428,12 @@ export default function JadwalPage() {
                         "Kelas ..."}
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="font-medium text-gray-800 dark:text-white">
+                      <span className="block font-medium text-gray-800 dark:text-white">
                         {mapelList.find((m) => m.id === item.mataPelajaranId)
                           ?.nama || "-"}
                       </span>
-                      <span className="text-xs text-gray-400 ml-1">
-                        (
-                        {
-                          mapelList.find((m) => m.id === item.mataPelajaranId)
-                            ?.kode
-                        }
-                        )
+                      <span className="mt-0.5 block text-xs text-gray-400">
+                        Kode: {mapelList.find((m) => m.id === item.mataPelajaranId)?.kode || "-"}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
@@ -496,11 +494,11 @@ export default function JadwalPage() {
             data.map((item) => (
               <div
                 key={item.id}
-                className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 dark:bg-gray-900/50"
+                className="jadwal-mobile-card"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
                       <Badge color="primary" size="sm">
                         {item.hari?.charAt(0).toUpperCase() +
                           item.hari?.slice(1)}
@@ -510,16 +508,19 @@ export default function JadwalPage() {
                           "Kelas ..."}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-800 dark:text-white">
+                    <p className="jadwal-subject mt-2 text-sm font-medium text-gray-800 dark:text-white">
                       {mapelList.find((m) => m.id === item.mataPelajaranId)
                         ?.nama || "-"}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-gray-400">
+                      Kode: {mapelList.find((m) => m.id === item.mataPelajaranId)?.kode || "-"}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Guru:{" "}
                       {guruList.find((g) => g.id === item.guruId)?.pegawai
                         ?.namaLengkap || "-"}
                     </p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
                       <span className="flex items-center">
                         <Icon name="clock" size={13} className="inline mr-1 text-gray-400" />
                         {formatJam(item.jamMulai)} - {formatJam(item.jamSelesai)}
@@ -533,16 +534,16 @@ export default function JadwalPage() {
                     </div>
                   </div>
                   {isAdminUser && (
-                    <div className="flex gap-2 shrink-0">
+                    <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:flex sm:w-auto">
                       <button
                         onClick={() => openEditModal(item)}
-                        className="px-3 py-1.5 text-xs font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
+                        className="rounded-md bg-brand-50 px-2.5 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-400"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-error-600 bg-error-50 rounded-lg hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
+                        className="rounded-md bg-error-50 px-2.5 py-1.5 text-xs font-medium text-error-600 hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400"
                       >
                         Hapus
                       </button>
@@ -559,7 +560,7 @@ export default function JadwalPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-lg p-6 max-h-screen overflow-y-auto"
+        className="jadwal-modal w-[calc(100%-1rem)] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -571,8 +572,8 @@ export default function JadwalPage() {
             {formError}
           </div>
         )}
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label>Semester *</Label>
               <select
@@ -608,7 +609,7 @@ export default function JadwalPage() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label>Mata Pelajaran *</Label>
               <select
@@ -644,7 +645,7 @@ export default function JadwalPage() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
             <div>
               <Label>Hari *</Label>
               <select
@@ -682,7 +683,7 @@ export default function JadwalPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
               <Label>Ruang</Label>
               <Input
@@ -711,11 +712,11 @@ export default function JadwalPage() {
               </select>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-800 sm:gap-3 sm:pt-4">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+              className="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 sm:px-4"
             >
               Batal
             </button>
@@ -725,6 +726,6 @@ export default function JadwalPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

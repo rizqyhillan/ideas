@@ -45,7 +45,7 @@ export default function SiswaDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="card-flat p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="icon-box bg-purple-50 dark:bg-purple-900/20">
+            <div className="icon-box bg-gray-100 dark:bg-gray-800">
               <CardIcon name="school" />
             </div>
             <div>

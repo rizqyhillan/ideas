@@ -117,7 +117,7 @@ export default function MataPelajaranPage() {
   }
 
   return (
-    <>
+    <div className="mapel-page">
       <PageBreadcrumb pageTitle="Mata Pelajaran" />
       {successMsg && (
         <div className="mb-4 p-3 rounded-lg alert-success-flat">
@@ -127,10 +127,10 @@ export default function MataPelajaranPage() {
       {errorMsg && (
         <div className="mb-4 p-3 rounded-lg alert-error-flat">{errorMsg}</div>
       )}
-      <div className="card-flat lg:p-6 p-4">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="card-flat p-4 sm:p-5 lg:p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+            <h3 className="text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg">
               Daftar Mata Pelajaran
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -230,7 +230,7 @@ export default function MataPelajaranPage() {
             </tbody>
           </table>
         </div>
-        <div className="md:hidden space-y-3">
+        <div className="space-y-3 md:hidden">
           {loading ? (
             <div className="py-8 text-center text-gray-400">Memuat...</div>
           ) : data.length === 0 ? (
@@ -239,16 +239,13 @@ export default function MataPelajaranPage() {
             data.map((item) => (
               <div
                 key={item.id}
-                className="p-4 rounded-lg border border-gray-200 dark:border-gray-800 card-flat"
+                className="academic-mobile-card"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="academic-mobile-card__content">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">
                         {item.kode}
-                      </span>
-                      <span className="font-bold text-gray-900 dark:text-white">
-                        {item.nama}
                       </span>
                       {!item.isActive && (
                         <Badge color="light" size="sm">
@@ -256,16 +253,19 @@ export default function MataPelajaranPage() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="break-words text-sm font-semibold leading-snug text-gray-900 dark:text-white">
+                      {item.nama}
+                    </p>
+                    <p className="mt-1 break-words text-xs text-gray-500 dark:text-gray-400">
                       {item.deskripsi || "-"}
                     </p>
                     {item.guruPengampu?.pegawai?.namaLengkap && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <p className="mt-1 break-words text-xs text-gray-500 dark:text-gray-400">
                         Pengampu: {item.guruPengampu.pegawai.namaLengkap}
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="academic-mobile-card__actions">
                     <button
                       onClick={() => openEditModal(item)}
                       className="btn-action-sm"
@@ -288,7 +288,7 @@ export default function MataPelajaranPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="max-w-lg p-6"
+        className="w-[calc(100%-1rem)] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <div className="mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -300,7 +300,7 @@ export default function MataPelajaranPage() {
             {formError}
           </div>
         )}
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
           <div>
             <Label>Kode *</Label>
             <Input
@@ -370,7 +370,7 @@ export default function MataPelajaranPage() {
               <option value="false">Nonaktif</option>
             </select>
           </div>
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-800 sm:gap-3 sm:pt-4">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -384,6 +384,6 @@ export default function MataPelajaranPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

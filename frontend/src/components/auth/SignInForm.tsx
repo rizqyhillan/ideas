@@ -42,7 +42,17 @@ export default function SignInForm() {
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="w-full max-w-md pt-10 mx-auto"></div>
+      <div className="w-full max-w-md pt-8 mx-auto lg:hidden">
+        <Link to="/" className="inline-flex items-center">
+          <img
+            src="/images/logo/Logo-Splasma-Website.png"
+            alt="SPLASMA"
+            width={600}
+            height={79}
+            className="h-auto w-56 max-w-full object-contain sm:w-64"
+          />
+        </Link>
+      </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">

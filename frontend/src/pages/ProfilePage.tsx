@@ -124,7 +124,7 @@ export default function ProfilePage() {
         {/* Profile Header Card */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-theme-xs">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-brand-500 text-white flex items-center justify-center text-3xl font-bold shadow-md shadow-brand-500/20 shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-brand-500 text-white flex items-center justify-center text-3xl font-bold shadow-sm shrink-0">
               {user.namaLengkap?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 text-center sm:text-left">

@@ -1,0 +1,488 @@
+/* Shared UI primitives. Keep spacing, radius and color decisions in one place. */
+:root {
+  --ui-bg: #f8f8f8;
+  --ui-surface: #ffffff;
+  --ui-surface-muted: #f5f5f5;
+  --ui-border: #e5e5e5;
+  --ui-border-strong: #d4d4d4;
+  --ui-text: #171717;
+  --ui-text-muted: #737373;
+  --ui-text-subtle: #a3a3a3;
+  --ui-accent: #465fff;
+  --ui-accent-hover: #3641f5;
+  --ui-accent-soft: #eef4ff;
+  --ui-danger: #991b1b;
+  --ui-radius-sm: 6px;
+  --ui-radius-md: 8px;
+  --ui-radius-lg: 12px;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 20px;
+  --ui-space-6: 24px;
+  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --ui-shadow-md: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+.dark {
+  --ui-bg: #0f0f0f;
+  --ui-surface: #171717;
+  --ui-surface-muted: #202020;
+  --ui-border: #2a2a2a;
+  --ui-border-strong: #404040;
+  --ui-text: #f5f5f5;
+  --ui-text-muted: #a3a3a3;
+  --ui-text-subtle: #737373;
+  --ui-accent: #7592ff;
+  --ui-accent-hover: #9cb9ff;
+  --ui-accent-soft: #1a2555;
+  --ui-danger: #fca5a5;
+}
+
+/* Repeated surfaces */
+.ui-card {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.ui-card-header {
+  padding: var(--ui-space-5) var(--ui-space-6);
+}
+
+.ui-card-body {
+  padding: var(--ui-space-4);
+  border-top: 1px solid var(--ui-border);
+}
+
+@media (min-width: 640px) {
+  .ui-card-body {
+    padding: var(--ui-space-6);
+  }
+}
+
+/* Shared dropdown surface and item styles */
+.ui-dropdown {
+  position: absolute;
+  z-index: 40;
+  right: 0;
+  margin-top: var(--ui-space-2);
+  min-width: 180px;
+  overflow: hidden;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-lg);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-md);
+}
+
+.ui-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px var(--ui-space-4);
+  color: var(--ui-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: left;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.ui-dropdown-item:hover,
+.ui-dropdown-item:focus-visible {
+  background: var(--ui-surface-muted);
+  color: var(--ui-accent);
+  outline: none;
+}
+
+/* Shared form controls */
+.ui-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ui-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.ui-input,
+.ui-select-trigger {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-size: 0.875rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ui-input {
+  padding: 10px var(--ui-space-4);
+}
+
+.ui-input::placeholder,
+.ui-select-trigger.is-placeholder {
+  color: var(--ui-text-subtle);
+}
+
+.ui-input:focus,
+.ui-select-trigger:focus-visible {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 18%, transparent);
+  outline: none;
+}
+
+.ui-input:disabled,
+.ui-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ui-input.is-error {
+  border-color: var(--ui-danger);
+}
+
+.ui-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--ui-space-4);
+  text-align: left;
+}
+
+.ui-select-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  max-height: 240px;
+  width: 100%;
+  overflow-y: auto;
+  padding: var(--ui-space-1);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-md);
+}
+
+.ui-select-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px var(--ui-space-3);
+  border-radius: var(--ui-radius-sm);
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+  text-align: left;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.ui-select-option:hover,
+.ui-select-option.is-active {
+  background: var(--ui-surface-muted);
+  color: var(--ui-text);
+}
+
+.ui-select-option.is-selected {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+
+/* Shared button styles */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-md);
+  padding: 0 var(--ui-space-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.ui-button--sm {
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.ui-button--primary {
+  background: var(--ui-accent);
+  color: #fff;
+}
+
+.ui-button--primary:hover {
+  background: var(--ui-accent-hover);
+}
+
+.ui-button--outline {
+  border-color: var(--ui-border-strong);
+  background: transparent;
+  color: var(--ui-text);
+}
+
+.ui-button--outline:hover {
+  background: var(--ui-surface-muted);
+}
+
+.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Desktop auth panel: solid geometric depth without gradients. */
+.auth-visual-panel {
+  position: relative;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.auth-visual-panel::before,
+.auth-visual-panel::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.auth-visual-panel::before {
+  top: 12%;
+  left: 12%;
+  height: 72%;
+  width: 1px;
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 96px 0 0 rgb(255 255 255 / 0.06), 192px 0 0 rgb(255 255 255 / 0.05),
+    288px 0 0 rgb(255 255 255 / 0.04);
+}
+
+.auth-visual-panel::after {
+  top: 22%;
+  left: 12%;
+  height: 1px;
+  width: 76%;
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 0 96px 0 rgb(255 255 255 / 0.06), 0 192px 0 rgb(255 255 255 / 0.05),
+    0 288px 0 rgb(255 255 255 / 0.04);
+}
+
+.auth-visual-shape {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid rgb(70 95 255 / 0.45);
+  transform: rotate(45deg);
+}
+
+.auth-visual-shape--top {
+  top: -210px;
+  right: -100px;
+  height: 420px;
+  width: 420px;
+  background: #161950;
+}
+
+.auth-visual-shape--bottom {
+  bottom: -260px;
+  left: -150px;
+  height: 500px;
+  width: 500px;
+  background: #111b3b;
+}
+
+.auth-visual-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 520px;
+  width: 520px;
+  border: 1px solid rgb(117 146 255 / 0.28);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Existing utility names kept as a compact shared API for pages. */
+.card-flat {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.card-flat-body {
+  padding: var(--ui-space-4);
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--ui-space-4);
+}
+
+.icon-box {
+  display: inline-flex;
+  height: 36px;
+  width: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ui-radius-md);
+}
+
+.select-ui {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  padding: 0 14px;
+  color: var(--ui-text);
+  font-size: 0.875rem;
+}
+
+.select-ui:focus {
+  border-color: var(--ui-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 18%, transparent);
+}
+
+.table-cell {
+  padding: 14px 16px;
+  color: var(--ui-text-muted);
+  font-size: 0.875rem;
+}
+
+.table-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ui-border);
+  background: var(--ui-surface-muted);
+  color: var(--ui-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.table-body-row {
+  transition: background-color 150ms ease;
+}
+
+.table-body-row:hover {
+  background: var(--ui-surface-muted);
+}
+
+.btn-action-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-sm);
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.btn-action-sm:hover {
+  background: var(--ui-surface-muted);
+  border-color: var(--ui-text-subtle);
+}
+
+.alert-success-flat,
+.alert-error-flat,
+.alert-info-flat {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  padding: 8px 12px;
+  background: var(--ui-surface-muted);
+  color: var(--ui-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.alert-error-flat {
+  border-color: color-mix(in srgb, var(--ui-danger) 40%, var(--ui-border));
+  color: var(--ui-danger);
+}
+
+@media (min-width: 640px) {
+  .page-container {
+    padding: var(--ui-space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding: var(--ui-space-6);
+  }
+}
+
+/* Jadwal page: compact controls and readable mobile cards. */
+.jadwal-filter .ui-input,
+.jadwal-filter .ui-select-trigger,
+.jadwal-modal .ui-input {
+  min-height: 40px;
+}
+
+.jadwal-mobile-card {
+  padding: var(--ui-space-3);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+}
+
+.jadwal-mobile-card .jadwal-subject {
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.mapel-page .ui-input,
+.semester-page .ui-input,
+.semester-page .ui-select-trigger,
+.konseling-page .ui-input,
+.konseling-page .ui-select-trigger,
+.absensi-page .ui-input {
+  min-height: 40px;
+}
+
+.academic-mobile-card {
+  min-width: 0;
+  padding: var(--ui-space-3);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+}
+
+.academic-mobile-card__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.academic-mobile-card__actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ui-space-2);
+}
+
+@media (min-width: 640px) {
+  .academic-mobile-card__actions {
+    display: flex;
+    width: auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .jadwal-page .ui-card {
+    box-shadow: none;
+  }
+
+  .jadwal-page .ui-button {
+    min-height: 36px;
+  }
+}
